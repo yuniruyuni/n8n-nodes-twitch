@@ -1,247 +1,243 @@
-![Banner image](https://user-images.githubusercontent.com/10284570/173569848-c624317f-42b1-45a6-ab09-f0ea3c247648.png)
+# n8n-nodes-twitch
 
-# n8n-nodes-starter
+[![CI](https://github.com/yuniruyuni/n8n-nodes-twitch/actions/workflows/ci.yml/badge.svg)](https://github.com/yuniruyuni/n8n-nodes-twitch/actions/workflows/ci.yml)
+[![npm version](https://badge.fury.io/js/@yuniruyuni%2Fn8n-nodes-twitch.svg)](https://www.npmjs.com/package/@yuniruyuni/n8n-nodes-twitch)
 
-This starter repository helps you build custom integrations for [n8n](https://n8n.io). It includes example nodes, credentials, the node linter, and all the tooling you need to get started.
+This is an n8n community node package for Twitch API integration. It provides comprehensive support for Twitch Helix API operations and real-time EventSub notifications via WebSocket.
 
-## Quick Start
+[n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
-> [!TIP]
-> **New to building n8n nodes?** The fastest way to get started is with `npm create @n8n/node`. This command scaffolds a complete node package for you using the [@n8n/node-cli](https://www.npmjs.com/package/@n8n/node-cli).
+English | [日本語](README.ja.md)
 
-**To create a new node package from scratch:**
+## Features
+
+### 25 Twitch API Nodes
+
+All nodes follow Twitch Helix API's resource-oriented structure:
+
+**User & Channel Management:**
+- **Twitch Users** - Get user information
+- **Twitch Channels** - Get channel information
+- **Twitch Streams** - Get stream information
+
+**Content & Media:**
+- **Twitch Clips** - Get, create clips
+- **Twitch Videos** - Get videos
+- **Twitch Games** - Get games, top games
+- **Twitch Search** - Search categories, channels, streams
+
+**Chat & Communication:**
+- **Twitch Chat Messages** - Send messages
+- **Twitch Chatters** - Get chatters list
+- **Twitch Emotes** - Get channel emotes
+- **Twitch Announcements** - Send announcements
+- **Twitch Whispers** - Send whispers
+
+**Channel Points & Rewards:**
+- **Twitch Custom Rewards** - Create, get, update, delete custom rewards
+- **Twitch Redemptions** - Get, update redemption status
+
+**Moderation:**
+- **Twitch Bans** - Ban, unban users, get banned users
+- **Twitch Moderators** - Get, add, remove moderators
+
+**Engagement:**
+- **Twitch Polls** - Get, create, end polls
+- **Twitch Predictions** - Get, create, lock, resolve predictions
+- **Twitch Raids** - Start, cancel raids
+
+**Monetization:**
+- **Twitch Bits Leaderboard** - Get bits leaderboard
+- **Twitch Cheermotes** - Get cheermotes
+- **Twitch Subscriptions** - Get broadcaster subscriptions, check user subscription
+
+**Scheduling & Teams:**
+- **Twitch Schedule** - Get, create, update, delete stream segments
+- **Twitch Teams** - Get channel teams, team information
+
+### EventSub Trigger Node
+
+**Twitch Trigger** - Real-time event notifications via Webhook:
+
+- **Stream Events:** online, offline
+- **Channel Events:** update, follow, subscribe, subscription end/gift/message, cheer, raid, ban, unban
+- **Chat Events:** message, clear, notification, message delete, clear user messages
+- **Channel Points:** custom reward add/update/remove, redemption add/update
+- **Polls:** begin, progress, end
+- **Predictions:** begin, progress, lock, end
+- **Goals:** begin, progress, end
+- **Hype Train:** begin, progress, end
+- **Moderator:** add, remove
+- **Shield Mode:** begin, end
+- **Shoutout:** create, receive
+
+**Supports 45+ EventSub events** with automatic subscription management and signature verification.
+
+## Authentication
+
+Two authentication methods are supported:
+
+1. **Client Credentials** (TwitchApi) - App access tokens using Client ID and Secret
+2. **OAuth2** (TwitchOAuth2Api) - User access tokens with customizable scopes
+
+OAuth2 credentials include scope selection for:
+- User information (`user:read:email`)
+- Channel management (`channel:manage:*`)
+- Moderation (`moderator:manage:*`)
+- Chat operations (`chat:read`, `chat:edit`)
+- And many more...
+
+## Installation
+
+### Self-Hosted n8n
+
+Install via npm in your n8n installation directory:
 
 ```bash
-npm create @n8n/node
+npm install @yuniruyuni/n8n-nodes-twitch
 ```
 
-**Already using this starter? Start developing with:**
+Or add to your n8n environment:
 
 ```bash
-npm run dev
+N8N_CUSTOM_EXTENSIONS="/path/to/@yuniruyuni/n8n-nodes-twitch"
 ```
 
-This starts n8n with your nodes loaded and hot reload enabled.
+For Docker installations, mount the package or add to your custom nodes directory.
 
-## What's Included
+### n8n Cloud
 
-This starter repository includes two example nodes to learn from:
+**Fully compatible** - This package uses the declarative routing pattern with no external dependencies. The Twitch Trigger node uses webhooks for EventSub notifications, which work seamlessly on n8n Cloud.
 
-- **[Example Node](nodes/Example/)** - A simple starter node that shows the basic structure with a custom `execute` method
-- **[GitHub Issues Node](nodes/GithubIssues/)** - A complete, production-ready example built using the **declarative style**:
-  - **Low-code approach** - Define operations declaratively without writing request logic
-  - Multiple resources (Issues, Comments)
-  - Multiple operations (Get, Get All, Create)
-  - Two authentication methods (OAuth2 and Personal Access Token)
-  - List search functionality for dynamic dropdowns
-  - Proper error handling and typing
-  - Ideal for HTTP API-based integrations
+## Compatibility
 
-> [!TIP]
-> The declarative/low-code style (used in GitHub Issues) is the recommended approach for building nodes that interact with HTTP APIs. It significantly reduces boilerplate code and handles requests automatically.
+- **n8n version:** 1.0.0 or higher
+- **Node.js version:** 18.10.0 or higher (recommended: 20.x)
 
-Browse these examples to understand both approaches, then modify them or create your own.
+## Usage
 
-## Finding Inspiration
+### Setting up Twitch Credentials
 
-Looking for more examples? Check out these resources:
+1. Go to [Twitch Developer Console](https://dev.twitch.tv/console/apps)
+2. Create a new application or use an existing one
+3. Note your Client ID and Client Secret
+4. For OAuth2, set the OAuth Redirect URL to your n8n instance (e.g., `https://your-n8n.com/rest/oauth2-credential/callback`)
 
-- **[npm Community Nodes](https://www.npmjs.com/search?q=keywords:n8n-community-node-package)** - Browse thousands of community-built nodes on npm using the `n8n-community-node-package` tag
-- **[n8n Built-in Nodes](https://github.com/n8n-io/n8n/tree/master/packages/nodes-base/nodes)** - Study the source code of n8n's official nodes for production-ready patterns and best practices
-- **[n8n Credentials](https://github.com/n8n-io/n8n/tree/master/packages/nodes-base/credentials)** - See how authentication is implemented for various services
+### Using Twitch Nodes
 
-These are excellent resources to understand how to structure your nodes, handle different API patterns, and implement advanced features.
+1. Add a Twitch node to your workflow
+2. Create new credentials (Client Credentials or OAuth2)
+3. Select the operation you want to perform
+4. Configure the required parameters
+5. Execute the workflow
 
-## Prerequisites
+### Using Twitch Trigger
 
-Before you begin, install the following on your development machine:
+1. Add the Twitch Trigger node to your workflow
+2. Create credentials (Client Credentials or OAuth2 with appropriate scopes)
+3. Select the EventSub event type you want to listen for
+4. Configure broadcaster ID and other required parameters
+5. Activate the workflow to start receiving events
 
-### Required
+The trigger uses webhooks to receive real-time events from Twitch. n8n automatically provides a secure HTTPS webhook URL (no manual webhook setup required on your end). When you activate the workflow, the node automatically:
+- Creates an EventSub subscription on Twitch
+- Verifies the webhook with Twitch's challenge mechanism
+- Validates event signatures for security
+- Automatically cleans up the subscription when the workflow is deactivated
 
-- **[Node.js](https://nodejs.org/)** (v22 or higher) and npm
-  - Linux/Mac/WSL: Install via [nvm](https://github.com/nvm-sh/nvm)
-  - Windows: Follow [Microsoft's NodeJS guide](https://learn.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-windows)
-- **[git](https://git-scm.com/downloads)**
+## Development
 
-### Recommended
+### Prerequisites
 
-- Follow n8n's [development environment setup guide](https://docs.n8n.io/integrations/creating-nodes/build/node-development-environment/)
+- Node.js 18.10.0 or higher
+- npm
 
-> [!NOTE]
-> The `@n8n/node-cli` is included as a dev dependency and will be installed automatically when you run `npm install`. The CLI includes n8n for local development, so you don't need to install n8n globally.
-
-## Getting Started with this Starter
-
-Follow these steps to create your own n8n community node package:
-
-### 1. Create Your Repository
-
-[Generate a new repository](https://github.com/n8n-io/n8n-nodes-starter/generate) from this template, then clone it:
+### Setup
 
 ```bash
-git clone https://github.com/<your-organization>/<your-repo-name>.git
-cd <your-repo-name>
-```
+# Clone the repository
+git clone https://github.com/yuniruyuni/n8n-nodes-twitch.git
+cd n8n-nodes-twitch
 
-### 2. Install Dependencies
-
-```bash
+# Install dependencies
 npm install
-```
 
-This installs all required dependencies including the `@n8n/node-cli`.
+# Build the nodes
+npm run build
 
-### 3. Explore the Examples
-
-Browse the example nodes in [nodes/](nodes/) and [credentials/](credentials/) to understand the structure:
-
-- Start with [nodes/Example/](nodes/Example/) for a basic node
-- Study [nodes/GithubIssues/](nodes/GithubIssues/) for a real-world implementation
-
-### 4. Build Your Node
-
-Edit the example nodes to fit your use case, or create new node files by copying the structure from [nodes/Example/](nodes/Example/).
-
-> [!TIP]
-> If you want to scaffold a completely new node package, use `npm create @n8n/node` to start fresh with the CLI's interactive generator.
-
-### 5. Configure Your Package
-
-Update `package.json` with your details:
-
-- `name` - Your package name (must start with `n8n-nodes-`)
-- `author` - Your name and email
-- `repository` - Your repository URL
-- `description` - What your node does
-
-Make sure your node is registered in the `n8n.nodes` array.
-
-### 6. Develop and Test Locally
-
-Start n8n with your node loaded:
-
-```bash
+# Start n8n with the nodes loaded (development mode)
 npm run dev
 ```
 
-This command runs `n8n-node dev` which:
-
-- Builds your node with watch mode
-- Starts n8n with your node available
-- Automatically rebuilds when you make changes
-- Opens n8n in your browser (usually http://localhost:5678)
-
-You can now test your node in n8n workflows!
-
-> [!NOTE]
-> Learn more about CLI commands in the [@n8n/node-cli documentation](https://www.npmjs.com/package/@n8n/node-cli).
-
-### 7. Lint Your Code
-
-Check for errors:
-
-```bash
-npm run lint
-```
-
-Auto-fix issues when possible:
-
-```bash
-npm run lint:fix
-```
-
-### 8. Build for Production
-
-When ready to publish:
-
-```bash
-npm run build
-```
-
-This compiles your TypeScript code to the `dist/` folder.
-
-### 9. Prepare for Publishing
-
-Before publishing:
-
-1. **Update documentation**: Replace this README with your node's documentation. Use [README_TEMPLATE.md](README_TEMPLATE.md) as a starting point.
-2. **Update the LICENSE**: Add your details to the [LICENSE](LICENSE.md) file.
-3. **Test thoroughly**: Ensure your node works in different scenarios.
-
-### 10. Publish to npm
-
-Publish your package to make it available to the n8n community:
-
-```bash
-npm publish
-```
-
-Learn more about [publishing to npm](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry).
-
-### 11. Submit for Verification (Optional)
-
-Get your node verified for n8n Cloud:
-
-1. Ensure your node meets the [requirements](https://docs.n8n.io/integrations/creating-nodes/deploy/submit-community-nodes/):
-   - Uses MIT license ✅ (included in this starter)
-   - No external package dependencies
-   - Follows n8n's design guidelines
-   - Passes quality and security review
-
-2. Submit through the [n8n Creator Portal](https://creators.n8n.io/nodes)
-
-**Benefits of verification:**
-
-- Available directly in n8n Cloud
-- Discoverable in the n8n nodes panel
-- Verified badge for quality assurance
-- Increased visibility in the n8n community
-
-## Available Scripts
-
-This starter includes several npm scripts to streamline development:
+### Available Scripts
 
 | Script                | Description                                                      |
 | --------------------- | ---------------------------------------------------------------- |
-| `npm run dev`         | Start n8n with your node and watch for changes (runs `n8n-node dev`) |
-| `npm run build`       | Compile TypeScript to JavaScript for production (runs `n8n-node build`) |
-| `npm run build:watch` | Build in watch mode (auto-rebuild on changes)                    |
-| `npm run lint`        | Check your code for errors and style issues (runs `n8n-node lint`) |
-| `npm run lint:fix`    | Automatically fix linting issues when possible (runs `n8n-node lint --fix`) |
-| `npm run release`     | Create a new release (runs `n8n-node release`)                   |
+| `npm run dev`         | Start n8n with your node and watch for changes |
+| `npm run build`       | Compile TypeScript to JavaScript |
+| `npm run build:watch` | Build in watch mode (auto-rebuild on changes) |
+| `npm run lint`        | Check code for errors and style issues |
+| `npm run lint:fix`    | Automatically fix linting issues |
+| `npm run release`     | Create a new release |
 
-> [!TIP]
-> These scripts use the [@n8n/node-cli](https://www.npmjs.com/package/@n8n/node-cli) under the hood. You can also run CLI commands directly, e.g., `npx n8n-node dev`.
+### Release Process
 
-## Troubleshooting
+This project uses `n8n-node release` (powered by `release-it`) for automated releases:
 
-### My node doesn't appear in n8n
+**Recommended: GitHub Actions**
 
-1. Make sure you ran `npm install` to install dependencies
-2. Check that your node is listed in `package.json` under `n8n.nodes`
-3. Restart the dev server with `npm run dev`
-4. Check the console for any error messages
+1. Go to **Actions** → **Release** → **Run workflow**
+2. Click **Run workflow**
+3. GitHub Actions automatically:
+   - Runs lint and build
+   - Updates version in package.json (default increment)
+   - Generates CHANGELOG
+   - Creates git commit and tag
+   - Publishes to npm
+   - Creates GitHub release with notes
 
-### Linting errors
+**Alternative: Local Release**
 
-Run `npm run lint:fix` to automatically fix most common issues. For remaining errors, check the [n8n node development guidelines](https://docs.n8n.io/integrations/creating-nodes/).
+For local development workflow:
+```bash
+npm run release
+```
+This provides an interactive release process managed by `n8n-node release`.
 
-### TypeScript errors
+**Prerequisites**:
+- Set `NPM_TOKEN` secret in GitHub repository settings
+- Ensure you have npm publishing rights for `@yuniruyuni/n8n-nodes-twitch`
+- For local releases: `npm login` and clean git state on `master` branch required
 
-Make sure you're using Node.js v22 or higher and have run `npm install` to get all type definitions.
+## Architecture
+
+This package uses the **declarative/low-code style** for all nodes:
+
+- Direct calls to Twitch Helix API (`https://api.twitch.tv/helix`)
+- n8n's `routing` property for HTTP requests
+- **No external dependencies** - fully compatible with n8n Cloud
+- Resource-oriented structure aligned with Twitch Helix API
+
+The Twitch Trigger node uses n8n's webhook system to receive EventSub notifications via HTTPS, with built-in signature verification for security.
 
 ## Resources
 
-- **[n8n Node Documentation](https://docs.n8n.io/integrations/creating-nodes/)** - Complete guide to building nodes
-- **[n8n Community Forum](https://community.n8n.io/)** - Get help and share your nodes
-- **[@n8n/node-cli Documentation](https://www.npmjs.com/package/@n8n/node-cli)** - CLI tool reference
-- **[n8n Creator Portal](https://creators.n8n.io/nodes)** - Submit your node for verification
-- **[Submit Community Nodes Guide](https://docs.n8n.io/integrations/creating-nodes/deploy/submit-community-nodes/)** - Verification requirements and process
-
-## Contributing
-
-Have suggestions for improving this starter? [Open an issue](https://github.com/n8n-io/n8n-nodes-starter/issues) or submit a pull request!
+- [n8n Documentation](https://docs.n8n.io/)
+- [Twitch API Documentation](https://dev.twitch.tv/docs/api/)
+- [Twitch EventSub Documentation](https://dev.twitch.tv/docs/eventsub/)
+- [Twitch Developer Console](https://dev.twitch.tv/console)
 
 ## License
 
-[MIT](https://github.com/n8n-io/n8n-nodes-starter/blob/master/LICENSE.md)
+[MIT](LICENSE.md)
+
+## Version History
+
+### 0.1.0
+
+- Initial release
+- 25 Twitch API nodes covering Users, Channels, Streams, Chat, Moderation, Channel Points, and more
+- Twitch Trigger node with EventSub Webhook support (45+ events)
+- Client Credentials and OAuth2 authentication
+- Resource-oriented architecture aligned with Twitch Helix API structure
+- **n8n Cloud compatible** - No external dependencies

@@ -1,19 +1,27 @@
 {
-	"name": "n8n-nodes-<...>",
+	"name": "@yuniruyuni/n8n-nodes-twitch",
 	"version": "0.1.0",
-	"description": "",
+	"description": "n8n node for Twitch API integration. Supports Twitch operations and EventSub triggers.",
 	"license": "MIT",
-	"homepage": "",
+	"homepage": "https://github.com/yuniruyuni/n8n-nodes-twitch",
 	"keywords": [
-		"n8n-community-node-package"
+		"n8n-community-node-package",
+		"n8n",
+		"twitch",
+		"eventsub",
+		"websocket",
+		"streaming",
+		"chat",
+		"raid",
+		"subscription"
 	],
 	"author": {
-		"name": "",
-		"email": ""
+		"name": "yuniruyuni",
+		"email": "yuniruyuni@gmail.com"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/<...>/n8n-nodes-<...>.git"
+		"url": "https://github.com/yuniruyuni/n8n-nodes-twitch.git"
 	},
 	"scripts": {
 		"build": "n8n-node build",
@@ -31,12 +39,35 @@
 		"n8nNodesApiVersion": 1,
 		"strict": true,
 		"credentials": [
-			"dist/credentials/GithubIssuesApi.credentials.js",
-			"dist/credentials/GithubIssuesOAuth2Api.credentials.js"
+			"dist/credentials/TwitchApi.credentials.js",
+			"dist/credentials/TwitchOAuth2Api.credentials.js"
 		],
 		"nodes": [
-			"dist/nodes/GithubIssues/GithubIssues.node.js",
-			"dist/nodes/Example/Example.node.js"
+			"dist/nodes/TwitchAnnouncements/TwitchAnnouncements.node.js",
+			"dist/nodes/TwitchBans/TwitchBans.node.js",
+			"dist/nodes/TwitchBitsLeaderboard/TwitchBitsLeaderboard.node.js",
+			"dist/nodes/TwitchChannels/TwitchChannels.node.js",
+			"dist/nodes/TwitchChatMessages/TwitchChatMessages.node.js",
+			"dist/nodes/TwitchChatters/TwitchChatters.node.js",
+			"dist/nodes/TwitchCheermotes/TwitchCheermotes.node.js",
+			"dist/nodes/TwitchClips/TwitchClips.node.js",
+			"dist/nodes/TwitchCustomRewards/TwitchCustomRewards.node.js",
+			"dist/nodes/TwitchEmotes/TwitchEmotes.node.js",
+			"dist/nodes/TwitchGames/TwitchGames.node.js",
+			"dist/nodes/TwitchModerators/TwitchModerators.node.js",
+			"dist/nodes/TwitchPolls/TwitchPolls.node.js",
+			"dist/nodes/TwitchPredictions/TwitchPredictions.node.js",
+			"dist/nodes/TwitchRaids/TwitchRaids.node.js",
+			"dist/nodes/TwitchRedemptions/TwitchRedemptions.node.js",
+			"dist/nodes/TwitchSchedule/TwitchSchedule.node.js",
+			"dist/nodes/TwitchSearch/TwitchSearch.node.js",
+			"dist/nodes/TwitchStreams/TwitchStreams.node.js",
+			"dist/nodes/TwitchSubscriptions/TwitchSubscriptions.node.js",
+			"dist/nodes/TwitchTeams/TwitchTeams.node.js",
+			"dist/nodes/TwitchTrigger/TwitchTrigger.node.js",
+			"dist/nodes/TwitchUsers/TwitchUsers.node.js",
+			"dist/nodes/TwitchVideos/TwitchVideos.node.js",
+			"dist/nodes/TwitchWhispers/TwitchWhispers.node.js"
 		]
 	},
 	"devDependencies": {
@@ -48,5 +79,8 @@
 	},
 	"peerDependencies": {
 		"n8n-workflow": "*"
+	},
+	"publishConfig": {
+		"access": "public"
 	}
 }

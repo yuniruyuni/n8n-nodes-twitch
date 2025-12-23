@@ -1,0 +1,468 @@
+import {
+	ApplicationError,
+	NodeConnectionTypes,
+	type IHookFunctions,
+	type IWebhookFunctions,
+	type INodeType,
+	type INodeTypeDescription,
+	type IWebhookResponseData,
+	type IDataObject,
+} from 'n8n-workflow';
+import { createHmac, timingSafeEqual } from 'crypto';
+
+export class TwitchTrigger implements INodeType {
+	description: INodeTypeDescription = {
+		displayName: 'Twitch Trigger',
+		name: 'twitchTrigger',
+		icon: { light: 'file:twitch.svg', dark: 'file:twitch.dark.svg' },
+		group: ['trigger'],
+		version: 1,
+		subtitle: '={{$parameter["event"]}}',
+		description: 'Listen to Twitch EventSub notifications via Webhook',
+		defaults: {
+			name: 'Twitch Trigger',
+		},
+		usableAsTool: true,
+		inputs: [],
+		outputs: [NodeConnectionTypes.Main],
+		credentials: [
+			{
+				name: 'twitchApi',
+				required: true,
+				displayOptions: {
+					show: {
+						authentication: ['clientCredentials'],
+					},
+				},
+			},
+			{
+				name: 'twitchOAuth2Api',
+				required: true,
+				displayOptions: {
+					show: {
+						authentication: ['oAuth2'],
+					},
+				},
+			},
+		],
+		webhooks: [
+			{
+				name: 'default',
+				httpMethod: 'POST',
+				responseMode: 'onReceived',
+				path: 'webhook',
+			},
+		],
+		properties: [
+			{
+				displayName: 'Authentication',
+				name: 'authentication',
+				type: 'options',
+				options: [
+					{
+						name: 'Client Credentials',
+						value: 'clientCredentials',
+					},
+					{
+						name: 'OAuth2',
+						value: 'oAuth2',
+					},
+				],
+				default: 'oAuth2',
+			},
+			{
+				displayName: 'Event',
+				name: 'event',
+				type: 'options',
+				noDataExpression: true,
+				options: [
+					{
+						name: 'Channel Ban',
+						value: 'channel.ban',
+					},
+					{
+						name: 'Channel Channel Points Custom Reward Add',
+						value: 'channel.channel_points_custom_reward.add',
+					},
+					{
+						name: 'Channel Channel Points Custom Reward Redemption Add',
+						value: 'channel.channel_points_custom_reward_redemption.add',
+					},
+					{
+						name: 'Channel Channel Points Custom Reward Redemption Update',
+						value: 'channel.channel_points_custom_reward_redemption.update',
+					},
+					{
+						name: 'Channel Channel Points Custom Reward Remove',
+						value: 'channel.channel_points_custom_reward.remove',
+					},
+					{
+						name: 'Channel Channel Points Custom Reward Update',
+						value: 'channel.channel_points_custom_reward.update',
+					},
+					{
+						name: 'Channel Chat Clear',
+						value: 'channel.chat.clear',
+					},
+					{
+						name: 'Channel Chat Clear User Messages',
+						value: 'channel.chat.clear_user_messages',
+					},
+					{
+						name: 'Channel Chat Message',
+						value: 'channel.chat.message',
+					},
+					{
+						name: 'Channel Chat Message Delete',
+						value: 'channel.chat.message_delete',
+					},
+					{
+						name: 'Channel Chat Notification',
+						value: 'channel.chat.notification',
+					},
+					{
+						name: 'Channel Cheer',
+						value: 'channel.cheer',
+					},
+					{
+						name: 'Channel Follow',
+						value: 'channel.follow',
+					},
+					{
+						name: 'Channel Goal Begin',
+						value: 'channel.goal.begin',
+					},
+					{
+						name: 'Channel Goal End',
+						value: 'channel.goal.end',
+					},
+					{
+						name: 'Channel Goal Progress',
+						value: 'channel.goal.progress',
+					},
+					{
+						name: 'Channel Hype Train Begin',
+						value: 'channel.hype_train.begin',
+					},
+					{
+						name: 'Channel Hype Train End',
+						value: 'channel.hype_train.end',
+					},
+					{
+						name: 'Channel Hype Train Progress',
+						value: 'channel.hype_train.progress',
+					},
+					{
+						name: 'Channel Moderator Add',
+						value: 'channel.moderator.add',
+					},
+					{
+						name: 'Channel Moderator Remove',
+						value: 'channel.moderator.remove',
+					},
+					{
+						name: 'Channel Poll Begin',
+						value: 'channel.poll.begin',
+					},
+					{
+						name: 'Channel Poll End',
+						value: 'channel.poll.end',
+					},
+					{
+						name: 'Channel Poll Progress',
+						value: 'channel.poll.progress',
+					},
+					{
+						name: 'Channel Prediction Begin',
+						value: 'channel.prediction.begin',
+					},
+					{
+						name: 'Channel Prediction End',
+						value: 'channel.prediction.end',
+					},
+					{
+						name: 'Channel Prediction Lock',
+						value: 'channel.prediction.lock',
+					},
+					{
+						name: 'Channel Prediction Progress',
+						value: 'channel.prediction.progress',
+					},
+					{
+						name: 'Channel Raid',
+						value: 'channel.raid',
+					},
+					{
+						name: 'Channel Shield Mode Begin',
+						value: 'channel.shield_mode.begin',
+					},
+					{
+						name: 'Channel Shield Mode End',
+						value: 'channel.shield_mode.end',
+					},
+					{
+						name: 'Channel Shoutout Create',
+						value: 'channel.shoutout.create',
+					},
+					{
+						name: 'Channel Shoutout Receive',
+						value: 'channel.shoutout.receive',
+					},
+					{
+						name: 'Channel Subscribe',
+						value: 'channel.subscribe',
+					},
+					{
+						name: 'Channel Subscription End',
+						value: 'channel.subscription.end',
+					},
+					{
+						name: 'Channel Subscription Gift',
+						value: 'channel.subscription.gift',
+					},
+					{
+						name: 'Channel Subscription Message',
+						value: 'channel.subscription.message',
+					},
+					{
+						name: 'Channel Unban',
+						value: 'channel.unban',
+					},
+					{
+						name: 'Channel Update',
+						value: 'channel.update',
+					},
+					{
+						name: 'Stream Offline',
+						value: 'stream.offline',
+					},
+					{
+						name: 'Stream Online',
+						value: 'stream.online',
+					},
+				],
+				default: 'stream.online',
+				description: 'The EventSub event to listen for',
+			},
+			{
+				displayName: 'Broadcaster ID',
+				name: 'broadcasterId',
+				type: 'string',
+				default: '',
+				required: true,
+				placeholder: 'e.g. 123456789',
+				description: 'The broadcaster user ID to monitor. You can get this from the User operation in the Twitch node.',
+			},
+		],
+	};
+
+	webhookMethods = {
+		default: {
+			async checkExists(this: IHookFunctions): Promise<boolean> {
+				const webhookData = this.getWorkflowStaticData('node');
+				if (webhookData.subscriptionId === undefined) {
+					return false;
+				}
+
+				const authentication = this.getNodeParameter('authentication') as string;
+				const credentials =
+					authentication === 'oAuth2'
+						? await this.getCredentials('twitchOAuth2Api')
+						: await this.getCredentials('twitchApi');
+
+				const clientId = credentials.clientId as string;
+				const accessToken =
+					authentication === 'oAuth2'
+						? (credentials.accessToken as string)
+						: (credentials.oauthTokenData as IDataObject).access_token as string;
+
+				try {
+					const response = await this.helpers.httpRequest({
+						method: 'GET',
+						url: `https://api.twitch.tv/helix/eventsub/subscriptions?id=${webhookData.subscriptionId}`,
+						headers: {
+							'Client-ID': clientId,
+							Authorization: `Bearer ${accessToken}`,
+						},
+						json: true,
+					});
+
+					const data = response as IDataObject;
+					const subscriptions = (data.data as IDataObject[]) || [];
+					return subscriptions.length > 0;
+				} catch {
+					return false;
+				}
+			},
+
+			async create(this: IHookFunctions): Promise<boolean> {
+				const webhookUrl = this.getNodeWebhookUrl('default');
+				const webhookData = this.getWorkflowStaticData('node');
+				const event = this.getNodeParameter('event') as string;
+				const broadcasterId = this.getNodeParameter('broadcasterId') as string;
+				const authentication = this.getNodeParameter('authentication') as string;
+
+				const credentials =
+					authentication === 'oAuth2'
+						? await this.getCredentials('twitchOAuth2Api')
+						: await this.getCredentials('twitchApi');
+
+				const clientId = credentials.clientId as string;
+				const accessToken =
+					authentication === 'oAuth2'
+						? (credentials.accessToken as string)
+						: (credentials.oauthTokenData as IDataObject).access_token as string;
+
+				// Generate a random secret for webhook verification
+				const secret = Array.from({ length: 32 }, () =>
+					Math.random().toString(36).charAt(2),
+				).join('');
+
+				const condition: IDataObject = {
+					broadcaster_user_id: broadcasterId,
+				};
+
+				// Some events require different condition fields
+				if (event === 'channel.follow') {
+					condition.moderator_user_id = broadcasterId;
+				}
+
+				const requestBody = {
+					type: event,
+					version: '1',
+					condition,
+					transport: {
+						method: 'webhook',
+						callback: webhookUrl,
+						secret,
+					},
+				};
+
+				try {
+					const response = await this.helpers.httpRequest({
+						method: 'POST',
+						url: 'https://api.twitch.tv/helix/eventsub/subscriptions',
+						headers: {
+							'Client-ID': clientId,
+							Authorization: `Bearer ${accessToken}`,
+							'Content-Type': 'application/json',
+						},
+						body: requestBody,
+						json: true,
+					});
+
+					const data = response as IDataObject;
+					const subscription = (data.data as IDataObject[])[0];
+
+					webhookData.subscriptionId = subscription.id;
+					webhookData.secret = secret;
+
+					return true;
+				} catch (error) {
+					throw new ApplicationError(`Failed to create Twitch EventSub subscription: ${error}`);
+				}
+			},
+
+			async delete(this: IHookFunctions): Promise<boolean> {
+				const webhookData = this.getWorkflowStaticData('node');
+				if (webhookData.subscriptionId === undefined) {
+					return false;
+				}
+
+				const authentication = this.getNodeParameter('authentication') as string;
+				const credentials =
+					authentication === 'oAuth2'
+						? await this.getCredentials('twitchOAuth2Api')
+						: await this.getCredentials('twitchApi');
+
+				const clientId = credentials.clientId as string;
+				const accessToken =
+					authentication === 'oAuth2'
+						? (credentials.accessToken as string)
+						: (credentials.oauthTokenData as IDataObject).access_token as string;
+
+				try {
+					await this.helpers.httpRequest({
+						method: 'DELETE',
+						url: `https://api.twitch.tv/helix/eventsub/subscriptions?id=${webhookData.subscriptionId}`,
+						headers: {
+							'Client-ID': clientId,
+							Authorization: `Bearer ${accessToken}`,
+						},
+					});
+
+					delete webhookData.subscriptionId;
+					delete webhookData.secret;
+
+					return true;
+				} catch {
+					return false;
+				}
+			},
+		},
+	};
+
+	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
+		const webhookData = this.getWorkflowStaticData('node');
+		const bodyData = this.getBodyData();
+		const headerData = this.getHeaderData();
+		const req = this.getRequestObject();
+
+		// Get raw body for signature verification
+		const rawBody = (req as IDataObject).rawBody || JSON.stringify(bodyData);
+
+		const messageId = headerData['twitch-eventsub-message-id'] as string;
+		const messageTimestamp = headerData['twitch-eventsub-message-timestamp'] as string;
+		const messageSignature = headerData['twitch-eventsub-message-signature'] as string;
+		const messageType = headerData['twitch-eventsub-message-type'] as string;
+
+		// Verify signature
+		const secret = webhookData.secret as string;
+		if (secret && messageSignature) {
+			const hmacMessage = messageId + messageTimestamp + rawBody;
+			const expectedSignature =
+				'sha256=' +
+				createHmac('sha256', secret).update(hmacMessage).digest('hex');
+
+			const signatureBuffer = Buffer.from(expectedSignature);
+			const receivedSignatureBuffer = Buffer.from(messageSignature);
+
+			if (
+				signatureBuffer.length !== receivedSignatureBuffer.length ||
+				!timingSafeEqual(signatureBuffer, receivedSignatureBuffer)
+			) {
+				return {
+					workflowData: [],
+				};
+			}
+		}
+
+		// Handle challenge verification
+		if (messageType === 'webhook_callback_verification') {
+			const challenge = (bodyData as IDataObject).challenge as string;
+			return {
+				webhookResponse: challenge,
+				workflowData: [],
+			};
+		}
+
+		// Handle notification
+		if (messageType === 'notification') {
+			const event = ((bodyData as IDataObject).event as IDataObject) || {};
+			return {
+				workflowData: [this.helpers.returnJsonArray([event])],
+			};
+		}
+
+		// Handle revocation
+		if (messageType === 'revocation') {
+			return {
+				workflowData: [],
+			};
+		}
+
+		return {
+			workflowData: [],
+		};
+	}
+}
