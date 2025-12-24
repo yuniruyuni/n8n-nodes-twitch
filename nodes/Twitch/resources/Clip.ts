@@ -140,12 +140,6 @@ export const clipOperations: INodeProperties[] = [
 									property: 'data',
 								},
 							},
-							{
-								type: 'setKeyValue',
-								properties: {
-									index: 0,
-								},
-							},
 						],
 					},
 				},

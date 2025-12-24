@@ -144,12 +144,6 @@ export const teamOperations: INodeProperties[] = [
 									property: 'data',
 								},
 							},
-							{
-								type: 'setKeyValue',
-								properties: {
-									index: 0,
-								},
-							},
 						],
 					},
 				},

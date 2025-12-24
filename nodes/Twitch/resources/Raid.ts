@@ -98,12 +98,6 @@ export const raidOperations: INodeProperties[] = [
 									property: 'data',
 								},
 							},
-							{
-								type: 'setKeyValue',
-								properties: {
-									index: 0,
-								},
-							},
 						],
 					},
 				},

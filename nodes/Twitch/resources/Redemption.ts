@@ -245,12 +245,6 @@ export const redemptionOperations: INodeProperties[] = [
 									property: 'data',
 								},
 							},
-							{
-								type: 'setKeyValue',
-								properties: {
-									index: 0,
-								},
-							},
 						],
 					},
 				},

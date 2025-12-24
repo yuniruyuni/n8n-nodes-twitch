@@ -166,12 +166,6 @@ export const subscriptionOperations: INodeProperties[] = [
 									property: 'data',
 								},
 							},
-							{
-								type: 'setKeyValue',
-								properties: {
-									index: 0,
-								},
-							},
 						],
 					},
 				},

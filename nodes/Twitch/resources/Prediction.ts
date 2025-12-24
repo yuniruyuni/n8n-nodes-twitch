@@ -200,12 +200,6 @@ export const predictionOperations: INodeProperties[] = [
 									property: 'data',
 								},
 							},
-							{
-								type: 'setKeyValue',
-								properties: {
-									index: 0,
-								},
-							},
 						],
 					},
 				},
@@ -296,12 +290,6 @@ export const predictionOperations: INodeProperties[] = [
 								type: 'rootProperty',
 								properties: {
 									property: 'data',
-								},
-							},
-							{
-								type: 'setKeyValue',
-								properties: {
-									index: 0,
 								},
 							},
 						],

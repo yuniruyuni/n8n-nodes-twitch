@@ -415,12 +415,6 @@ export const customRewardOperations: INodeProperties[] = [
 									property: 'data',
 								},
 							},
-							{
-								type: 'setKeyValue',
-								properties: {
-									index: 0,
-								},
-							},
 						],
 					},
 				},
@@ -543,12 +537,6 @@ export const customRewardOperations: INodeProperties[] = [
 								type: 'rootProperty',
 								properties: {
 									property: 'data',
-								},
-							},
-							{
-								type: 'setKeyValue',
-								properties: {
-									index: 0,
 								},
 							},
 						],

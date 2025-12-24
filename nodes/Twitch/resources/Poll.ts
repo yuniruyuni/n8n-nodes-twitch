@@ -255,12 +255,6 @@ export const pollOperations: INodeProperties[] = [
 									property: 'data',
 								},
 							},
-							{
-								type: 'setKeyValue',
-								properties: {
-									index: 0,
-								},
-							},
 						],
 					},
 				},
@@ -346,12 +340,6 @@ export const pollOperations: INodeProperties[] = [
 								type: 'rootProperty',
 								properties: {
 									property: 'data',
-								},
-							},
-							{
-								type: 'setKeyValue',
-								properties: {
-									index: 0,
 								},
 							},
 						],
