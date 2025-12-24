@@ -1,5 +1,7 @@
 import type {
 	Icon,
+	IAuthenticateGeneric,
+	ICredentialTestRequest,
 	ICredentialType,
 	INodeProperties,
 } from 'n8n-workflow';
@@ -75,4 +77,23 @@ export class TwitchOAuth2Api implements ICredentialType {
 			default: 'body',
 		},
 	];
+
+	authenticate: IAuthenticateGeneric = {
+		type: 'generic',
+		properties: {
+			headers: {
+				'Client-ID': '={{$credentials.clientId}}',
+			},
+		},
+	};
+
+	test: ICredentialTestRequest = {
+		request: {
+			baseURL: 'https://api.twitch.tv/helix',
+			url: '/users',
+			headers: {
+				'Client-ID': '={{$credentials.clientId}}',
+			},
+		},
+	};
 }

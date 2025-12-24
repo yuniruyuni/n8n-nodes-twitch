@@ -62,7 +62,6 @@ export class Twitch implements INodeType {
 			headers: {
 				Accept: 'application/json',
 				'Content-Type': 'application/json',
-				'Client-ID': '={{$credentials.clientId}}',
 			},
 		},
 		properties: [
