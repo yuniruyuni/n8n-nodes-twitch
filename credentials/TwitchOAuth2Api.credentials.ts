@@ -41,6 +41,12 @@ export class TwitchOAuth2Api implements ICredentialType {
 		{
 			displayName: 'Scope',
 			name: 'scope',
+			type: 'hidden',
+			default: 'user:read:email',
+		},
+		{
+			displayName: 'Scopes',
+			name: 'scopeSelection',
 			type: 'multiOptions',
 			default: ['user:read:email'],
 			description: 'Select the Twitch scopes required for your application. See <a href="https://dev.twitch.tv/docs/authentication/scopes/" target="_blank">Twitch Scopes</a> for details.',
@@ -444,11 +450,12 @@ export class TwitchOAuth2Api implements ICredentialType {
 		this: IHttpRequestHelper,
 		credentials: ICredentialDataDecryptedObject,
 	) {
-		// Only return OAuth2-specific properties, excluding n8n internal properties
-		const scope = Array.isArray(credentials.scope)
-			? credentials.scope.join(' ')
-			: credentials.scope;
+		// Convert scopeSelection array to scope string
+		const scope = Array.isArray(credentials.scopeSelection)
+			? credentials.scopeSelection.join(' ')
+			: credentials.scopeSelection || 'user:read:email';
 
+		// Only return OAuth2-specific properties, excluding n8n internal properties
 		return {
 			clientId: credentials.clientId,
 			clientSecret: credentials.clientSecret,
