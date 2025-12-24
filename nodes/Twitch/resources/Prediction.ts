@@ -1,5 +1,149 @@
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { updateDisplayOptions } from '../shared/updateDisplayOptions';
+
+// Field definitions for each operation
+const createPredictionFields: INodeProperties[] = [
+	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+	},
+	{
+		displayName: 'Title',
+		name: 'title',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. Will I win this match?',
+		description: 'The question that viewers are predicting. Maximum: 45 characters.',
+	},
+	{
+		displayName: 'Outcome 1 Title',
+		name: 'outcome1Title',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. Yes',
+		description: 'The title for the first outcome. Maximum: 25 characters.',
+	},
+	{
+		displayName: 'Outcome 2 Title',
+		name: 'outcome2Title',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. No',
+		description: 'The title for the second outcome. Maximum: 25 characters.',
+	},
+	{
+		displayName: 'Prediction Window',
+		name: 'predictionWindow',
+		type: 'number',
+		default: 120,
+		required: true,
+		typeOptions: {
+			minValue: 30,
+			maxValue: 1800,
+		},
+		description: 'The length of time (in seconds) that viewers have to make a prediction. Minimum: 30. Maximum: 1800.',
+	},
+];
+
+const getPredictionsFields: INodeProperties[] = [
+	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+	},
+	{
+		displayName: 'Prediction ID',
+		name: 'predictionId',
+		type: 'string',
+		default: '',
+		placeholder: 'e.g. abc123-def456-ghi789',
+		description: 'The ID of the prediction to get. If not specified, returns all predictions for the broadcaster.',
+	},
+	{
+		displayName: 'First',
+		name: 'first',
+		type: 'number',
+		default: 20,
+		typeOptions: {
+			minValue: 1,
+			maxValue: 100,
+		},
+		description: 'Maximum number of items to return',
+	},
+];
+
+const endPredictionFields: INodeProperties[] = [
+	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+	},
+	{
+		displayName: 'Prediction ID',
+		name: 'endPredictionId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. abc123-def456-ghi789',
+		description: 'The ID of the prediction to end',
+	},
+	{
+		displayName: 'Status',
+		name: 'status',
+		type: 'options',
+		options: [
+			{
+				name: 'RESOLVED',
+				value: 'RESOLVED',
+				description: 'The winning outcome is determined and points are distributed',
+			},
+			{
+				name: 'CANCELED',
+				value: 'CANCELED',
+				description: 'The prediction is canceled and points are refunded',
+			},
+			{
+				name: 'LOCKED',
+				value: 'LOCKED',
+				description: 'The prediction is locked and viewers can no longer make predictions',
+			},
+		],
+		default: 'RESOLVED',
+		required: true,
+		description: 'The status to set the prediction to',
+	},
+	{
+		displayName: 'Winning Outcome ID',
+		name: 'winningOutcomeId',
+		type: 'string',
+		displayOptions: {
+			show: {
+				status: ['RESOLVED'],
+			},
+		},
+		default: '',
+		required: true,
+		placeholder: 'e.g. outcome123',
+		description: 'The ID of the winning outcome (required when status is RESOLVED)',
+	},
+];
 
 export const predictionOperations: INodeProperties[] = [
 	{
@@ -170,153 +314,7 @@ export const predictionOperations: INodeProperties[] = [
 ];
 
 export const predictionFields: INodeProperties[] = [
-	// Create Prediction Parameters
-	// broadcasterId is now in CommonFields.ts
-
-	{
-		displayName: 'Title',
-		name: 'title',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['prediction'],
-				operation: ['createPrediction'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. Will I win this match?',
-		description: 'The question that viewers are predicting. Maximum: 45 characters.',
-	},
-	{
-		displayName: 'Outcome 1 Title',
-		name: 'outcome1Title',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['prediction'],
-				operation: ['createPrediction'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. Yes',
-		description: 'The title for the first outcome. Maximum: 25 characters.',
-	},
-	{
-		displayName: 'Outcome 2 Title',
-		name: 'outcome2Title',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['prediction'],
-				operation: ['createPrediction'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. No',
-		description: 'The title for the second outcome. Maximum: 25 characters.',
-	},
-	{
-		displayName: 'Prediction Window',
-		name: 'predictionWindow',
-		type: 'number',
-		displayOptions: {
-			show: {
-				resource: ['prediction'],
-				operation: ['createPrediction'],
-			},
-		},
-		default: 120,
-		required: true,
-		typeOptions: {
-			minValue: 30,
-			maxValue: 1800,
-		},
-		description: 'The length of time (in seconds) that viewers have to make a prediction. Minimum: 30. Maximum: 1800.',
-	},
-	// Get Predictions Parameters
-	// broadcasterId is now in CommonFields.ts
-
-	{
-		displayName: 'Prediction ID',
-		name: 'predictionId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['prediction'],
-				operation: ['getPredictions'],
-			},
-		},
-		default: '',
-		placeholder: 'e.g. abc123-def456-ghi789',
-		description: 'The ID of the prediction to get. If not specified, returns all predictions for the broadcaster.',
-	},
-	// first is now in CommonFields.ts
-	// End Prediction Parameters
-	// broadcasterId is now in CommonFields.ts
-
-	{
-		displayName: 'Prediction ID',
-		name: 'endPredictionId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['prediction'],
-				operation: ['endPrediction'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. abc123-def456-ghi789',
-		description: 'The ID of the prediction to end',
-	},
-	{
-		displayName: 'Status',
-		name: 'status',
-		type: 'options',
-		displayOptions: {
-			show: {
-				resource: ['prediction'],
-				operation: ['endPrediction'],
-			},
-		},
-		options: [
-			{
-				name: 'RESOLVED',
-				value: 'RESOLVED',
-				description: 'The winning outcome is determined and points are distributed',
-			},
-			{
-				name: 'CANCELED',
-				value: 'CANCELED',
-				description: 'The prediction is canceled and points are refunded',
-			},
-			{
-				name: 'LOCKED',
-				value: 'LOCKED',
-				description: 'The prediction is locked and viewers can no longer make predictions',
-			},
-		],
-		default: 'RESOLVED',
-		required: true,
-		description: 'The status to set the prediction to',
-	},
-	{
-		displayName: 'Winning Outcome ID',
-		name: 'winningOutcomeId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['prediction'],
-				operation: ['endPrediction'],
-				status: ['RESOLVED'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. outcome123',
-		description: 'The ID of the winning outcome (required when status is RESOLVED)',
-	},
+	...updateDisplayOptions({ show: { resource: ['prediction'], operation: ['createPrediction'] } }, createPredictionFields),
+	...updateDisplayOptions({ show: { resource: ['prediction'], operation: ['getPredictions'] } }, getPredictionsFields),
+	...updateDisplayOptions({ show: { resource: ['prediction'], operation: ['endPrediction'] } }, endPredictionFields),
 ];

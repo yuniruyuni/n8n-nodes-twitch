@@ -1,5 +1,97 @@
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { updateDisplayOptions } from '../shared/updateDisplayOptions';
+
+// Field definitions for each operation
+const createClipFields: INodeProperties[] = [
+	{
+		displayName: 'Has Delay',
+		name: 'hasDelay',
+		type: 'boolean',
+		default: false,
+		description: 'Whether to add a delay before capturing the clip. If true, a delay is added before the clip is captured.',
+	},
+];
+
+const getClipsFields: INodeProperties[] = [
+	{
+		displayName: 'Filter Type',
+		name: 'filterType',
+		type: 'options',
+		options: [
+			{
+				name: 'Broadcaster ID',
+				value: 'broadcasterId',
+				description: 'Get clips for a specific broadcaster',
+			},
+			{
+				name: 'Game ID',
+				value: 'gameId',
+				description: 'Get clips for a specific game',
+			},
+			{
+				name: 'Clip ID',
+				value: 'clipId',
+				description: 'Get a specific clip by ID',
+			},
+		],
+		default: 'broadcasterId',
+		required: true,
+		description: 'The type of filter to use when retrieving clips',
+	},
+	{
+		displayName: 'Game ID',
+		name: 'gameId',
+		type: 'string',
+		displayOptions: {
+			show: {
+				filterType: ['gameId'],
+			},
+		},
+		default: '',
+		required: true,
+		placeholder: 'e.g. 987654321',
+	},
+	{
+		displayName: 'Clip ID',
+		name: 'clipId',
+		type: 'string',
+		displayOptions: {
+			show: {
+				filterType: ['clipId'],
+			},
+		},
+		default: '',
+		required: true,
+		placeholder: 'e.g. AwkwardHelplessSalamanderSwiftRage',
+	},
+	{
+		displayName: 'Started At',
+		name: 'startedAt',
+		type: 'string',
+		displayOptions: {
+			show: {
+				filterType: ['broadcasterId', 'gameId'],
+			},
+		},
+		default: '',
+		placeholder: 'e.g. 2021-01-01T00:00:00Z',
+		description: 'The start date/time for clips (RFC3339 format)',
+	},
+	{
+		displayName: 'Ended At',
+		name: 'endedAt',
+		type: 'string',
+		displayOptions: {
+			show: {
+				filterType: ['broadcasterId', 'gameId'],
+			},
+		},
+		default: '',
+		placeholder: 'e.g. 2021-12-31T23:59:59Z',
+		description: 'The end date/time for clips (RFC3339 format)',
+	},
+];
 
 export const clipOperations: INodeProperties[] = [
 	{
@@ -124,115 +216,6 @@ export const clipOperations: INodeProperties[] = [
 ];
 
 export const clipFields: INodeProperties[] = [
-	// Create Clip Parameters
-	// broadcasterId is now in CommonFields.ts
-
-	{
-		displayName: 'Has Delay',
-		name: 'hasDelay',
-		type: 'boolean',
-		displayOptions: {
-			show: {
-				resource: ['clip'],
-				operation: ['createClip'],
-			},
-		},
-		default: false,
-		description: 'Whether to add a delay before capturing the clip. If true, a delay is added before the clip is captured.',
-	},
-	// Get Clips Parameters
-	{
-		displayName: 'Filter Type',
-		name: 'filterType',
-		type: 'options',
-		displayOptions: {
-			show: {
-				resource: ['clip'],
-				operation: ['getClips'],
-			},
-		},
-		options: [
-			{
-				name: 'Broadcaster ID',
-				value: 'broadcasterId',
-				description: 'Get clips for a specific broadcaster',
-			},
-			{
-				name: 'Game ID',
-				value: 'gameId',
-				description: 'Get clips for a specific game',
-			},
-			{
-				name: 'Clip ID',
-				value: 'clipId',
-				description: 'Get a specific clip by ID',
-			},
-		],
-		default: 'broadcasterId',
-		required: true,
-		description: 'The type of filter to use when retrieving clips',
-	},
-	// broadcasterId is now in CommonFields.ts
-
-	{
-		displayName: 'Game ID',
-		name: 'gameId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['clip'],
-				operation: ['getClips'],
-				filterType: ['gameId'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. 987654321',
-	},
-	{
-		displayName: 'Clip ID',
-		name: 'clipId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['clip'],
-				operation: ['getClips'],
-				filterType: ['clipId'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. AwkwardHelplessSalamanderSwiftRage',
-	},
-	{
-		displayName: 'Started At',
-		name: 'startedAt',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['clip'],
-				operation: ['getClips'],
-				filterType: ['broadcasterId', 'gameId'],
-			},
-		},
-		default: '',
-		placeholder: 'e.g. 2021-01-01T00:00:00Z',
-		description: 'The start date/time for clips (RFC3339 format)',
-	},
-	{
-		displayName: 'Ended At',
-		name: 'endedAt',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['clip'],
-				operation: ['getClips'],
-				filterType: ['broadcasterId', 'gameId'],
-			},
-		},
-		default: '',
-		placeholder: 'e.g. 2021-12-31T23:59:59Z',
-		description: 'The end date/time for clips (RFC3339 format)',
-	},
-	// first is now in CommonFields.ts
+	...updateDisplayOptions({ show: { resource: ['clip'], operation: ['createClip'] } }, createClipFields),
+	...updateDisplayOptions({ show: { resource: ['clip'], operation: ['getClips'] } }, getClipsFields),
 ];

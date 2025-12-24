@@ -1,5 +1,19 @@
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { updateDisplayOptions } from '../shared/updateDisplayOptions';
+
+// Field definitions for each operation
+const getInfoFields: INodeProperties[] = [
+	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+	},
+];
 
 export const channelOperations: INodeProperties[] = [
 	{
@@ -61,5 +75,5 @@ export const channelOperations: INodeProperties[] = [
 ];
 
 export const channelFields: INodeProperties[] = [
-	// broadcasterId is now in CommonFields.ts
+	...updateDisplayOptions({ show: { resource: ['channel'], operation: ['getInfo'] } }, getInfoFields),
 ];

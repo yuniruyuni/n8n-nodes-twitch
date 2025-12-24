@@ -1,5 +1,54 @@
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { updateDisplayOptions } from '../shared/updateDisplayOptions';
+
+// Field definitions for each operation
+const startRaidFields: INodeProperties[] = [
+	{
+		displayName: 'From Broadcaster ID or Username',
+		name: 'fromBroadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The broadcaster user ID or username that is starting the raid (must be the authenticated user). If a username is provided, it will be automatically converted to user ID.',
+	},
+	{
+		displayName: 'To Broadcaster ID or Username',
+		name: 'toBroadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 987654321 or username',
+		description: 'The broadcaster user ID or username to raid. If a username is provided, it will be automatically converted to user ID.',
+	},
+	{
+		displayName: 'Note',
+		name: 'startRaidNote',
+		type: 'notice',
+		default: '',
+		description: 'Requires OAuth2 authentication with channel:manage:raids scope. The authenticated user must match the from_broadcaster_id.',
+	},
+];
+
+const cancelRaidFields: INodeProperties[] = [
+	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+	},
+	{
+		displayName: 'Note',
+		name: 'cancelRaidNote',
+		type: 'notice',
+		default: '',
+		description: 'Requires OAuth2 authentication with channel:manage:raids scope. You can only cancel a raid that has not been completed.',
+	},
+];
 
 export const raidOperations: INodeProperties[] = [
 	{
@@ -91,63 +140,6 @@ export const raidOperations: INodeProperties[] = [
 ];
 
 export const raidFields: INodeProperties[] = [
-	// Start Raid Parameters
-	{
-		displayName: 'From Broadcaster ID or Username',
-		name: 'fromBroadcasterId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['raid'],
-				operation: ['startRaid'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username that is starting the raid (must be the authenticated user). If a username is provided, it will be automatically converted to user ID.',
-	},
-	{
-		displayName: 'To Broadcaster ID or Username',
-		name: 'toBroadcasterId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['raid'],
-				operation: ['startRaid'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. 987654321 or username',
-		description: 'The broadcaster user ID or username to raid. If a username is provided, it will be automatically converted to user ID.',
-	},
-	{
-		displayName: 'Note',
-		name: 'startRaidNote',
-		type: 'notice',
-		default: '',
-		displayOptions: {
-			show: {
-				resource: ['raid'],
-				operation: ['startRaid'],
-			},
-		},
-		description: 'Requires OAuth2 authentication with channel:manage:raids scope. The authenticated user must match the from_broadcaster_id.',
-	},
-	// Cancel Raid Parameters
-	// broadcasterId is now in CommonFields.ts
-	{
-		displayName: 'Note',
-		name: 'cancelRaidNote',
-		type: 'notice',
-		default: '',
-		displayOptions: {
-			show: {
-				resource: ['raid'],
-				operation: ['cancelRaid'],
-			},
-		},
-		description: 'Requires OAuth2 authentication with channel:manage:raids scope. You can only cancel a raid that has not been completed.',
-	},
+	...updateDisplayOptions({ show: { resource: ['raid'], operation: ['startRaid'] } }, startRaidFields),
+	...updateDisplayOptions({ show: { resource: ['raid'], operation: ['cancelRaid'] } }, cancelRaidFields),
 ];

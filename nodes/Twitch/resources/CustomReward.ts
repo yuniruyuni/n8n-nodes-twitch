@@ -1,5 +1,336 @@
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { updateDisplayOptions } from '../shared/updateDisplayOptions';
+
+// Field definitions for each operation
+const createFields: INodeProperties[] = [
+	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+	},
+	{
+		displayName: 'Title',
+		name: 'title',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. My Custom Reward',
+		description: 'The custom reward title (max 45 characters)',
+	},
+	{
+		displayName: 'Cost',
+		name: 'cost',
+		type: 'number',
+		default: 100,
+		required: true,
+		typeOptions: {
+			minValue: 1,
+		},
+		description: 'The cost of the reward in channel points',
+	},
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		options: [
+			{
+				displayName: 'Background Color',
+				name: 'backgroundColor',
+				type: 'color',
+				default: '',
+				placeholder: 'e.g. #9147FF',
+				description: 'The background color to use for the reward (hex code)',
+			},
+			{
+				displayName: 'Global Cooldown Seconds',
+				name: 'globalCooldownSeconds',
+				type: 'number',
+				default: 60,
+				typeOptions: {
+					minValue: 1,
+				},
+				description: 'The cooldown in seconds',
+			},
+			{
+				displayName: 'Is Enabled',
+				name: 'isEnabled',
+				type: 'boolean',
+				default: true,
+				description: 'Whether the reward is enabled and can be redeemed',
+			},
+			{
+				displayName: 'Is Global Cooldown Enabled',
+				name: 'isGlobalCooldownEnabled',
+				type: 'boolean',
+				default: false,
+				description: 'Whether a cooldown is enabled',
+			},
+			{
+				displayName: 'Is Max Per Stream Enabled',
+				name: 'isMaxPerStreamEnabled',
+				type: 'boolean',
+				default: false,
+				description: 'Whether a maximum per stream is enabled',
+			},
+			{
+				displayName: 'Is Max Per User Per Stream Enabled',
+				name: 'isMaxPerUserPerStreamEnabled',
+				type: 'boolean',
+				default: false,
+				description: 'Whether a maximum per user per stream is enabled',
+			},
+			{
+				displayName: 'Is User Input Required',
+				name: 'isUserInputRequired',
+				type: 'boolean',
+				default: false,
+				description: 'Whether the user needs to enter text when redeeming the reward',
+			},
+			{
+				displayName: 'Max Per Stream',
+				name: 'maxPerStream',
+				type: 'number',
+				default: 1,
+				typeOptions: {
+					minValue: 1,
+				},
+				description: 'The maximum number of redemptions allowed per stream',
+			},
+			{
+				displayName: 'Max Per User Per Stream',
+				name: 'maxPerUserPerStream',
+				type: 'number',
+				default: 1,
+				typeOptions: {
+					minValue: 1,
+				},
+				description: 'The maximum number of redemptions allowed per user per stream',
+			},
+			{
+				displayName: 'Prompt',
+				name: 'prompt',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. Enter your message here',
+				description: 'The prompt shown to the viewer when redeeming the reward (max 200 characters)',
+			},
+			{
+				displayName: 'Should Redemptions Skip Request Queue',
+				name: 'shouldRedemptionsSkipRequestQueue',
+				type: 'boolean',
+				default: false,
+				description: 'Whether redemptions should be automatically fulfilled',
+			},
+		],
+	},
+];
+
+const getFields: INodeProperties[] = [
+	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+	},
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		options: [
+			{
+				displayName: 'Reward ID',
+				name: 'id',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. 92af127c-7326-4483-a52b-b0da0be61c01',
+				description: 'The ID of the custom reward to get (if not specified, returns all rewards)',
+			},
+			{
+				displayName: 'Only Manageable Rewards',
+				name: 'onlyManageableRewards',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to filter the results and only return custom rewards that the calling client_id can manage',
+			},
+		],
+	},
+];
+
+const updateFields: INodeProperties[] = [
+	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+	},
+	{
+		displayName: 'Reward ID',
+		name: 'rewardId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 92af127c-7326-4483-a52b-b0da0be61c01',
+		description: 'The ID of the custom reward',
+	},
+	{
+		displayName: 'Update Fields',
+		name: 'updateFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		options: [
+			{
+				displayName: 'Background Color',
+				name: 'backgroundColor',
+				type: 'color',
+				default: '',
+				placeholder: 'e.g. #9147FF',
+				description: 'The background color to use for the reward (hex code)',
+			},
+			{
+				displayName: 'Cost',
+				name: 'cost',
+				type: 'number',
+				default: 100,
+				typeOptions: {
+					minValue: 1,
+				},
+				description: 'The cost of the reward in channel points',
+			},
+			{
+				displayName: 'Global Cooldown Seconds',
+				name: 'globalCooldownSeconds',
+				type: 'number',
+				default: 60,
+				typeOptions: {
+					minValue: 1,
+				},
+				description: 'The cooldown in seconds',
+			},
+			{
+				displayName: 'Is Enabled',
+				name: 'isEnabled',
+				type: 'boolean',
+				default: true,
+				description: 'Whether the reward is enabled and can be redeemed',
+			},
+			{
+				displayName: 'Is Global Cooldown Enabled',
+				name: 'isGlobalCooldownEnabled',
+				type: 'boolean',
+				default: false,
+				description: 'Whether a cooldown is enabled',
+			},
+			{
+				displayName: 'Is Max Per Stream Enabled',
+				name: 'isMaxPerStreamEnabled',
+				type: 'boolean',
+				default: false,
+				description: 'Whether a maximum per stream is enabled',
+			},
+			{
+				displayName: 'Is Max Per User Per Stream Enabled',
+				name: 'isMaxPerUserPerStreamEnabled',
+				type: 'boolean',
+				default: false,
+				description: 'Whether a maximum per user per stream is enabled',
+			},
+			{
+				displayName: 'Is Paused',
+				name: 'isPaused',
+				type: 'boolean',
+				default: false,
+				description: 'Whether the reward is currently paused',
+			},
+			{
+				displayName: 'Is User Input Required',
+				name: 'isUserInputRequired',
+				type: 'boolean',
+				default: false,
+				description: 'Whether the user needs to enter text when redeeming the reward',
+			},
+			{
+				displayName: 'Max Per Stream',
+				name: 'maxPerStream',
+				type: 'number',
+				default: 1,
+				typeOptions: {
+					minValue: 1,
+				},
+				description: 'The maximum number of redemptions allowed per stream',
+			},
+			{
+				displayName: 'Max Per User Per Stream',
+				name: 'maxPerUserPerStream',
+				type: 'number',
+				default: 1,
+				typeOptions: {
+					minValue: 1,
+				},
+				description: 'The maximum number of redemptions allowed per user per stream',
+			},
+			{
+				displayName: 'Prompt',
+				name: 'prompt',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. Enter your message here',
+				description: 'The prompt shown to the viewer when redeeming the reward (max 200 characters)',
+			},
+			{
+				displayName: 'Should Redemptions Skip Request Queue',
+				name: 'shouldRedemptionsSkipRequestQueue',
+				type: 'boolean',
+				default: false,
+				description: 'Whether redemptions should be automatically fulfilled',
+			},
+			{
+				displayName: 'Title',
+				name: 'title',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. Updated Reward Title',
+				description: 'The custom reward title (max 45 characters)',
+			},
+		],
+	},
+];
+
+const deleteFields: INodeProperties[] = [
+	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+	},
+	{
+		displayName: 'Reward ID',
+		name: 'rewardId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 92af127c-7326-4483-a52b-b0da0be61c01',
+		description: 'The ID of the custom reward',
+	},
+];
 
 export const customRewardOperations: INodeProperties[] = [
 	{
@@ -253,312 +584,8 @@ export const customRewardOperations: INodeProperties[] = [
 ];
 
 export const customRewardFields: INodeProperties[] = [
-	// Broadcaster ID (all operations)
-	// broadcasterId is now in CommonFields.ts
-
-	// Create Parameters
-	{
-		displayName: 'Title',
-		name: 'title',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['customReward'],
-				operation: ['create'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. My Custom Reward',
-		description: 'The custom reward title (max 45 characters)',
-	},
-	{
-		displayName: 'Cost',
-		name: 'cost',
-		type: 'number',
-		displayOptions: {
-			show: {
-				resource: ['customReward'],
-				operation: ['create'],
-			},
-		},
-		default: 100,
-		required: true,
-		typeOptions: {
-			minValue: 1,
-		},
-		description: 'The cost of the reward in channel points',
-	},
-	{
-		displayName: 'Additional Fields',
-		name: 'additionalFields',
-		type: 'collection',
-		placeholder: 'Add Field',
-		default: {},
-		displayOptions: {
-			show: {
-				resource: ['customReward'],
-				operation: ['create', 'get'],
-			},
-		},
-		options: [
-			{
-				displayName: 'Background Color',
-				name: 'backgroundColor',
-				type: 'color',
-				default: '',
-				placeholder: 'e.g. #9147FF',
-				description: 'The background color to use for the reward (hex code)',
-			},
-			{
-				displayName: 'Global Cooldown Seconds',
-				name: 'globalCooldownSeconds',
-				type: 'number',
-				default: 60,
-				typeOptions: {
-					minValue: 1,
-				},
-				description: 'The cooldown in seconds',
-			},
-			{
-				displayName: 'Is Enabled',
-				name: 'isEnabled',
-				type: 'boolean',
-				default: true,
-				description: 'Whether the reward is enabled and can be redeemed',
-			},
-			{
-				displayName: 'Is Global Cooldown Enabled',
-				name: 'isGlobalCooldownEnabled',
-				type: 'boolean',
-				default: false,
-				description: 'Whether a cooldown is enabled',
-			},
-			{
-				displayName: 'Is Max Per Stream Enabled',
-				name: 'isMaxPerStreamEnabled',
-				type: 'boolean',
-				default: false,
-				description: 'Whether a maximum per stream is enabled',
-			},
-			{
-				displayName: 'Is Max Per User Per Stream Enabled',
-				name: 'isMaxPerUserPerStreamEnabled',
-				type: 'boolean',
-				default: false,
-				description: 'Whether a maximum per user per stream is enabled',
-			},
-			{
-				displayName: 'Is User Input Required',
-				name: 'isUserInputRequired',
-				type: 'boolean',
-				default: false,
-				description: 'Whether the user needs to enter text when redeeming the reward',
-			},
-			{
-				displayName: 'Max Per Stream',
-				name: 'maxPerStream',
-				type: 'number',
-				default: 1,
-				typeOptions: {
-					minValue: 1,
-				},
-				description: 'The maximum number of redemptions allowed per stream',
-			},
-			{
-				displayName: 'Max Per User Per Stream',
-				name: 'maxPerUserPerStream',
-				type: 'number',
-				default: 1,
-				typeOptions: {
-					minValue: 1,
-				},
-				description: 'The maximum number of redemptions allowed per user per stream',
-			},
-			{
-				displayName: 'Only Manageable Rewards',
-				name: 'onlyManageableRewards',
-				type: 'boolean',
-				default: false,
-				description: 'Whether to filter the results and only return custom rewards that the calling client_id can manage',
-				displayOptions: {
-					show: {
-						'/operation': ['get'],
-					},
-				},
-			},
-			{
-				displayName: 'Prompt',
-				name: 'prompt',
-				type: 'string',
-				default: '',
-				placeholder: 'e.g. Enter your message here',
-				description: 'The prompt shown to the viewer when redeeming the reward (max 200 characters)',
-			},
-			{
-				displayName: 'Reward ID',
-				name: 'id',
-				type: 'string',
-				default: '',
-				placeholder: 'e.g. 92af127c-7326-4483-a52b-b0da0be61c01',
-				description: 'The ID of the custom reward to get (if not specified, returns all rewards)',
-				displayOptions: {
-					show: {
-						'/operation': ['get'],
-					},
-				},
-			},
-			{
-				displayName: 'Should Redemptions Skip Request Queue',
-				name: 'shouldRedemptionsSkipRequestQueue',
-				type: 'boolean',
-				default: false,
-				description: 'Whether redemptions should be automatically fulfilled',
-			},
-		],
-	},
-	// Update/Delete Parameters
-	{
-		displayName: 'Reward ID',
-		name: 'rewardId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['customReward'],
-				operation: ['update', 'delete'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. 92af127c-7326-4483-a52b-b0da0be61c01',
-		description: 'The ID of the custom reward',
-	},
-	{
-		displayName: 'Update Fields',
-		name: 'updateFields',
-		type: 'collection',
-		placeholder: 'Add Field',
-		default: {},
-		displayOptions: {
-			show: {
-				resource: ['customReward'],
-				operation: ['update'],
-			},
-		},
-		options: [
-			{
-				displayName: 'Background Color',
-				name: 'backgroundColor',
-				type: 'color',
-				default: '',
-				placeholder: 'e.g. #9147FF',
-				description: 'The background color to use for the reward (hex code)',
-			},
-			{
-				displayName: 'Cost',
-				name: 'cost',
-				type: 'number',
-				default: 100,
-				typeOptions: {
-					minValue: 1,
-				},
-				description: 'The cost of the reward in channel points',
-			},
-			{
-				displayName: 'Global Cooldown Seconds',
-				name: 'globalCooldownSeconds',
-				type: 'number',
-				default: 60,
-				typeOptions: {
-					minValue: 1,
-				},
-				description: 'The cooldown in seconds',
-			},
-			{
-				displayName: 'Is Enabled',
-				name: 'isEnabled',
-				type: 'boolean',
-				default: true,
-				description: 'Whether the reward is enabled and can be redeemed',
-			},
-			{
-				displayName: 'Is Global Cooldown Enabled',
-				name: 'isGlobalCooldownEnabled',
-				type: 'boolean',
-				default: false,
-				description: 'Whether a cooldown is enabled',
-			},
-			{
-				displayName: 'Is Max Per Stream Enabled',
-				name: 'isMaxPerStreamEnabled',
-				type: 'boolean',
-				default: false,
-				description: 'Whether a maximum per stream is enabled',
-			},
-			{
-				displayName: 'Is Max Per User Per Stream Enabled',
-				name: 'isMaxPerUserPerStreamEnabled',
-				type: 'boolean',
-				default: false,
-				description: 'Whether a maximum per user per stream is enabled',
-			},
-			{
-				displayName: 'Is Paused',
-				name: 'isPaused',
-				type: 'boolean',
-				default: false,
-				description: 'Whether the reward is currently paused',
-			},
-			{
-				displayName: 'Is User Input Required',
-				name: 'isUserInputRequired',
-				type: 'boolean',
-				default: false,
-				description: 'Whether the user needs to enter text when redeeming the reward',
-			},
-			{
-				displayName: 'Max Per Stream',
-				name: 'maxPerStream',
-				type: 'number',
-				default: 1,
-				typeOptions: {
-					minValue: 1,
-				},
-				description: 'The maximum number of redemptions allowed per stream',
-			},
-			{
-				displayName: 'Max Per User Per Stream',
-				name: 'maxPerUserPerStream',
-				type: 'number',
-				default: 1,
-				typeOptions: {
-					minValue: 1,
-				},
-				description: 'The maximum number of redemptions allowed per user per stream',
-			},
-			{
-				displayName: 'Prompt',
-				name: 'prompt',
-				type: 'string',
-				default: '',
-				placeholder: 'e.g. Enter your message here',
-				description: 'The prompt shown to the viewer when redeeming the reward (max 200 characters)',
-			},
-			{
-				displayName: 'Should Redemptions Skip Request Queue',
-				name: 'shouldRedemptionsSkipRequestQueue',
-				type: 'boolean',
-				default: false,
-				description: 'Whether redemptions should be automatically fulfilled',
-			},
-			{
-				displayName: 'Title',
-				name: 'title',
-				type: 'string',
-				default: '',
-				placeholder: 'e.g. Updated Reward Title',
-				description: 'The custom reward title (max 45 characters)',
-			},
-		],
-	},
+	...updateDisplayOptions({ show: { resource: ['customReward'], operation: ['create'] } }, createFields),
+	...updateDisplayOptions({ show: { resource: ['customReward'], operation: ['get'] } }, getFields),
+	...updateDisplayOptions({ show: { resource: ['customReward'], operation: ['update'] } }, updateFields),
+	...updateDisplayOptions({ show: { resource: ['customReward'], operation: ['delete'] } }, deleteFields),
 ];

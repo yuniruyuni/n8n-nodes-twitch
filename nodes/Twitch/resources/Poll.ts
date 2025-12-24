@@ -1,5 +1,180 @@
 import type { INodeProperties, IDataObject } from 'n8n-workflow';
 import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { updateDisplayOptions } from '../shared/updateDisplayOptions';
+
+// Field definitions for each operation
+const createPollFields: INodeProperties[] = [
+	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+	},
+	{
+		displayName: 'Title',
+		name: 'title',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. What game should I play next?',
+		description: 'Question displayed for the poll. Maximum: 60 characters.',
+	},
+	{
+		displayName: 'Choices',
+		name: 'choices',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. ["Option 1", "Option 2", "Option 3"] or Option 1, Option 2, Option 3',
+		description: 'Poll choices as a JSON array or comma-separated list',
+	},
+	{
+		displayName: 'Duration',
+		name: 'duration',
+		type: 'number',
+		default: 300,
+		required: true,
+		typeOptions: {
+			minValue: 15,
+			maxValue: 1800,
+		},
+		description: 'Total duration for the poll in seconds. Minimum: 15. Maximum: 1800.',
+	},
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		options: [
+			{
+				displayName: 'Bits Voting Enabled',
+				name: 'bitsVotingEnabled',
+				type: 'boolean',
+				default: false,
+				description: 'Whether viewers can cast additional votes using Bits',
+			},
+			{
+				displayName: 'Bits Per Vote',
+				name: 'bitsPerVote',
+				type: 'number',
+				default: 0,
+				typeOptions: {
+					minValue: 0,
+					maxValue: 10000,
+				},
+				description: 'Number of Bits required to vote once with Bits',
+			},
+			{
+				displayName: 'Channel Points Voting Enabled',
+				name: 'channelPointsVotingEnabled',
+				type: 'boolean',
+				default: false,
+				description: 'Whether viewers can cast additional votes using Channel Points',
+			},
+			{
+				displayName: 'Channel Points Per Vote',
+				name: 'channelPointsPerVote',
+				type: 'number',
+				default: 0,
+				typeOptions: {
+					minValue: 0,
+					maxValue: 1000000,
+				},
+				description: 'Number of Channel Points required to vote once',
+			},
+		],
+	},
+	{
+		displayName: 'Note',
+		name: 'pollsNote',
+		type: 'notice',
+		default: '',
+		description: 'Requires OAuth2 authentication with channel:manage:polls scope',
+	},
+];
+
+const getPollsFields: INodeProperties[] = [
+	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'getBroadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The broadcaster user ID or username whose polls to retrieve',
+	},
+	{
+		displayName: 'Poll IDs',
+		name: 'pollIds',
+		type: 'string',
+		default: '',
+		placeholder: 'e.g. poll-ID-1 or poll-ID-1,poll-ID-2',
+		description: 'Filter by poll ID(s). Separate multiple IDs with commas.',
+	},
+	{
+		displayName: 'First',
+		name: 'first',
+		type: 'number',
+		default: 20,
+		typeOptions: {
+			minValue: 1,
+			maxValue: 100,
+		},
+		description: 'Maximum number of items to return',
+	},
+];
+
+const endPollFields: INodeProperties[] = [
+	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'endBroadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The broadcaster user ID or username who owns the poll',
+	},
+	{
+		displayName: 'Poll ID',
+		name: 'pollId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. ed961efd-8a3f-4cf5-a9d0-e616c590cd2a',
+		description: 'The ID of the poll to end',
+	},
+	{
+		displayName: 'Status',
+		name: 'status',
+		type: 'options',
+		options: [
+			{
+				name: 'Terminated',
+				value: 'TERMINATED',
+				description: 'End the poll immediately',
+			},
+			{
+				name: 'Archived',
+				value: 'ARCHIVED',
+				description: 'Archive the poll immediately',
+			},
+		],
+		default: 'TERMINATED',
+		required: true,
+		description: 'The status to set for the poll when ending it',
+	},
+	{
+		displayName: 'Note',
+		name: 'pollsNote',
+		type: 'notice',
+		default: '',
+		description: 'Requires OAuth2 authentication with channel:manage:polls scope',
+	},
+];
 
 export const pollOperations: INodeProperties[] = [
 	{
@@ -189,181 +364,7 @@ export const pollOperations: INodeProperties[] = [
 ];
 
 export const pollFields: INodeProperties[] = [
-	// Create Poll Parameters
-	// broadcasterId is now in CommonFields.ts
-
-	{
-		displayName: 'Title',
-		name: 'title',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['poll'],
-				operation: ['createPoll'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. What game should I play next?',
-		description: 'Question displayed for the poll. Maximum: 60 characters.',
-	},
-	{
-		displayName: 'Choices',
-		name: 'choices',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['poll'],
-				operation: ['createPoll'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. ["Option 1", "Option 2", "Option 3"] or Option 1, Option 2, Option 3',
-		description: 'Poll choices as a JSON array or comma-separated list',
-	},
-	{
-		displayName: 'Duration',
-		name: 'duration',
-		type: 'number',
-		displayOptions: {
-			show: {
-				resource: ['poll'],
-				operation: ['createPoll'],
-			},
-		},
-		default: 300,
-		required: true,
-		typeOptions: {
-			minValue: 15,
-			maxValue: 1800,
-		},
-		description: 'Total duration for the poll in seconds. Minimum: 15. Maximum: 1800.',
-	},
-	{
-		displayName: 'Additional Fields',
-		name: 'additionalFields',
-		type: 'collection',
-		placeholder: 'Add Field',
-		default: {},
-		displayOptions: {
-			show: {
-				resource: ['poll'],
-				operation: ['createPoll'],
-			},
-		},
-		options: [
-			{
-				displayName: 'Bits Voting Enabled',
-				name: 'bitsVotingEnabled',
-				type: 'boolean',
-				default: false,
-				description: 'Whether viewers can cast additional votes using Bits',
-			},
-			{
-				displayName: 'Bits Per Vote',
-				name: 'bitsPerVote',
-				type: 'number',
-				default: 0,
-				typeOptions: {
-					minValue: 0,
-					maxValue: 10000,
-				},
-				description: 'Number of Bits required to vote once with Bits',
-			},
-			{
-				displayName: 'Channel Points Voting Enabled',
-				name: 'channelPointsVotingEnabled',
-				type: 'boolean',
-				default: false,
-				description: 'Whether viewers can cast additional votes using Channel Points',
-			},
-			{
-				displayName: 'Channel Points Per Vote',
-				name: 'channelPointsPerVote',
-				type: 'number',
-				default: 0,
-				typeOptions: {
-					minValue: 0,
-					maxValue: 1000000,
-				},
-				description: 'Number of Channel Points required to vote once',
-			},
-		],
-	},
-	// Get Polls Parameters
-	// getBroadcasterId is now in CommonFields.ts
-
-	{
-		displayName: 'Poll IDs',
-		name: 'pollIds',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['poll'],
-				operation: ['getPolls'],
-			},
-		},
-		default: '',
-		placeholder: 'e.g. poll-ID-1 or poll-ID-1,poll-ID-2',
-		description: 'Filter by poll ID(s). Separate multiple IDs with commas.',
-	},
-	// first is now in CommonFields.ts
-	// End Poll Parameters
-	// endBroadcasterId is now in CommonFields.ts
-
-	{
-		displayName: 'Poll ID',
-		name: 'pollId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['poll'],
-				operation: ['endPoll'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. ed961efd-8a3f-4cf5-a9d0-e616c590cd2a',
-		description: 'The ID of the poll to end',
-	},
-	{
-		displayName: 'Status',
-		name: 'status',
-		type: 'options',
-		displayOptions: {
-			show: {
-				resource: ['poll'],
-				operation: ['endPoll'],
-			},
-		},
-		options: [
-			{
-				name: 'Terminated',
-				value: 'TERMINATED',
-				description: 'End the poll immediately',
-			},
-			{
-				name: 'Archived',
-				value: 'ARCHIVED',
-				description: 'Archive the poll immediately',
-			},
-		],
-		default: 'TERMINATED',
-		required: true,
-		description: 'The status to set for the poll when ending it',
-	},
-	{
-		displayName: 'Note',
-		name: 'pollsNote',
-		type: 'notice',
-		default: '',
-		displayOptions: {
-			show: {
-				resource: ['poll'],
-				operation: ['createPoll', 'endPoll'],
-			},
-		},
-		description: 'Requires OAuth2 authentication with channel:manage:polls scope',
-	},
+	...updateDisplayOptions({ show: { resource: ['poll'], operation: ['createPoll'] } }, createPollFields),
+	...updateDisplayOptions({ show: { resource: ['poll'], operation: ['getPolls'] } }, getPollsFields),
+	...updateDisplayOptions({ show: { resource: ['poll'], operation: ['endPoll'] } }, endPollFields),
 ];

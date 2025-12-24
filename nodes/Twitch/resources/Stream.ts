@@ -1,4 +1,18 @@
 import type { INodeProperties } from 'n8n-workflow';
+import { updateDisplayOptions } from '../shared/updateDisplayOptions';
+
+// Field definitions for each operation
+const getFields: INodeProperties[] = [
+	{
+		displayName: 'User Login',
+		name: 'streamUserLogin',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. username',
+		description: 'The user login name',
+	},
+];
 
 export const streamOperations: INodeProperties[] = [
 	{
@@ -49,19 +63,5 @@ export const streamOperations: INodeProperties[] = [
 ];
 
 export const streamFields: INodeProperties[] = [
-	{
-		displayName: 'User Login',
-		name: 'streamUserLogin',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['stream'],
-				operation: ['get'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. username',
-		description: 'The user login name',
-	},
+	...updateDisplayOptions({ show: { resource: ['stream'], operation: ['get'] } }, getFields),
 ];

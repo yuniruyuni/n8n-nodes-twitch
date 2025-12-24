@@ -1,5 +1,67 @@
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { updateDisplayOptions } from '../shared/updateDisplayOptions';
+
+// Field definitions for each operation
+const getBroadcasterSubscriptionsFields: INodeProperties[] = [
+	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+	},
+	{
+		displayName: 'User ID or Username',
+		name: 'userId',
+		type: 'string',
+		default: '',
+		placeholder: 'e.g. 123456789,987654321 or username1,username2',
+		description: 'Filter by user IDs or usernames (comma-separated)',
+	},
+	{
+		displayName: 'First',
+		name: 'first',
+		type: 'number',
+		default: 20,
+		typeOptions: {
+			minValue: 1,
+			maxValue: 100,
+		},
+		description: 'Maximum number of items to return',
+	},
+	{
+		displayName: 'After',
+		name: 'after',
+		type: 'string',
+		default: '',
+		placeholder: 'e.g. eyJiIjpudWxsLCJhIjp7Ik9mZnNldCI6MjB9fQ',
+		description: 'Pagination cursor',
+	},
+];
+
+const checkUserSubscriptionFields: INodeProperties[] = [
+	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+	},
+	{
+		displayName: 'User ID or Username',
+		name: 'checkUserId',
+		type: 'string',
+		required: true,
+		default: '',
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The user ID or username to check. If a username is provided, it will be automatically converted to user ID.',
+	},
+];
 
 export const subscriptionOperations: INodeProperties[] = [
 	{
@@ -120,38 +182,6 @@ export const subscriptionOperations: INodeProperties[] = [
 ];
 
 export const subscriptionFields: INodeProperties[] = [
-	// broadcasterId is now in CommonFields.ts
-	// userId is now in CommonFields.ts
-
-	{
-		displayName: 'User ID or Username',
-		name: 'checkUserId',
-		type: 'string',
-		required: true,
-		default: '',
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The user ID or username to check. If a username is provided, it will be automatically converted to user ID.',
-		displayOptions: {
-			show: {
-				resource: ['subscription'],
-				operation: ['checkUserSubscription'],
-			},
-		},
-	},
-	// first is now in CommonFields.ts
-
-	{
-		displayName: 'After',
-		name: 'after',
-		type: 'string',
-		default: '',
-		placeholder: 'e.g. eyJiIjpudWxsLCJhIjp7Ik9mZnNldCI6MjB9fQ',
-		description: 'Pagination cursor',
-		displayOptions: {
-			show: {
-				resource: ['subscription'],
-				operation: ['getBroadcasterSubscriptions'],
-			},
-		},
-	},
+	...updateDisplayOptions({ show: { resource: ['subscription'], operation: ['getBroadcasterSubscriptions'] } }, getBroadcasterSubscriptionsFields),
+	...updateDisplayOptions({ show: { resource: ['subscription'], operation: ['checkUserSubscription'] } }, checkUserSubscriptionFields),
 ];
