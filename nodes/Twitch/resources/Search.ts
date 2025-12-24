@@ -80,17 +80,8 @@ export const searchFields: INodeProperties[] = [
 				placeholder: 'e.g. starcraft',
 				description: 'The search query',
 			},
-			{
-				displayName: 'First',
-				name: 'first',
-				type: 'number',
-				default: 20,
-				description: 'Maximum number of objects to return. Maximum: 100. Default: 20.',
-				typeOptions: {
-					minValue: 1,
-					maxValue: 100,
-				},
-			},
+			// first is now in CommonFields.ts
+
 			{
 				displayName: 'Live Only',
 				name: 'liveOnly',

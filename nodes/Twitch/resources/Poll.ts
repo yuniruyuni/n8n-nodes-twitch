@@ -190,21 +190,8 @@ export const pollOperations: INodeProperties[] = [
 
 export const pollFields: INodeProperties[] = [
 	// Create Poll Parameters
-	{
-		displayName: 'Broadcaster ID or Username',
-		name: 'broadcasterId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['poll'],
-				operation: ['createPoll'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username who will own the poll',
-	},
+	// broadcasterId is now in CommonFields.ts
+
 	{
 		displayName: 'Title',
 		name: 'title',
@@ -305,21 +292,8 @@ export const pollFields: INodeProperties[] = [
 		],
 	},
 	// Get Polls Parameters
-	{
-		displayName: 'Broadcaster ID or Username',
-		name: 'getBroadcasterId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['poll'],
-				operation: ['getPolls'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username whose polls to retrieve',
-	},
+	// getBroadcasterId is now in CommonFields.ts
+
 	{
 		displayName: 'Poll IDs',
 		name: 'pollIds',
@@ -334,39 +308,10 @@ export const pollFields: INodeProperties[] = [
 		placeholder: 'e.g. poll-ID-1 or poll-ID-1,poll-ID-2',
 		description: 'Filter by poll ID(s). Separate multiple IDs with commas.',
 	},
-	{
-		displayName: 'First',
-		name: 'first',
-		type: 'number',
-		displayOptions: {
-			show: {
-				resource: ['poll'],
-				operation: ['getPolls'],
-			},
-		},
-		default: 20,
-		typeOptions: {
-			minValue: 1,
-			maxValue: 20,
-		},
-		description: 'Maximum number of polls to return',
-	},
+	// first is now in CommonFields.ts
 	// End Poll Parameters
-	{
-		displayName: 'Broadcaster ID or Username',
-		name: 'endBroadcasterId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['poll'],
-				operation: ['endPoll'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username who owns the poll',
-	},
+	// endBroadcasterId is now in CommonFields.ts
+
 	{
 		displayName: 'Poll ID',
 		name: 'pollId',

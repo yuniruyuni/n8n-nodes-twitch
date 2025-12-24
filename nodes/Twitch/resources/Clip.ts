@@ -125,21 +125,8 @@ export const clipOperations: INodeProperties[] = [
 
 export const clipFields: INodeProperties[] = [
 	// Create Clip Parameters
-	{
-		displayName: 'Broadcaster ID or Username',
-		name: 'broadcasterId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['clip'],
-				operation: ['createClip'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username whose stream will be clipped. If a username is provided, it will be automatically converted to user ID.',
-	},
+	// broadcasterId is now in CommonFields.ts
+
 	{
 		displayName: 'Has Delay',
 		name: 'hasDelay',
@@ -185,22 +172,8 @@ export const clipFields: INodeProperties[] = [
 		required: true,
 		description: 'The type of filter to use when retrieving clips',
 	},
-	{
-		displayName: 'Broadcaster ID or Username',
-		name: 'broadcasterId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['clip'],
-				operation: ['getClips'],
-				filterType: ['broadcasterId'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
-	},
+	// broadcasterId is now in CommonFields.ts
+
 	{
 		displayName: 'Game ID',
 		name: 'gameId',
@@ -261,22 +234,5 @@ export const clipFields: INodeProperties[] = [
 		placeholder: 'e.g. 2021-12-31T23:59:59Z',
 		description: 'The end date/time for clips (RFC3339 format)',
 	},
-	{
-		displayName: 'First',
-		name: 'first',
-		type: 'number',
-		displayOptions: {
-			show: {
-				resource: ['clip'],
-				operation: ['getClips'],
-				filterType: ['broadcasterId', 'gameId'],
-			},
-		},
-		default: 20,
-		typeOptions: {
-			minValue: 1,
-			maxValue: 100,
-		},
-		description: 'Maximum number of clips to return (1-100)',
-	},
+	// first is now in CommonFields.ts
 ];

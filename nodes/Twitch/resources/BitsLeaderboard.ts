@@ -137,18 +137,5 @@ export const bitsLeaderboardFields: INodeProperties[] = [
 					},
 				},
 			},
-			{
-				displayName: 'User ID or Username',
-				name: 'userId',
-				type: 'string',
-				default: '',
-				placeholder: 'e.g. 123456789 or username',
-				description: 'Filter results to a specific user ID or username. If a username is provided, it will be automatically converted to user ID.',
-				displayOptions: {
-					show: {
-				resource: ['bitsLeaderboard'],
-						operation: ['get'],
-					},
-				},
-			},
+			// userId is now in CommonFields.ts
 ];

@@ -62,51 +62,7 @@ export const chatterOperations: INodeProperties[] = [
 ];
 
 export const chatterFields: INodeProperties[] = [
-			{
-				displayName: 'Broadcaster ID or Username',
-				name: 'broadcasterId',
-				type: 'string',
-				displayOptions: {
-					show: {
-				resource: ['chatter'],
-						operation: ['get'],
-					},
-				},
-				default: '',
-				required: true,
-				placeholder: 'e.g. 123456789 or username',
-				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
-			},
-			{
-				displayName: 'Moderator ID or Username',
-				name: 'moderatorId',
-				type: 'string',
-				displayOptions: {
-					show: {
-				resource: ['chatter'],
-						operation: ['get'],
-					},
-				},
-				default: '',
-				required: true,
-				placeholder: 'e.g. 987654321 or username',
-				description: 'The moderator user ID or username. If a username is provided, it will be automatically converted to user ID.',
-			},
-			{
-				displayName: 'First',
-				name: 'first',
-				type: 'number',
-				displayOptions: {
-					show: {
-				resource: ['chatter'],
-						operation: ['get'],
-					},
-				},
-				default: 100,
-				description: 'The maximum number of items to return (1-1000)',
-				typeOptions: {
-					minValue: 1,
-					maxValue: 1000,
-				},
-			},
+			// broadcasterId is now in CommonFields.ts
+			// moderatorId is now in CommonFields.ts
+			// first is now in CommonFields.ts
 ];

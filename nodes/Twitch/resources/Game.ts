@@ -175,24 +175,8 @@ export const gameFields: INodeProperties[] = [
 				description: 'The value to search for. Supports multiple values separated by commas (max 100).',
 			},
 			// Get Top Games Parameters
-			{
-				displayName: 'First',
-				name: 'first',
-				type: 'number',
-				displayOptions: {
-					show: {
-				resource: ['game'],
-						operation: ['getTopGames'],
-					},
-				},
-				default: 20,
-				typeOptions: {
-					minValue: 1,
-					maxValue: 100,
-				},
-				placeholder: 'e.g. 20',
-				description: 'Maximum number of games to return (1-100). Default is 20.',
-			},
+			// first is now in CommonFields.ts
+
 			{
 				displayName: 'After',
 				name: 'after',

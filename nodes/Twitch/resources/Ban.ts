@@ -172,51 +172,10 @@ export const banOperations: INodeProperties[] = [
 
 export const banFields: INodeProperties[] = [
 			// Ban User Parameters
-			{
-				displayName: 'Broadcaster ID or Username',
-				name: 'broadcasterId',
-				type: 'string',
-				displayOptions: {
-					show: {
-				resource: ['ban'],
-						operation: ['banUser'],
-					},
-				},
-				default: '',
-				required: true,
-				placeholder: 'e.g. 123456789 or username',
-				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
-			},
-			{
-				displayName: 'Moderator ID or Username',
-				name: 'moderatorId',
-				type: 'string',
-				displayOptions: {
-					show: {
-				resource: ['ban'],
-						operation: ['banUser'],
-					},
-				},
-				default: '',
-				required: true,
-				placeholder: 'e.g. 987654321 or username',
-				description: 'The moderator user ID or username (must match the user access token). If a username is provided, it will be automatically converted to user ID.',
-			},
-			{
-				displayName: 'User ID or Username',
-				name: 'userId',
-				type: 'string',
-				displayOptions: {
-					show: {
-				resource: ['ban'],
-						operation: ['banUser'],
-					},
-				},
-				default: '',
-				required: true,
-				placeholder: 'e.g. 555666777 or username',
-				description: 'The user ID or username to ban. If a username is provided, it will be automatically converted to user ID.',
-			},
+			// broadcasterId is now in CommonFields.ts
+			// moderatorId is now in CommonFields.ts
+			// userId is now in CommonFields.ts
+
 			{
 				displayName: 'Duration',
 				name: 'duration',
@@ -250,67 +209,13 @@ export const banFields: INodeProperties[] = [
 				description: 'The reason for the ban (max 500 characters)',
 			},
 			// Unban User Parameters
-			{
-				displayName: 'Broadcaster ID or Username',
-				name: 'broadcasterId',
-				type: 'string',
-				displayOptions: {
-					show: {
-				resource: ['ban'],
-						operation: ['unbanUser'],
-					},
-				},
-				default: '',
-				required: true,
-				placeholder: 'e.g. 123456789 or username',
-				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
-			},
-			{
-				displayName: 'Moderator ID or Username',
-				name: 'moderatorId',
-				type: 'string',
-				displayOptions: {
-					show: {
-				resource: ['ban'],
-						operation: ['unbanUser'],
-					},
-				},
-				default: '',
-				required: true,
-				placeholder: 'e.g. 987654321 or username',
-				description: 'The moderator user ID or username (must match the user access token). If a username is provided, it will be automatically converted to user ID.',
-			},
-			{
-				displayName: 'User ID or Username',
-				name: 'userId',
-				type: 'string',
-				displayOptions: {
-					show: {
-				resource: ['ban'],
-						operation: ['unbanUser'],
-					},
-				},
-				default: '',
-				required: true,
-				placeholder: 'e.g. 555666777 or username',
-				description: 'The user ID or username to unban. If a username is provided, it will be automatically converted to user ID.',
-			},
+			// broadcasterId is now in CommonFields.ts
+			// moderatorId is now in CommonFields.ts
+			// userId is now in CommonFields.ts
+
 			// Get Banned Users Parameters
-			{
-				displayName: 'Broadcaster ID or Username',
-				name: 'broadcasterId',
-				type: 'string',
-				displayOptions: {
-					show: {
-				resource: ['ban'],
-						operation: ['getBannedUsers'],
-					},
-				},
-				default: '',
-				required: true,
-				placeholder: 'e.g. 123456789 or username',
-				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
-			},
+			// broadcasterId is now in CommonFields.ts
+
 			{
 				displayName: 'User IDs or Usernames',
 				name: 'userIds',
@@ -325,21 +230,5 @@ export const banFields: INodeProperties[] = [
 				placeholder: 'e.g. 555666777,888999000 or user1,user2',
 				description: 'Comma-separated list of user IDs or usernames to filter results. Usernames will be automatically converted to user IDs.',
 			},
-			{
-				displayName: 'First',
-				name: 'first',
-				type: 'number',
-				displayOptions: {
-					show: {
-				resource: ['ban'],
-						operation: ['getBannedUsers'],
-					},
-				},
-				default: 20,
-				typeOptions: {
-					minValue: 1,
-					maxValue: 100,
-				},
-				description: 'Maximum number of objects to return (1-100)',
-			},
+			// first is now in CommonFields.ts
 ];

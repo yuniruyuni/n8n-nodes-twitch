@@ -140,22 +140,8 @@ export const videoFields: INodeProperties[] = [
 		description: 'How to query for videos (at least one required)',
 	},
 	// Get Videos - User ID parameter
-	{
-		displayName: 'User ID or Username',
-		name: 'userId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['video'],
-				operation: ['getVideos'],
-				queryBy: ['userId'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'User ID or username who owns the videos. If a username is provided, it will be automatically converted to user ID.',
-	},
+	// userId is now in CommonFields.ts
+
 	// Get Videos - Game ID parameter
 	{
 		displayName: 'Game ID',
@@ -204,17 +190,8 @@ export const videoFields: INodeProperties[] = [
 			},
 		},
 		options: [
-			{
-				displayName: 'First',
-				name: 'first',
-				type: 'number',
-				default: 20,
-				typeOptions: {
-					minValue: 1,
-					maxValue: 100,
-				},
-				description: 'Maximum number of videos to return. Default: 20. Max: 100.',
-			},
+			// first is now in CommonFields.ts
+
 			{
 				displayName: 'Language',
 				name: 'language',

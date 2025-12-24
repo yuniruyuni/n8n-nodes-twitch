@@ -25,6 +25,7 @@ import { teamOperations, teamFields } from './resources/Team';
 import { userOperations, userFields } from './resources/User';
 import { videoOperations, videoFields } from './resources/Video';
 import { whisperOperations, whisperFields } from './resources/Whisper';
+import { commonFields } from './resources/CommonFields';
 
 export class Twitch implements INodeType {
 	description: INodeTypeDescription = {
@@ -140,6 +141,9 @@ export class Twitch implements INodeType {
 			...userFields,
 			...videoFields,
 			...whisperFields,
+
+			// Common fields (must be last to handle duplicate parameters)
+			...commonFields,
 		],
 	};
 }

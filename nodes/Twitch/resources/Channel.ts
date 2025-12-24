@@ -61,19 +61,5 @@ export const channelOperations: INodeProperties[] = [
 ];
 
 export const channelFields: INodeProperties[] = [
-	{
-		displayName: 'Broadcaster ID or Username',
-		name: 'broadcasterId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['channel'],
-				operation: ['getInfo'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
-	},
+	// broadcasterId is now in CommonFields.ts
 ];

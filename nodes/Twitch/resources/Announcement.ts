@@ -67,36 +67,7 @@ export const announcementOperations: INodeProperties[] = [
 ];
 
 export const announcementFields: INodeProperties[] = [
-			{
-				displayName: 'Broadcaster ID or Username',
-				name: 'broadcasterId',
-				type: 'string',
-				displayOptions: {
-					show: {
-				resource: ['announcement'],
-						operation: ['send'],
-					},
-				},
-				default: '',
-				required: true,
-				placeholder: 'e.g. 123456789 or username',
-				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
-			},
-			{
-				displayName: 'Moderator ID or Username',
-				name: 'moderatorId',
-				type: 'string',
-				displayOptions: {
-					show: {
-				resource: ['announcement'],
-						operation: ['send'],
-					},
-				},
-				default: '',
-				required: true,
-				placeholder: 'e.g. 987654321 or username',
-				description: 'The moderator user ID or username (must match the user access token). If a username is provided, it will be automatically converted to user ID.',
-			},
+			// broadcasterId and moderatorId are now in CommonFields.ts
 			{
 				displayName: 'Message',
 				name: 'message',

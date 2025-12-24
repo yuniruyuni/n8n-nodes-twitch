@@ -120,34 +120,9 @@ export const subscriptionOperations: INodeProperties[] = [
 ];
 
 export const subscriptionFields: INodeProperties[] = [
-	{
-		displayName: 'Broadcaster ID or Username',
-		name: 'broadcasterId',
-		type: 'string',
-		required: true,
-		default: '',
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
-		displayOptions: {
-			show: {
-				resource: ['subscription'],
-			},
-		},
-	},
-	{
-		displayName: 'User IDs or Usernames',
-		name: 'userId',
-		type: 'string',
-		default: '',
-		placeholder: 'e.g. 123456789,987654321 or username1,username2',
-		description: 'Filter by user IDs or usernames (comma-separated)',
-		displayOptions: {
-			show: {
-				resource: ['subscription'],
-				operation: ['getBroadcasterSubscriptions'],
-			},
-		},
-	},
+	// broadcasterId is now in CommonFields.ts
+	// userId is now in CommonFields.ts
+
 	{
 		displayName: 'User ID or Username',
 		name: 'checkUserId',
@@ -163,24 +138,8 @@ export const subscriptionFields: INodeProperties[] = [
 			},
 		},
 	},
-	{
-		displayName: 'First',
-		name: 'first',
-		type: 'number',
-		default: 20,
-		typeOptions: {
-			minValue: 1,
-			maxValue: 100,
-		},
-		placeholder: 'e.g. 20',
-		description: 'Number of results (1-100)',
-		displayOptions: {
-			show: {
-				resource: ['subscription'],
-				operation: ['getBroadcasterSubscriptions'],
-			},
-		},
-	},
+	// first is now in CommonFields.ts
+
 	{
 		displayName: 'After',
 		name: 'after',

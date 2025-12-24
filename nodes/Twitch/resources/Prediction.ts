@@ -171,21 +171,8 @@ export const predictionOperations: INodeProperties[] = [
 
 export const predictionFields: INodeProperties[] = [
 	// Create Prediction Parameters
-	{
-		displayName: 'Broadcaster ID or Username',
-		name: 'broadcasterId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['prediction'],
-				operation: ['createPrediction'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username running the prediction. If a username is provided, it will be automatically converted to user ID.',
-	},
+	// broadcasterId is now in CommonFields.ts
+
 	{
 		displayName: 'Title',
 		name: 'title',
@@ -250,21 +237,8 @@ export const predictionFields: INodeProperties[] = [
 		description: 'The length of time (in seconds) that viewers have to make a prediction. Minimum: 30. Maximum: 1800.',
 	},
 	// Get Predictions Parameters
-	{
-		displayName: 'Broadcaster ID or Username',
-		name: 'broadcasterId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['prediction'],
-				operation: ['getPredictions'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username whose predictions you want to get. If a username is provided, it will be automatically converted to user ID.',
-	},
+	// broadcasterId is now in CommonFields.ts
+
 	{
 		displayName: 'Prediction ID',
 		name: 'predictionId',
@@ -279,39 +253,10 @@ export const predictionFields: INodeProperties[] = [
 		placeholder: 'e.g. abc123-def456-ghi789',
 		description: 'The ID of the prediction to get. If not specified, returns all predictions for the broadcaster.',
 	},
-	{
-		displayName: 'First',
-		name: 'first',
-		type: 'number',
-		displayOptions: {
-			show: {
-				resource: ['prediction'],
-				operation: ['getPredictions'],
-			},
-		},
-		default: 20,
-		typeOptions: {
-			minValue: 1,
-			maxValue: 20,
-		},
-		description: 'Maximum number of predictions to return (1-20)',
-	},
+	// first is now in CommonFields.ts
 	// End Prediction Parameters
-	{
-		displayName: 'Broadcaster ID or Username',
-		name: 'broadcasterId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['prediction'],
-				operation: ['endPrediction'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username running the prediction. If a username is provided, it will be automatically converted to user ID.',
-	},
+	// broadcasterId is now in CommonFields.ts
+
 	{
 		displayName: 'Prediction ID',
 		name: 'endPredictionId',

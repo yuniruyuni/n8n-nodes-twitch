@@ -180,21 +180,8 @@ export const moderatorOperations: INodeProperties[] = [
 
 export const moderatorFields: INodeProperties[] = [
 			// Get operation parameters
-			{
-				displayName: 'Broadcaster ID or Username',
-				name: 'broadcasterId',
-				type: 'string',
-				displayOptions: {
-					show: {
-				resource: ['moderator'],
-						operation: ['get'],
-					},
-				},
-				default: '',
-				required: true,
-				placeholder: 'e.g. 141981764 or username',
-				description: 'The broadcaster user ID or username whose list of moderators you want to get. If a username is provided, it will be automatically converted to user ID.',
-			},
+			// broadcasterId is now in CommonFields.ts
+
 			{
 				displayName: 'User IDs or Usernames',
 				name: 'userIds',
@@ -209,84 +196,11 @@ export const moderatorFields: INodeProperties[] = [
 				placeholder: 'e.g. 123456,789012 or username1,username2',
 				description: 'Filters the list for specific moderators. Comma-separated list of user IDs or usernames. Maximum 100.',
 			},
-			{
-				displayName: 'First',
-				name: 'first',
-				type: 'number',
-				displayOptions: {
-					show: {
-				resource: ['moderator'],
-						operation: ['get'],
-					},
-				},
-				default: 20,
-				typeOptions: {
-					minValue: 1,
-					maxValue: 100,
-				},
-				placeholder: 'e.g. 20',
-				description: 'Maximum number of moderators to return (1-100). Default is 20.',
-			},
+			// first is now in CommonFields.ts
 			// Add operation parameters
-			{
-				displayName: 'Broadcaster ID or Username',
-				name: 'broadcasterId',
-				type: 'string',
-				displayOptions: {
-					show: {
-				resource: ['moderator'],
-						operation: ['add'],
-					},
-				},
-				default: '',
-				required: true,
-				placeholder: 'e.g. 141981764 or username',
-				description: 'The broadcaster user ID or username that owns the chat room. If a username is provided, it will be automatically converted to user ID.',
-			},
-			{
-				displayName: 'User ID or Username',
-				name: 'userId',
-				type: 'string',
-				displayOptions: {
-					show: {
-				resource: ['moderator'],
-						operation: ['add'],
-					},
-				},
-				default: '',
-				required: true,
-				placeholder: 'e.g. 123456 or username',
-				description: 'The user ID or username to add as a moderator. If a username is provided, it will be automatically converted to user ID.',
-			},
+			// broadcasterId is now in CommonFields.ts
+			// userId is now in CommonFields.ts
 			// Remove operation parameters
-			{
-				displayName: 'Broadcaster ID or Username',
-				name: 'broadcasterId',
-				type: 'string',
-				displayOptions: {
-					show: {
-				resource: ['moderator'],
-						operation: ['remove'],
-					},
-				},
-				default: '',
-				required: true,
-				placeholder: 'e.g. 141981764 or username',
-				description: 'The broadcaster user ID or username that owns the chat room. If a username is provided, it will be automatically converted to user ID.',
-			},
-			{
-				displayName: 'User ID or Username',
-				name: 'userId',
-				type: 'string',
-				displayOptions: {
-					show: {
-				resource: ['moderator'],
-						operation: ['remove'],
-					},
-				},
-				default: '',
-				required: true,
-				placeholder: 'e.g. 123456 or username',
-				description: 'The user ID or username to remove as a moderator. If a username is provided, it will be automatically converted to user ID.',
-			},
+			// broadcasterId is now in CommonFields.ts
+			// userId is now in CommonFields.ts
 ];

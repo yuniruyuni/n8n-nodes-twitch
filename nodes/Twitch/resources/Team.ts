@@ -97,21 +97,8 @@ export const teamOperations: INodeProperties[] = [
 ];
 
 export const teamFields: INodeProperties[] = [
-			{
-				displayName: 'Broadcaster ID or Username',
-				name: 'broadcasterId',
-				type: 'string',
-				required: true,
-				default: '',
-				placeholder: 'e.g. 123456789 or username',
-				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
-				displayOptions: {
-					show: {
-				resource: ['team'],
-						operation: ['getChannelTeams'],
-					},
-				},
-			},
+			// broadcasterId is now in CommonFields.ts
+
 			{
 				displayName: 'Search By',
 				name: 'searchBy',

@@ -136,21 +136,7 @@ export const raidFields: INodeProperties[] = [
 		description: 'Requires OAuth2 authentication with channel:manage:raids scope. The authenticated user must match the from_broadcaster_id.',
 	},
 	// Cancel Raid Parameters
-	{
-		displayName: 'Broadcaster ID or Username',
-		name: 'broadcasterId',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['raid'],
-				operation: ['cancelRaid'],
-			},
-		},
-		default: '',
-		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username that initiated the raid (must be the authenticated user). If a username is provided, it will be automatically converted to user ID.',
-	},
+	// broadcasterId is now in CommonFields.ts
 	{
 		displayName: 'Note',
 		name: 'cancelRaidNote',

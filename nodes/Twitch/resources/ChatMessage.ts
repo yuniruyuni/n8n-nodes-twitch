@@ -62,21 +62,7 @@ export const chatMessageOperations: INodeProperties[] = [
 ];
 
 export const chatMessageFields: INodeProperties[] = [
-			{
-				displayName: 'Broadcaster ID or Username',
-				name: 'broadcasterId',
-				type: 'string',
-				displayOptions: {
-					show: {
-				resource: ['chatMessage'],
-						operation: ['sendMessage'],
-					},
-				},
-				default: '',
-				required: true,
-				placeholder: 'e.g. 123456789 or username',
-				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
-			},
+			// broadcasterId is now in CommonFields.ts
 			{
 				displayName: 'Sender ID or Username',
 				name: 'senderId',

@@ -254,20 +254,8 @@ export const customRewardOperations: INodeProperties[] = [
 
 export const customRewardFields: INodeProperties[] = [
 	// Broadcaster ID (all operations)
-	{
-		displayName: 'Broadcaster ID or Username',
-		name: 'broadcasterId',
-		type: 'string',
-		default: '',
-		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
-		displayOptions: {
-			show: {
-				resource: ['customReward'],
-			},
-		},
-	},
+	// broadcasterId is now in CommonFields.ts
+
 	// Create Parameters
 	{
 		displayName: 'Title',

@@ -125,20 +125,8 @@ export const redemptionOperations: INodeProperties[] = [
 
 export const redemptionFields: INodeProperties[] = [
 	// Broadcaster ID (all operations)
-	{
-		displayName: 'Broadcaster ID or Username',
-		name: 'broadcasterId',
-		type: 'string',
-		default: '',
-		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
-		displayOptions: {
-			show: {
-				resource: ['redemption'],
-			},
-		},
-	},
+	// broadcasterId is now in CommonFields.ts
+
 	// Reward ID (all operations)
 	{
 		displayName: 'Reward ID',
@@ -206,17 +194,8 @@ export const redemptionFields: INodeProperties[] = [
 				default: 'OLDEST',
 				description: 'Sort order for redemptions',
 			},
-			{
-				displayName: 'First',
-				name: 'first',
-				type: 'number',
-				default: 20,
-				typeOptions: {
-					minValue: 1,
-					maxValue: 50,
-				},
-				description: 'Maximum number of redemptions to return (1-50)',
-			},
+			// first is now in CommonFields.ts
+
 			{
 				displayName: 'After',
 				name: 'after',

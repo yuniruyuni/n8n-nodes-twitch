@@ -53,19 +53,5 @@ export const emoteOperations: INodeProperties[] = [
 ];
 
 export const emoteFields: INodeProperties[] = [
-			{
-				displayName: 'Broadcaster ID or Username',
-				name: 'broadcasterId',
-				type: 'string',
-				displayOptions: {
-					show: {
-				resource: ['emote'],
-						operation: ['getChannelEmotes'],
-					},
-				},
-				default: '',
-				required: true,
-				placeholder: 'e.g. 123456789 or username',
-				description: 'The broadcaster user ID or username whose emotes you want to get. If a username is provided, it will be automatically converted to user ID.',
-			},
+			// broadcasterId is now in CommonFields.ts
 ];

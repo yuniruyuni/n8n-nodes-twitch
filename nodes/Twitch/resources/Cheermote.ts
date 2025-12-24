@@ -57,18 +57,5 @@ export const cheermoteOperations: INodeProperties[] = [
 ];
 
 export const cheermoteFields: INodeProperties[] = [
-			{
-				displayName: 'Broadcaster ID or Username',
-				name: 'broadcasterId',
-				type: 'string',
-				displayOptions: {
-					show: {
-				resource: ['cheermote'],
-						operation: ['get'],
-					},
-				},
-				default: '',
-				placeholder: 'e.g. 123456789 or username',
-				description: 'The broadcaster user ID or username. If omitted, returns global cheermotes. If a username is provided, it will be automatically converted to user ID.',
-			},
+			// broadcasterId is now in CommonFields.ts
 ];

@@ -201,15 +201,8 @@ export const scheduleOperations: INodeProperties[] = [
 ];
 
 export const scheduleFields: INodeProperties[] = [
-			{
-				displayName: 'Broadcaster ID or Username',
-				name: 'broadcasterId',
-				type: 'string',
-				required: true,
-				default: '',
-				placeholder: 'e.g. 123456789 or username',
-				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
-			},
+			// broadcasterId is now in CommonFields.ts
+
 			// Get Schedule parameters
 			{
 				displayName: 'Segment IDs',
@@ -253,24 +246,8 @@ export const scheduleFields: INodeProperties[] = [
 					},
 				},
 			},
-			{
-				displayName: 'First',
-				name: 'first',
-				type: 'number',
-				default: 20,
-				typeOptions: {
-					minValue: 1,
-					maxValue: 25,
-				},
-				placeholder: 'e.g. 20',
-				description: 'Number of segments (1-25)',
-				displayOptions: {
-					show: {
-				resource: ['schedule'],
-						operation: ['getSchedule'],
-					},
-				},
-			},
+			// first is now in CommonFields.ts
+
 			{
 				displayName: 'After',
 				name: 'after',
