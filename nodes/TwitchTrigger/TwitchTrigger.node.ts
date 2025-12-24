@@ -9,7 +9,7 @@ import {
 	type IDataObject,
 } from 'n8n-workflow';
 import { createHmac, timingSafeEqual } from 'crypto';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrUsername } from '../Twitch/shared/userIdConverter';
 
 export class TwitchTrigger implements INodeType {
 	description: INodeTypeDescription = {

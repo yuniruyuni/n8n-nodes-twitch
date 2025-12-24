@@ -42,31 +42,8 @@
 			"dist/credentials/TwitchOAuth2Api.credentials.js"
 		],
 		"nodes": [
-			"dist/nodes/TwitchAnnouncements/TwitchAnnouncements.node.js",
-			"dist/nodes/TwitchBans/TwitchBans.node.js",
-			"dist/nodes/TwitchBitsLeaderboard/TwitchBitsLeaderboard.node.js",
-			"dist/nodes/TwitchChannels/TwitchChannels.node.js",
-			"dist/nodes/TwitchChatMessages/TwitchChatMessages.node.js",
-			"dist/nodes/TwitchChatters/TwitchChatters.node.js",
-			"dist/nodes/TwitchCheermotes/TwitchCheermotes.node.js",
-			"dist/nodes/TwitchClips/TwitchClips.node.js",
-			"dist/nodes/TwitchCustomRewards/TwitchCustomRewards.node.js",
-			"dist/nodes/TwitchEmotes/TwitchEmotes.node.js",
-			"dist/nodes/TwitchGames/TwitchGames.node.js",
-			"dist/nodes/TwitchModerators/TwitchModerators.node.js",
-			"dist/nodes/TwitchPolls/TwitchPolls.node.js",
-			"dist/nodes/TwitchPredictions/TwitchPredictions.node.js",
-			"dist/nodes/TwitchRaids/TwitchRaids.node.js",
-			"dist/nodes/TwitchRedemptions/TwitchRedemptions.node.js",
-			"dist/nodes/TwitchSchedule/TwitchSchedule.node.js",
-			"dist/nodes/TwitchSearch/TwitchSearch.node.js",
-			"dist/nodes/TwitchStreams/TwitchStreams.node.js",
-			"dist/nodes/TwitchSubscriptions/TwitchSubscriptions.node.js",
-			"dist/nodes/TwitchTeams/TwitchTeams.node.js",
-			"dist/nodes/TwitchTrigger/TwitchTrigger.node.js",
-			"dist/nodes/TwitchUsers/TwitchUsers.node.js",
-			"dist/nodes/TwitchVideos/TwitchVideos.node.js",
-			"dist/nodes/TwitchWhispers/TwitchWhispers.node.js"
+			"dist/nodes/Twitch/Twitch.node.js",
+			"dist/nodes/TwitchTrigger/TwitchTrigger.node.js"
 		]
 	},
 	"devDependencies": {
