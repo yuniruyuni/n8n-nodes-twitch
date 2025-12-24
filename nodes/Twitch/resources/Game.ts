@@ -5,37 +5,28 @@ import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 // Field definitions for each operation
 const getGamesFields: INodeProperties[] = [
 	{
-		displayName: 'Search By',
-		name: 'searchBy',
-		type: 'options',
-		options: [
-			{
-				name: 'Game ID',
-				value: 'id',
-				description: 'Search by Twitch game ID',
-			},
-			{
-				name: 'Game Name',
-				value: 'name',
-				description: 'Search by game name',
-			},
-			{
-				name: 'IGDB ID',
-				value: 'igdb_id',
-				description: 'Search by IGDB (Internet Game Database) ID',
-			},
-		],
-		default: 'name',
-		description: 'The field to search games by',
-	},
-	{
-		displayName: 'Search Value',
-		name: 'searchValue',
+		displayName: 'Game IDs',
+		name: 'gameIds',
 		type: 'string',
 		default: '',
-		required: true,
-		placeholder: 'e.g. Fortnite or 33214,493057',
-		description: 'The value to search for. Supports multiple values separated by commas (max 100).',
+		placeholder: 'e.g. 33214,493057',
+		description: 'Game IDs to get. Supports multiple values separated by commas. Combined total with other parameters must not exceed 100.',
+	},
+	{
+		displayName: 'Game Names',
+		name: 'gameNames',
+		type: 'string',
+		default: '',
+		placeholder: 'e.g. Fortnite,League of Legends',
+		description: 'Game names to get. Must exactly match game titles. Supports multiple values separated by commas. Combined total with other parameters must not exceed 100.',
+	},
+	{
+		displayName: 'IGDB IDs',
+		name: 'igdbIds',
+		type: 'string',
+		default: '',
+		placeholder: 'e.g. 1905,5678',
+		description: 'IGDB (Internet Game Database) IDs to get. Supports multiple values separated by commas. Combined total with other parameters must not exceed 100.',
 	},
 ];
 
@@ -94,29 +85,37 @@ export const gameOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const searchBy = this.getNodeParameter('searchBy', 0) as string;
-								const searchValue = this.getNodeParameter('searchValue', 0) as string;
+								const gameIds = this.getNodeParameter('gameIds', 0) as string;
+								const gameNames = this.getNodeParameter('gameNames', 0) as string;
+								const igdbIds = this.getNodeParameter('igdbIds', 0) as string;
 
-								if (!searchValue || searchValue.trim() === '') {
-									throw new ApplicationError('Search value is required');
+								// Parse and collect all values
+								const ids = gameIds ? gameIds.split(',').map((v) => v.trim()).filter((v) => v !== '') : [];
+								const names = gameNames ? gameNames.split(',').map((v) => v.trim()).filter((v) => v !== '') : [];
+								const igdb = igdbIds ? igdbIds.split(',').map((v) => v.trim()).filter((v) => v !== '') : [];
+
+								// Validate that at least one parameter is provided
+								if (ids.length === 0 && names.length === 0 && igdb.length === 0) {
+									throw new ApplicationError('At least one of Game IDs, Game Names, or IGDB IDs is required');
 								}
 
-								// Split by comma and trim whitespace
-								const values = searchValue.split(',').map((v) => v.trim()).filter((v) => v !== '');
-
-								if (values.length === 0) {
-									throw new ApplicationError('At least one search value is required');
+								// Validate total count doesn't exceed 100
+								const totalCount = ids.length + names.length + igdb.length;
+								if (totalCount > 100) {
+									throw new ApplicationError(`Total number of IDs and names must not exceed 100 (got ${totalCount})`);
 								}
 
 								// Build query string parameters
 								const qs: Record<string, string | string[]> = {};
 
-								if (searchBy === 'id') {
-									qs.id = values;
-								} else if (searchBy === 'name') {
-									qs.name = values;
-								} else if (searchBy === 'igdb_id') {
-									qs.igdb_id = values;
+								if (ids.length > 0) {
+									qs.id = ids;
+								}
+								if (names.length > 0) {
+									qs.name = names;
+								}
+								if (igdb.length > 0) {
+									qs.igdb_id = igdb;
 								}
 
 								requestOptions.qs = qs;

@@ -51,24 +51,6 @@ const createPollFields: INodeProperties[] = [
 		default: {},
 		options: [
 			{
-				displayName: 'Bits Voting Enabled',
-				name: 'bitsVotingEnabled',
-				type: 'boolean',
-				default: false,
-				description: 'Whether viewers can cast additional votes using Bits',
-			},
-			{
-				displayName: 'Bits Per Vote',
-				name: 'bitsPerVote',
-				type: 'number',
-				default: 0,
-				typeOptions: {
-					minValue: 0,
-					maxValue: 10000,
-				},
-				description: 'Number of Bits required to vote once with Bits',
-			},
-			{
 				displayName: 'Channel Points Voting Enabled',
 				name: 'channelPointsVotingEnabled',
 				type: 'boolean',
@@ -108,23 +90,40 @@ const getPollsFields: INodeProperties[] = [
 		description: 'The broadcaster user ID or username whose polls to retrieve',
 	},
 	{
-		displayName: 'Poll IDs',
-		name: 'pollIds',
-		type: 'string',
-		default: '',
-		placeholder: 'e.g. poll-ID-1 or poll-ID-1,poll-ID-2',
-		description: 'Filter by poll ID(s). Separate multiple IDs with commas.',
-	},
-	{
-		displayName: 'First',
-		name: 'first',
-		type: 'number',
-		default: 20,
-		typeOptions: {
-			minValue: 1,
-			maxValue: 100,
-		},
-		description: 'Maximum number of items to return',
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		options: [
+			{
+				displayName: 'Poll IDs',
+				name: 'pollIds',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. poll-ID-1 or poll-ID-1,poll-ID-2',
+				description: 'Filter by poll ID(s). Separate multiple IDs with commas. Maximum 20 IDs.',
+			},
+			{
+				displayName: 'First',
+				name: 'first',
+				type: 'number',
+				default: 20,
+				typeOptions: {
+					minValue: 1,
+					maxValue: 20,
+				},
+				description: 'Maximum number of items to return per page. Default: 20.',
+			},
+			{
+				displayName: 'After',
+				name: 'after',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. eyJiIjpudWxsLCJhIjp7Ik9mZnNldCI6NX19',
+				description: 'Cursor for pagination. Use the cursor from the previous response to get the next page.',
+			},
+		],
 	},
 ];
 
@@ -229,12 +228,6 @@ export const pollOperations: INodeProperties[] = [
 
 								const additionalFields = this.getNodeParameter('additionalFields', 0, {}) as IDataObject;
 
-								if (additionalFields.bitsVotingEnabled !== undefined) {
-									body.bits_voting_enabled = additionalFields.bitsVotingEnabled;
-								}
-								if (additionalFields.bitsPerVote !== undefined) {
-									body.bits_per_vote = additionalFields.bitsPerVote;
-								}
 								if (additionalFields.channelPointsVotingEnabled !== undefined) {
 									body.channel_points_voting_enabled = additionalFields.channelPointsVotingEnabled;
 								}
@@ -278,14 +271,18 @@ export const pollOperations: INodeProperties[] = [
 									broadcaster_id: broadcasterId,
 								};
 
-								const pollIds = this.getNodeParameter('pollIds', 0) as string;
-								if (pollIds) {
-									qs.id = pollIds;
+								const additionalFields = this.getNodeParameter('additionalFields', 0, {}) as IDataObject;
+
+								if (additionalFields.pollIds) {
+									qs.id = additionalFields.pollIds;
 								}
 
-								const first = this.getNodeParameter('first', 0) as number;
-								if (first) {
-									qs.first = first;
+								if (additionalFields.first) {
+									qs.first = additionalFields.first;
+								}
+
+								if (additionalFields.after) {
+									qs.after = additionalFields.after;
 								}
 
 								requestOptions.qs = qs;

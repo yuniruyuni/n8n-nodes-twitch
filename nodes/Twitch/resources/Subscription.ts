@@ -38,7 +38,15 @@ const getBroadcasterSubscriptionsFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		placeholder: 'e.g. eyJiIjpudWxsLCJhIjp7Ik9mZnNldCI6MjB9fQ',
-		description: 'Pagination cursor',
+		description: 'Cursor for forward pagination. Do not specify if you set the User ID parameter.',
+	},
+	{
+		displayName: 'Before',
+		name: 'before',
+		type: 'string',
+		default: '',
+		placeholder: 'e.g. eyJiIjpudWxsLCJhIjp7Ik9mZnNldCI6MjB9fQ',
+		description: 'Cursor for backward pagination. Do not specify if you set the User ID parameter.',
 	},
 ];
 
@@ -92,6 +100,7 @@ export const subscriptionOperations: INodeProperties[] = [
 								const userIdInput = this.getNodeParameter('userId', 0) as string;
 								const first = this.getNodeParameter('first', 0) as number;
 								const after = this.getNodeParameter('after', 0) as string;
+								const before = this.getNodeParameter('before', 0) as string;
 
 								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 
@@ -112,6 +121,7 @@ export const subscriptionOperations: INodeProperties[] = [
 
 								if (first) qs.first = first;
 								if (after) qs.after = after;
+								if (before) qs.before = before;
 
 								requestOptions.qs = qs;
 								return requestOptions;

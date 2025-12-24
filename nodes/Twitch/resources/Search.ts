@@ -10,17 +10,35 @@ const searchCommonFields: INodeProperties[] = [
 		default: '',
 		required: true,
 		placeholder: 'e.g. starcraft',
-		description: 'The search query',
+		description: 'URI-encoded search string. For example, encode search strings like "angel of death" as "angel%20of%20death".',
+	},
+	{
+		displayName: 'First',
+		name: 'first',
+		type: 'number',
+		default: 20,
+		description: 'Maximum number of items to return per page (1-100). Default is 20.',
+		typeOptions: {
+			minValue: 1,
+			maxValue: 100,
+		},
+	},
+	{
+		displayName: 'After',
+		name: 'after',
+		type: 'string',
+		default: '',
+		description: 'Cursor for pagination. Use the cursor from the previous response to get the next page.',
 	},
 ];
 
 const searchChannelsFields: INodeProperties[] = [
 	{
 		displayName: 'Live Only',
-		name: 'liveOnly',
+		name: 'live_only',
 		type: 'boolean',
 		default: false,
-		description: 'Whether to only return channels that are currently live',
+		description: 'Whether to return only channels that are currently streaming live. Default is false (both live and offline channels).',
 	},
 ];
 
@@ -40,7 +58,7 @@ export const searchOperations: INodeProperties[] = [
 				name: 'Search Channels',
 				value: 'searchChannels',
 				action: 'Search for channels',
-				description: 'Search for channels matching a query',
+				description: 'Search for channels that have streamed content within the past 6 months',
 				routing: {
 					request: {
 						method: 'GET',
@@ -48,7 +66,8 @@ export const searchOperations: INodeProperties[] = [
 						qs: {
 							query: '={{$parameter.query}}',
 							'={{$parameter.first ? "first" : undefined}}': '={{$parameter.first}}',
-							'={{$parameter.liveOnly !== undefined ? "live_only" : undefined}}': '={{$parameter.liveOnly}}',
+							'={{$parameter.after ? "after" : undefined}}': '={{$parameter.after}}',
+							'={{$parameter.live_only !== undefined ? "live_only" : undefined}}': '={{$parameter.live_only}}',
 						},
 					},
 					output: {
@@ -67,7 +86,7 @@ export const searchOperations: INodeProperties[] = [
 				name: 'Search Categories',
 				value: 'searchCategories',
 				action: 'Search for categories',
-				description: 'Search for categories/games matching a query',
+				description: 'Search for games or categories matching a query',
 				routing: {
 					request: {
 						method: 'GET',
@@ -75,6 +94,7 @@ export const searchOperations: INodeProperties[] = [
 						qs: {
 							query: '={{$parameter.query}}',
 							'={{$parameter.first ? "first" : undefined}}': '={{$parameter.first}}',
+							'={{$parameter.after ? "after" : undefined}}': '={{$parameter.after}}',
 						},
 					},
 					output: {

@@ -70,7 +70,7 @@ const getPredictionsFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		placeholder: 'e.g. abc123-def456-ghi789',
-		description: 'The ID of the prediction to get. If not specified, returns all predictions for the broadcaster.',
+		description: 'The ID of the prediction to get. To specify multiple IDs, separate them with commas. Maximum of 25 IDs. If not specified, returns all predictions for the broadcaster.',
 	},
 	{
 		displayName: 'First',
@@ -79,9 +79,17 @@ const getPredictionsFields: INodeProperties[] = [
 		default: 20,
 		typeOptions: {
 			minValue: 1,
-			maxValue: 100,
+			maxValue: 25,
 		},
-		description: 'Maximum number of items to return',
+		description: 'Maximum number of items to return per page (1-25)',
+	},
+	{
+		displayName: 'After',
+		name: 'after',
+		type: 'string',
+		default: '',
+		placeholder: 'e.g. eyJiIjpudWxsLCJhIjp7Ik9mZnNldCI6NX19',
+		description: 'The cursor used to get the next page of results',
 	},
 ];
 
@@ -225,12 +233,24 @@ export const predictionOperations: INodeProperties[] = [
 
 								const predictionId = this.getNodeParameter('predictionId', '') as string;
 								if (predictionId) {
-									qs.id = predictionId;
+									// Support multiple IDs separated by commas
+									const ids = predictionId.split(',').map(id => id.trim()).filter(id => id);
+									if (ids.length === 1) {
+										qs.id = ids[0];
+									} else if (ids.length > 1) {
+										// For multiple IDs, we need to add them as separate query parameters
+										qs.id = ids;
+									}
 								}
 
 								const first = this.getNodeParameter('first', '') as number;
 								if (first) {
 									qs.first = first;
+								}
+
+								const after = this.getNodeParameter('after', '') as string;
+								if (after) {
+									qs.after = after;
 								}
 
 								requestOptions.qs = qs;

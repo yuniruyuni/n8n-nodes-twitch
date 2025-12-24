@@ -10,7 +10,7 @@ const sendWhisperFields: INodeProperties[] = [
 		required: true,
 		default: '',
 		placeholder: 'e.g. 123456789',
-		description: 'The ID of the user sending the whisper',
+		description: 'The ID of the user sending the whisper. This user must have a verified phone number. This ID must match the user ID in the OAuth2 access token.',
 	},
 	{
 		displayName: 'To User ID',
@@ -28,7 +28,7 @@ const sendWhisperFields: INodeProperties[] = [
 		required: true,
 		default: '',
 		placeholder: 'e.g. Hello from n8n!',
-		description: 'The whisper message to send (maximum 500 characters)',
+		description: 'The whisper message to send. Must not be empty. Maximum 500 characters if recipient hasn\'t whispered before, 10,000 characters if they have. Messages exceeding the limit are truncated.',
 	},
 ];
 

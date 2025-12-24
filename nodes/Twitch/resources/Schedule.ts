@@ -44,9 +44,9 @@ const getScheduleFields: INodeProperties[] = [
 		default: 20,
 		typeOptions: {
 			minValue: 1,
-			maxValue: 100,
+			maxValue: 25,
 		},
-		description: 'Maximum number of items to return',
+		description: 'Maximum number of items to return per page (1-25)',
 	},
 	{
 		displayName: 'After',
@@ -224,6 +224,70 @@ const deleteSegmentFields: INodeProperties[] = [
 		default: '',
 		placeholder: 'e.g. eyJzZWdtZW50SUQiOiI...',
 		description: 'The ID of the segment',
+	},
+];
+
+const updateScheduleSettingsFields: INodeProperties[] = [
+	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+	},
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		options: [
+			{
+				displayName: 'Is Vacation Enabled',
+				name: 'isVacationEnabled',
+				type: 'boolean',
+				default: false,
+				description: 'Whether the broadcaster has scheduled a vacation. Set to true to enable Vacation Mode.',
+			},
+			{
+				displayName: 'Vacation Start Time',
+				name: 'vacationStartTime',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. 2021-05-16T00:00:00Z',
+				description: 'The UTC date and time of when the vacation starts (RFC3339 format). Required if vacation is enabled.',
+			},
+			{
+				displayName: 'Vacation End Time',
+				name: 'vacationEndTime',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. 2021-05-30T23:59:59Z',
+				description: 'The UTC date and time of when the vacation ends (RFC3339 format). Required if vacation is enabled.',
+			},
+			{
+				displayName: 'Timezone',
+				name: 'timezone',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. America/New_York',
+				description: 'The timezone that the broadcaster broadcasts from (IANA format). Required if vacation is enabled.',
+			},
+		],
+	},
+];
+
+const getICalendarFields: INodeProperties[] = [
+	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
 	},
 ];
 
@@ -421,6 +485,73 @@ export const scheduleOperations: INodeProperties[] = [
 					},
 				},
 			},
+			{
+				name: 'Update Schedule Settings',
+				value: 'updateScheduleSettings',
+				action: 'Update schedule settings',
+				description: 'Update schedule settings such as vacation mode',
+				routing: {
+					request: {
+						method: 'PATCH',
+						url: '/schedule/settings',
+					},
+					send: {
+						preSend: [
+							async function (this, requestOptions) {
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
+
+								const qs: IDataObject = {
+									broadcaster_id: broadcasterId,
+								};
+
+								if (additionalFields.isVacationEnabled !== undefined) {
+									qs.is_vacation_enabled = additionalFields.isVacationEnabled;
+								}
+								if (additionalFields.vacationStartTime) {
+									qs.vacation_start_time = additionalFields.vacationStartTime;
+								}
+								if (additionalFields.vacationEndTime) {
+									qs.vacation_end_time = additionalFields.vacationEndTime;
+								}
+								if (additionalFields.timezone) {
+									qs.timezone = additionalFields.timezone;
+								}
+
+								requestOptions.qs = qs;
+								return requestOptions;
+							},
+						],
+					},
+				},
+			},
+			{
+				name: 'Get iCalendar',
+				value: 'getICalendar',
+				action: 'Get icalendar',
+				description: 'Get the streaming schedule as an iCalendar',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '/schedule/icalendar',
+					},
+					send: {
+						preSend: [
+							async function (this, requestOptions) {
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+
+								requestOptions.qs = {
+									broadcaster_id: broadcasterId,
+								};
+
+								return requestOptions;
+							},
+						],
+					},
+				},
+			},
 		],
 		default: 'getSchedule',
 	},
@@ -431,4 +562,6 @@ export const scheduleFields: INodeProperties[] = [
 	...updateDisplayOptions({ show: { resource: ['schedule'], operation: ['createSegment'] } }, createSegmentFields),
 	...updateDisplayOptions({ show: { resource: ['schedule'], operation: ['updateSegment'] } }, updateSegmentFields),
 	...updateDisplayOptions({ show: { resource: ['schedule'], operation: ['deleteSegment'] } }, deleteSegmentFields),
+	...updateDisplayOptions({ show: { resource: ['schedule'], operation: ['updateScheduleSettings'] } }, updateScheduleSettingsFields),
+	...updateDisplayOptions({ show: { resource: ['schedule'], operation: ['getICalendar'] } }, getICalendarFields),
 ];

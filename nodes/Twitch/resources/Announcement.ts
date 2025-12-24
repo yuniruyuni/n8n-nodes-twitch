@@ -5,13 +5,31 @@ import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 // Field definitions for each operation
 const sendFields: INodeProperties[] = [
 	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 12826 or username',
+		description: 'The ID of the broadcaster that owns the chat room to send the announcement to. If a username is provided, it will be automatically converted to user ID.',
+	},
+	{
+		displayName: 'Moderator ID or Username',
+		name: 'moderatorId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 141981764 or username',
+		description: 'The ID of a user who has permission to moderate the broadcaster\'s chat room, or the broadcaster\'s ID if they\'re sending the announcement. This ID must match the user ID in the user access token. If a username is provided, it will be automatically converted to user ID.',
+	},
+	{
 		displayName: 'Message',
 		name: 'message',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. Important announcement!',
-		description: 'The announcement message (max 500 characters)',
+		description: 'The announcement to make in the broadcaster\'s chat room. Announcements are limited to a maximum of 500 characters; announcements longer than 500 characters are truncated.',
 	},
 	{
 		displayName: 'Color',
@@ -40,7 +58,7 @@ const sendFields: INodeProperties[] = [
 			},
 		],
 		default: 'primary',
-		description: 'The color of the announcement',
+		description: 'The color used to highlight the announcement. If set to primary or not set, the channel\'s accent color is used.',
 	},
 ];
 
@@ -89,16 +107,6 @@ export const announcementOperations: INodeProperties[] = [
 								};
 
 								return requestOptions;
-							},
-						],
-					},
-					output: {
-						postReceive: [
-							{
-								type: 'rootProperty',
-								properties: {
-									property: 'data',
-								},
 							},
 						],
 					},

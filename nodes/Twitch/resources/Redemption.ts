@@ -23,33 +23,70 @@ const getFields: INodeProperties[] = [
 		description: 'The ID of the custom reward',
 	},
 	{
+		displayName: 'Filter By',
+		name: 'filterBy',
+		type: 'options',
+		options: [
+			{
+				name: 'Status',
+				value: 'status',
+				description: 'Filter redemptions by status',
+			},
+			{
+				name: 'Redemption IDs',
+				value: 'ids',
+				description: 'Get specific redemptions by their IDs',
+			},
+		],
+		default: 'status',
+		description: 'Choose how to filter the redemptions',
+	},
+	{
+		displayName: 'Status',
+		name: 'status',
+		type: 'options',
+		displayOptions: {
+			show: {
+				filterBy: ['status'],
+			},
+		},
+		options: [
+			{
+				name: 'Unfulfilled',
+				value: 'UNFULFILLED',
+			},
+			{
+				name: 'Fulfilled',
+				value: 'FULFILLED',
+			},
+			{
+				name: 'Canceled',
+				value: 'CANCELED',
+			},
+		],
+		default: 'UNFULFILLED',
+		description: 'Filter redemptions by status. Note: Canceled and fulfilled redemptions are returned for only a few days after they\'re canceled or fulfilled.',
+	},
+	{
+		displayName: 'Redemption IDs',
+		name: 'redemptionIds',
+		type: 'string',
+		displayOptions: {
+			show: {
+				filterBy: ['ids'],
+			},
+		},
+		default: '',
+		placeholder: 'e.g. 17fa2df1-ad76-4804-bfa5-a40ef63efe63,5678-1234-abcd-efgh',
+		description: 'Comma-separated list of redemption IDs to filter by (maximum 50 IDs)',
+	},
+	{
 		displayName: 'Additional Fields',
 		name: 'additionalFields',
 		type: 'collection',
 		placeholder: 'Add Field',
 		default: {},
 		options: [
-			{
-				displayName: 'Status',
-				name: 'status',
-				type: 'options',
-				options: [
-					{
-						name: 'Unfulfilled',
-						value: 'UNFULFILLED',
-					},
-					{
-						name: 'Fulfilled',
-						value: 'FULFILLED',
-					},
-					{
-						name: 'Canceled',
-						value: 'CANCELED',
-					},
-				],
-				default: 'UNFULFILLED',
-				description: 'Filter redemptions by status',
-			},
 			{
 				displayName: 'Sort',
 				name: 'sort',
@@ -74,9 +111,9 @@ const getFields: INodeProperties[] = [
 				default: 20,
 				typeOptions: {
 					minValue: 1,
-					maxValue: 100,
+					maxValue: 50,
 				},
-				description: 'Maximum number of items to return',
+				description: 'Maximum number of redemptions to return per page (1-50, default: 20)',
 			},
 			{
 				displayName: 'After',
@@ -110,13 +147,13 @@ const updateFields: INodeProperties[] = [
 		description: 'The ID of the custom reward',
 	},
 	{
-		displayName: 'Redemption ID',
-		name: 'redemptionId',
+		displayName: 'Redemption IDs',
+		name: 'redemptionIds',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 17fa2df1-ad76-4804-bfa5-a40ef63efe63',
-		description: 'The ID of the redemption to update',
+		placeholder: 'e.g. 17fa2df1-ad76-4804-bfa5-a40ef63efe63,5678-1234-abcd-efgh',
+		description: 'Comma-separated list of redemption IDs to update (maximum 50 IDs). You may only update redemptions that have a status of UNFULFILLED.',
 	},
 	{
 		displayName: 'Status',
@@ -130,11 +167,12 @@ const updateFields: INodeProperties[] = [
 			{
 				name: 'Canceled',
 				value: 'CANCELED',
+				description: 'Setting the status to CANCELED refunds the user\'s channel points',
 			},
 		],
 		default: 'FULFILLED',
 		required: true,
-		description: 'The new status of the redemption',
+		description: 'The new status to set for the redemptions',
 	},
 ];
 
@@ -166,17 +204,31 @@ export const redemptionOperations: INodeProperties[] = [
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
 								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 								const rewardId = this.getNodeParameter('rewardId', 0) as string;
+								const filterBy = this.getNodeParameter('filterBy', 0) as string;
 
 								const qs: IDataObject = {
 									broadcaster_id: broadcasterId,
 									reward_id: rewardId,
 								};
 
+								// Handle filtering - either by status or by redemption IDs
+								if (filterBy === 'status') {
+									const status = this.getNodeParameter('status', 0) as string;
+									qs.status = status;
+								} else if (filterBy === 'ids') {
+									const redemptionIdsInput = this.getNodeParameter('redemptionIds', 0) as string;
+									const redemptionIds = redemptionIdsInput.split(',').map(id => id.trim()).filter(id => id);
+
+									// Add multiple id parameters (API supports id=123&id=456 format)
+									if (!requestOptions.qs) {
+										requestOptions.qs = {};
+									}
+									// Store as array - n8n will handle converting to multiple query params
+									(requestOptions.qs as IDataObject).id = redemptionIds;
+								}
+
 								const additionalFields = this.getNodeParameter('additionalFields', 0, {}) as IDataObject;
 
-								if (additionalFields.status) {
-									qs.status = additionalFields.status;
-								}
 								if (additionalFields.sort) {
 									qs.sort = additionalFields.sort;
 								}
@@ -187,7 +239,7 @@ export const redemptionOperations: INodeProperties[] = [
 									qs.after = additionalFields.after;
 								}
 
-								requestOptions.qs = qs;
+								requestOptions.qs = { ...requestOptions.qs, ...qs };
 								return requestOptions;
 							},
 						],
@@ -208,7 +260,7 @@ export const redemptionOperations: INodeProperties[] = [
 				name: 'Update Redemption Status',
 				value: 'update',
 				action: 'Update redemption status',
-				description: 'Update the status of a custom reward redemption',
+				description: 'Update the status of custom reward redemptions (up to 50 at once)',
 				routing: {
 					request: {
 						method: 'PATCH',
@@ -220,13 +272,17 @@ export const redemptionOperations: INodeProperties[] = [
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
 								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 								const rewardId = this.getNodeParameter('rewardId', 0) as string;
-								const redemptionId = this.getNodeParameter('redemptionId', 0) as string;
+								const redemptionIdsInput = this.getNodeParameter('redemptionIds', 0) as string;
 								const status = this.getNodeParameter('status', 0) as string;
+
+								// Parse comma-separated redemption IDs
+								const redemptionIds = redemptionIdsInput.split(',').map(id => id.trim()).filter(id => id);
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,
 									reward_id: rewardId,
-									id: redemptionId,
+									// Store as array - n8n will handle converting to multiple query params (id=123&id=456)
+									id: redemptionIds,
 								};
 
 								requestOptions.body = {

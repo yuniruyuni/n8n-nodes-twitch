@@ -4,13 +4,202 @@ import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 // Field definitions for each operation
 const getFields: INodeProperties[] = [
 	{
-		displayName: 'User Login',
-		name: 'userLogin',
+		displayName: 'Lookup By',
+		name: 'lookupBy',
+		type: 'options',
+		options: [
+			{
+				name: 'User ID',
+				value: 'id',
+			},
+			{
+				name: 'User Login',
+				value: 'login',
+			},
+		],
+		default: 'login',
+		description: 'Whether to look up user by ID or login name',
+	},
+	{
+		displayName: 'User IDs',
+		name: 'userIds',
+		type: 'string',
+		default: '',
+		displayOptions: {
+			show: {
+				lookupBy: ['id'],
+			},
+		},
+		placeholder: 'e.g. 141981764',
+		description: 'User ID(s) to get. For multiple users, separate with commas. Maximum 100 IDs.',
+	},
+	{
+		displayName: 'User Logins',
+		name: 'userLogins',
+		type: 'string',
+		default: '',
+		displayOptions: {
+			show: {
+				lookupBy: ['login'],
+			},
+		},
+		placeholder: 'e.g. twitchdev',
+		description: 'User login name(s) to get. For multiple users, separate with commas. Maximum 100 logins.',
+	},
+];
+
+const updateFields: INodeProperties[] = [
+	{
+		displayName: 'Description',
+		name: 'description',
+		type: 'string',
+		default: '',
+		placeholder: 'Channel description',
+		description: 'The string to update the channel\'s description to (maximum 300 characters). Leave empty to remove description.',
+	},
+];
+
+const blockFields: INodeProperties[] = [
+	{
+		displayName: 'Target User ID',
+		name: 'targetUserId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. username',
-		description: 'The user login name',
+		placeholder: 'e.g. 198704263',
+		description: 'The ID of the user to block',
+	},
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		options: [
+			{
+				displayName: 'Source Context',
+				name: 'sourceContext',
+				type: 'options',
+				options: [
+					{
+						name: 'Chat',
+						value: 'chat',
+					},
+					{
+						name: 'Whisper',
+						value: 'whisper',
+					},
+				],
+				default: 'chat',
+				description: 'The location where the harassment took place',
+			},
+			{
+				displayName: 'Reason',
+				name: 'reason',
+				type: 'options',
+				options: [
+					{
+						name: 'Harassment',
+						value: 'harassment',
+					},
+					{
+						name: 'Spam',
+						value: 'spam',
+					},
+					{
+						name: 'Other',
+						value: 'other',
+					},
+				],
+				default: 'harassment',
+				description: 'The reason for blocking the user',
+			},
+		],
+	},
+];
+
+const unblockFields: INodeProperties[] = [
+	{
+		displayName: 'Target User ID',
+		name: 'targetUserId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 198704263',
+		description: 'The ID of the user to unblock',
+	},
+];
+
+const getBlockListFields: INodeProperties[] = [
+	{
+		displayName: 'Broadcaster ID',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 141981764',
+		description: 'The ID of the broadcaster whose list of blocked users you want to get',
+	},
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		options: [
+			{
+				displayName: 'First',
+				name: 'first',
+				type: 'number',
+				default: 20,
+				typeOptions: {
+					minValue: 1,
+					maxValue: 100,
+				},
+				description: 'Maximum number of items to return per page (1-100, default: 20)',
+			},
+			{
+				displayName: 'After',
+				name: 'after',
+				type: 'string',
+				default: '',
+				description: 'Cursor for pagination',
+			},
+		],
+	},
+];
+
+const getActiveExtensionsFields: INodeProperties[] = [
+	{
+		displayName: 'User ID',
+		name: 'userId',
+		type: 'string',
+		default: '',
+		placeholder: 'e.g. 141981764',
+		description: 'The ID of the broadcaster whose active extensions you want to get. Optional if using user access token.',
+	},
+];
+
+const updateExtensionsFields: INodeProperties[] = [
+	{
+		displayName: 'Extensions Data',
+		name: 'extensionsData',
+		type: 'json',
+		default: '{\n  "data": {\n    "panel": {},\n    "overlay": {},\n    "component": {}\n  }\n}',
+		required: true,
+		description: 'Extensions configuration as JSON. See Twitch API documentation for structure.',
+	},
+];
+
+const getAuthorizationFields: INodeProperties[] = [
+	{
+		displayName: 'User IDs',
+		name: 'userIds',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 141981764,197886470',
+		description: 'User ID(s) to check authorization for. For multiple users, separate with commas. Maximum 10 IDs.',
 	},
 ];
 
@@ -27,16 +216,124 @@ export const userOperations: INodeProperties[] = [
 		},
 		options: [
 			{
+				name: 'Block',
+				value: 'block',
+				action: 'Block a user',
+				description: 'Block a user from interacting with the broadcaster',
+				routing: {
+					request: {
+						method: 'PUT',
+						url: '/users/blocks',
+						qs: {
+							target_user_id: '={{$parameter.targetUserId}}',
+							source_context: '={{$parameter.additionalFields?.sourceContext}}',
+							reason: '={{$parameter.additionalFields?.reason}}',
+						},
+					},
+				},
+			},
+			{
 				name: 'Get',
 				value: 'get',
-				action: 'Get a user',
-				description: 'Get information about a user',
+				action: 'Get users',
+				description: 'Get information about one or more users',
 				routing: {
 					request: {
 						method: 'GET',
 						url: '/users',
+					},
+					send: {
+						preSend: [
+							async function (this, requestOptions) {
+								const lookupBy = this.getNodeParameter('lookupBy', 0) as string;
+								const value = this.getNodeParameter(
+									lookupBy === 'id' ? 'userIds' : 'userLogins',
+									0,
+								) as string;
+
+								if (value) {
+									const values = value.split(',').map((v) => v.trim());
+									requestOptions.qs = requestOptions.qs || {};
+									requestOptions.qs[lookupBy] = values;
+								}
+
+								return requestOptions;
+							},
+						],
+					},
+					output: {
+						postReceive: [
+							{
+								type: 'rootProperty',
+								properties: {
+									property: 'data',
+								},
+							},
+						],
+					},
+				},
+			},
+			{
+				name: 'Get Active Extensions',
+				value: 'getActiveExtensions',
+				action: 'Get active extensions',
+				description: 'Get the active extensions that the broadcaster has installed',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '/users/extensions',
 						qs: {
-							login: '={{$parameter.userLogin}}',
+							user_id: '={{$parameter.userId}}',
+						},
+					},
+				},
+			},
+			{
+				name: 'Get Authorization',
+				value: 'getAuthorization',
+				action: 'Get user authorization',
+				description: 'Get the authorization scopes that users have granted',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '/authorization/users',
+					},
+					send: {
+						preSend: [
+							async function (this, requestOptions) {
+								const userIds = this.getNodeParameter('userIds', 0) as string;
+								const ids = userIds.split(',').map((id) => id.trim());
+								requestOptions.qs = requestOptions.qs || {};
+								requestOptions.qs.user_id = ids;
+								return requestOptions;
+							},
+						],
+					},
+					output: {
+						postReceive: [
+							{
+								type: 'rootProperty',
+								properties: {
+									property: 'data',
+								},
+							},
+						],
+					},
+				},
+			},
+			{
+				name: 'Get Block List',
+				value: 'getBlockList',
+				action: 'Get user block list',
+				description: 'Get the list of users that the broadcaster has blocked',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '/users/blocks',
+						qs: {
+							broadcaster_id: '={{$parameter.broadcasterId}}',
+							first: '={{$parameter.additionalFields?.first}}',
+							after: '={{$parameter.additionalFields?.after}}',
 						},
 					},
 					output: {
@@ -51,6 +348,89 @@ export const userOperations: INodeProperties[] = [
 					},
 				},
 			},
+			{
+				name: 'Get Extensions',
+				value: 'getExtensions',
+				action: 'Get user extensions',
+				description: 'Get all extensions (active and inactive) that the broadcaster has installed',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '/users/extensions/list',
+					},
+					output: {
+						postReceive: [
+							{
+								type: 'rootProperty',
+								properties: {
+									property: 'data',
+								},
+							},
+						],
+					},
+				},
+			},
+			{
+				name: 'Unblock',
+				value: 'unblock',
+				action: 'Unblock a user',
+				description: 'Remove a user from the broadcaster\'s list of blocked users',
+				routing: {
+					request: {
+						method: 'DELETE',
+						url: '/users/blocks',
+						qs: {
+							target_user_id: '={{$parameter.targetUserId}}',
+						},
+					},
+				},
+			},
+			{
+				name: 'Update',
+				value: 'update',
+				action: 'Update user',
+				description: 'Update the authenticated user\'s information',
+				routing: {
+					request: {
+						method: 'PUT',
+						url: '/users',
+						qs: {
+							description: '={{$parameter.description}}',
+						},
+					},
+					output: {
+						postReceive: [
+							{
+								type: 'rootProperty',
+								properties: {
+									property: 'data',
+								},
+							},
+						],
+					},
+				},
+			},
+			{
+				name: 'Update Extensions',
+				value: 'updateExtensions',
+				action: 'Update user extensions',
+				description: 'Update an installed extension\'s information',
+				routing: {
+					request: {
+						method: 'PUT',
+						url: '/users/extensions',
+					},
+					send: {
+						preSend: [
+							async function (this, requestOptions) {
+								const extensionsData = this.getNodeParameter('extensionsData', 0) as string;
+								requestOptions.body = JSON.parse(extensionsData);
+								return requestOptions;
+							},
+						],
+					},
+				},
+			},
 		],
 		default: 'get',
 	},
@@ -58,4 +438,23 @@ export const userOperations: INodeProperties[] = [
 
 export const userFields: INodeProperties[] = [
 	...updateDisplayOptions({ show: { resource: ['user'], operation: ['get'] } }, getFields),
+	...updateDisplayOptions({ show: { resource: ['user'], operation: ['update'] } }, updateFields),
+	...updateDisplayOptions({ show: { resource: ['user'], operation: ['block'] } }, blockFields),
+	...updateDisplayOptions({ show: { resource: ['user'], operation: ['unblock'] } }, unblockFields),
+	...updateDisplayOptions(
+		{ show: { resource: ['user'], operation: ['getBlockList'] } },
+		getBlockListFields,
+	),
+	...updateDisplayOptions(
+		{ show: { resource: ['user'], operation: ['getActiveExtensions'] } },
+		getActiveExtensionsFields,
+	),
+	...updateDisplayOptions(
+		{ show: { resource: ['user'], operation: ['updateExtensions'] } },
+		updateExtensionsFields,
+	),
+	...updateDisplayOptions(
+		{ show: { resource: ['user'], operation: ['getAuthorization'] } },
+		getAuthorizationFields,
+	),
 ];

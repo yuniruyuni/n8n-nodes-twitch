@@ -5,13 +5,22 @@ import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 // Field definitions for each operation
 const sendMessageFields: INodeProperties[] = [
 	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 12826 or username',
+		description: 'The ID of the broadcaster whose chat room the message will be sent to. If a username is provided, it will be automatically converted to user ID.',
+	},
+	{
 		displayName: 'Sender ID or Username',
 		name: 'senderId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 987654321 or username',
-		description: 'The sender user ID or username (must match the user access token). If a username is provided, it will be automatically converted to user ID.',
+		placeholder: 'e.g. 141981764 or username',
+		description: 'The ID of the user sending the message. This ID must match the user ID in the user access token. If a username is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Message',
@@ -19,11 +28,26 @@ const sendMessageFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. Hello, Twitch!',
-		description: 'The message to send. Maximum length: 500 characters.',
+		placeholder: 'e.g. Hello, world! twitchdevHype',
+		description: 'The message to send. The message is limited to a maximum of 500 characters. Chat messages can also include emoticons. To include emoticons, use the name of the emote (case sensitive, without colons).',
 		typeOptions: {
 			maxValue: 500,
 		},
+	},
+	{
+		displayName: 'Reply Parent Message ID',
+		name: 'replyParentMessageId',
+		type: 'string',
+		default: '',
+		placeholder: 'e.g. abc-123-def',
+		description: 'The ID of the chat message being replied to',
+	},
+	{
+		displayName: 'For Source Only',
+		name: 'forSourceOnly',
+		type: 'boolean',
+		default: false,
+		description: 'Whether to send the message only to the source channel during a shared chat session. NOTE: This parameter can only be set when using an App Access Token. It will result in an HTTP 400 error when using a User Access Token.',
 	},
 ];
 
@@ -55,16 +79,38 @@ export const chatMessageOperations: INodeProperties[] = [
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
 								const senderIdInput = this.getNodeParameter('senderId') as string;
 								const message = this.getNodeParameter('message') as string;
+								const replyParentMessageId = this.getNodeParameter('replyParentMessageId', '') as string;
+								const forSourceOnly = this.getNodeParameter('forSourceOnly', false) as boolean;
 
 								// Resolve usernames to user IDs
 								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 								const senderId = await resolveUserIdOrUsername.call(this, senderIdInput);
 
-								requestOptions.body = {
+								// Build request body with required fields
+								const body: {
+									broadcaster_id: string;
+									sender_id: string;
+									message: string;
+									reply_parent_message_id?: string;
+									for_source_only?: boolean;
+								} = {
 									broadcaster_id: broadcasterId,
 									sender_id: senderId,
 									message: message,
 								};
+
+								// Add optional fields if provided
+								if (replyParentMessageId) {
+									body.reply_parent_message_id = replyParentMessageId;
+								}
+
+								// Only include for_source_only if explicitly set to true
+								// (API default is false for now, changing to true on May 19, 2025)
+								if (forSourceOnly) {
+									body.for_source_only = forSourceOnly;
+								}
+
+								requestOptions.body = body;
 
 								return requestOptions;
 							},

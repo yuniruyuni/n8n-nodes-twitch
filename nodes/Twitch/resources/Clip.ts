@@ -5,11 +5,24 @@ import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 // Field definitions for each operation
 const createClipFields: INodeProperties[] = [
 	{
-		displayName: 'Has Delay',
-		name: 'hasDelay',
-		type: 'boolean',
-		default: false,
-		description: 'Whether to add a delay before capturing the clip. If true, a delay is added before the clip is captured.',
+		displayName: 'Title',
+		name: 'title',
+		type: 'string',
+		default: '',
+		placeholder: 'e.g. Epic Moment',
+		description: 'The title of the clip',
+	},
+	{
+		displayName: 'Duration',
+		name: 'duration',
+		type: 'number',
+		default: 30,
+		typeOptions: {
+			minValue: 5,
+			maxValue: 60,
+			numberPrecision: 1,
+		},
+		description: 'The length of the clip in seconds (5-60). Default is 30.',
 	},
 ];
 
@@ -63,7 +76,8 @@ const getClipsFields: INodeProperties[] = [
 		},
 		default: '',
 		required: true,
-		placeholder: 'e.g. AwkwardHelplessSalamanderSwiftRage',
+		placeholder: 'e.g. AwkwardHelplessSalamanderSwiftRage or clip1,clip2,clip3',
+		description: 'One or more clip IDs separated by commas (max 100)',
 	},
 	{
 		displayName: 'Started At',
@@ -90,6 +104,45 @@ const getClipsFields: INodeProperties[] = [
 		default: '',
 		placeholder: 'e.g. 2021-12-31T23:59:59Z',
 		description: 'The end date/time for clips (RFC3339 format)',
+	},
+	{
+		displayName: 'Is Featured',
+		name: 'isFeatured',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				filterType: ['broadcasterId', 'gameId'],
+			},
+		},
+		default: false,
+		description: 'Whether to filter by featured clips only',
+	},
+	{
+		displayName: 'First',
+		name: 'first',
+		type: 'number',
+		default: 20,
+		typeOptions: {
+			minValue: 1,
+			maxValue: 100,
+		},
+		description: 'Maximum number of clips to return (1-100). Default is 20.',
+	},
+	{
+		displayName: 'After',
+		name: 'after',
+		type: 'string',
+		default: '',
+		placeholder: 'e.g. eyJiIjpudWxsLCJhIjp7Ik9mZnNldCI6MjB9fQ',
+		description: 'Cursor for forward pagination. Get this from the pagination object in the previous response.',
+	},
+	{
+		displayName: 'Before',
+		name: 'before',
+		type: 'string',
+		default: '',
+		placeholder: 'e.g. eyJiIjpudWxsLCJhIjp7Ik9mZnNldCI6MjB9fQ',
+		description: 'Cursor for backward pagination. Get this from the pagination object in the previous response.',
 	},
 ];
 
@@ -119,15 +172,24 @@ export const clipOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-								const hasDelay = this.getNodeParameter('hasDelay') as boolean;
+								const title = this.getNodeParameter('title', '') as string;
+								const duration = this.getNodeParameter('duration', 30) as number;
 
 								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 
-								requestOptions.qs = {
+								const qs: IDataObject = {
 									broadcaster_id: broadcasterId,
-									has_delay: hasDelay,
 								};
 
+								if (title) {
+									qs.title = title;
+								}
+
+								if (duration !== 30) {
+									qs.duration = duration;
+								}
+
+								requestOptions.qs = qs;
 								return requestOptions;
 							},
 						],
@@ -168,7 +230,10 @@ export const clipOperations: INodeProperties[] = [
 								} else if (filterType === 'gameId') {
 									qs.game_id = this.getNodeParameter('gameId') as string;
 								} else if (filterType === 'clipId') {
-									qs.id = this.getNodeParameter('clipId') as string;
+									const clipIdInput = this.getNodeParameter('clipId') as string;
+									// Split by comma and trim whitespace, support multiple clip IDs
+									const clipIds = clipIdInput.split(',').map((id) => id.trim()).filter((id) => id !== '');
+									qs.id = clipIds;
 								}
 
 								// Add optional parameters
@@ -182,9 +247,24 @@ export const clipOperations: INodeProperties[] = [
 									qs.ended_at = endedAt;
 								}
 
+								const isFeatured = this.getNodeParameter('isFeatured', false) as boolean;
+								if (isFeatured) {
+									qs.is_featured = isFeatured;
+								}
+
 								const first = this.getNodeParameter('first', 20) as number;
 								if (first) {
 									qs.first = first;
+								}
+
+								const after = this.getNodeParameter('after', '') as string;
+								if (after && after.trim() !== '') {
+									qs.after = after.trim();
+								}
+
+								const before = this.getNodeParameter('before', '') as string;
+								if (before && before.trim() !== '') {
+									qs.before = before.trim();
 								}
 
 								requestOptions.qs = qs;

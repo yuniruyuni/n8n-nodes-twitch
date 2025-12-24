@@ -56,4 +56,20 @@ export const cheermoteOperations: INodeProperties[] = [
 	},
 ];
 
-export const cheermoteFields: INodeProperties[] = [];
+export const cheermoteFields: INodeProperties[] = [
+	{
+		displayName: 'Broadcaster',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		placeholder: 'Enter broadcaster username or ID',
+		description:
+			'The ID or username of the broadcaster whose custom Cheermotes you want to get. If not specified, the response contains only global Cheermotes. If specified and the broadcaster uploaded Cheermotes, they will be included in the response.',
+		displayOptions: {
+			show: {
+				resource: ['cheermote'],
+				operation: ['get'],
+			},
+		},
+	},
+];

@@ -14,7 +14,7 @@ const getFields: INodeProperties[] = [
 			maxValue: 100,
 		},
 		placeholder: 'e.g. 10',
-		description: 'Number of results to return (1-100)',
+		description: 'Number of results to return (1-100). Default is 10.',
 	},
 	{
 		displayName: 'Period',
@@ -43,15 +43,23 @@ const getFields: INodeProperties[] = [
 			},
 		],
 		default: 'all',
-		description: 'Time period for the leaderboard',
+		description: 'Time period for the leaderboard. Uses PST time zone.',
 	},
 	{
 		displayName: 'Started At',
 		name: 'startedAt',
 		type: 'dateTime',
 		default: '',
-		placeholder: 'e.g. 2024-01-01T00:00:00Z',
-		description: 'Timestamp for the period start (RFC3339 format)',
+		placeholder: 'e.g. 2024-01-01T08:00:00Z',
+		description: 'Start date for the period (RFC3339 format). Only used when period is not "all". Note: Date is converted to PST, so adjust for timezone offset.',
+	},
+	{
+		displayName: 'User ID or Username',
+		name: 'userId',
+		type: 'string',
+		default: '',
+		placeholder: 'e.g. 123456789 or username',
+		description: 'User ID or username that cheered bits. If count is greater than 1, response may include users ranked above and below this user. Leave empty for top leaders.',
 	},
 ];
 
