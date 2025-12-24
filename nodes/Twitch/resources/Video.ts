@@ -79,6 +79,20 @@ const getVideosFields: INodeProperties[] = [
 		default: {},
 		options: [
 			{
+				displayName: 'After',
+				name: 'after',
+				type: 'string',
+				default: '',
+				description: 'Cursor for forward pagination. Only applies when querying by user ID.',
+			},
+			{
+				displayName: 'Before',
+				name: 'before',
+				type: 'string',
+				default: '',
+				description: 'Cursor for backward pagination. Only applies when querying by user ID.',
+			},
+			{
 				displayName: 'First',
 				name: 'first',
 				type: 'number',
@@ -171,20 +185,6 @@ const getVideosFields: INodeProperties[] = [
 				],
 				default: 'all',
 				description: 'Type of videos to return',
-			},
-			{
-				displayName: 'After',
-				name: 'after',
-				type: 'string',
-				default: '',
-				description: 'Cursor for forward pagination. Only applies when querying by user ID.',
-			},
-			{
-				displayName: 'Before',
-				name: 'before',
-				type: 'string',
-				default: '',
-				description: 'Cursor for backward pagination. Only applies when querying by user ID.',
 			},
 		],
 	},
