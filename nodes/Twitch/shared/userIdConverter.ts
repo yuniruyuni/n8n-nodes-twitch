@@ -20,24 +20,20 @@ export async function resolveUserIdOrUsername(
 	}
 
 	// Otherwise, treat it as a username and resolve to ID
-	const credentials = await this.getCredentials('twitchOAuth2Api');
-	const clientId = credentials.clientId as string;
-	const accessToken = credentials.accessToken as string;
-
 	const options: IHttpRequestOptions = {
 		method: 'GET',
 		url: `https://api.twitch.tv/helix/users`,
 		qs: {
 			login: input,
 		},
-		headers: {
-			'Client-ID': clientId,
-			Authorization: `Bearer ${accessToken}`,
-		},
 		json: true,
 	};
 
-	const response = (await this.helpers.httpRequest(options)) as {
+	const response = (await this.helpers.httpRequestWithAuthentication.call(
+		this,
+		'twitchOAuth2Api',
+		options,
+	)) as {
 		data: Array<{ id: string; login: string }>;
 	};
 
