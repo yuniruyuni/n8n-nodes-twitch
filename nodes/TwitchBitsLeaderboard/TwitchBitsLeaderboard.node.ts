@@ -16,22 +16,8 @@ export class TwitchBitsLeaderboard implements INodeType {
 		outputs: [NodeConnectionTypes.Main],
 		credentials: [
 			{
-				name: 'twitchApi',
-				required: true,
-				displayOptions: {
-					show: {
-						authentication: ['clientCredentials'],
-					},
-				},
-			},
-			{
 				name: 'twitchOAuth2Api',
 				required: true,
-				displayOptions: {
-					show: {
-						authentication: ['oAuth2'],
-					},
-				},
 			},
 		],
 		requestDefaults: {
@@ -42,22 +28,6 @@ export class TwitchBitsLeaderboard implements INodeType {
 			},
 		},
 		properties: [
-			{
-				displayName: 'Authentication',
-				name: 'authentication',
-				type: 'options',
-				options: [
-					{
-						name: 'Client Credentials',
-						value: 'clientCredentials',
-					},
-					{
-						name: 'OAuth2',
-						value: 'oAuth2',
-					},
-				],
-				default: 'oAuth2',
-			},
 			{
 				displayName: 'Operation',
 				name: 'operation',

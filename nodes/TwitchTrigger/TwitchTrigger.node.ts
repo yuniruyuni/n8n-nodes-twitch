@@ -27,22 +27,8 @@ export class TwitchTrigger implements INodeType {
 		outputs: [NodeConnectionTypes.Main],
 		credentials: [
 			{
-				name: 'twitchApi',
-				required: true,
-				displayOptions: {
-					show: {
-						authentication: ['clientCredentials'],
-					},
-				},
-			},
-			{
 				name: 'twitchOAuth2Api',
 				required: true,
-				displayOptions: {
-					show: {
-						authentication: ['oAuth2'],
-					},
-				},
 			},
 		],
 		webhooks: [
@@ -54,22 +40,6 @@ export class TwitchTrigger implements INodeType {
 			},
 		],
 		properties: [
-			{
-				displayName: 'Authentication',
-				name: 'authentication',
-				type: 'options',
-				options: [
-					{
-						name: 'Client Credentials',
-						value: 'clientCredentials',
-					},
-					{
-						name: 'OAuth2',
-						value: 'oAuth2',
-					},
-				],
-				default: 'oAuth2',
-			},
 			{
 				displayName: 'Event',
 				name: 'event',
@@ -264,17 +234,10 @@ export class TwitchTrigger implements INodeType {
 					return false;
 				}
 
-				const authentication = this.getNodeParameter('authentication') as string;
-				const credentials =
-					authentication === 'oAuth2'
-						? await this.getCredentials('twitchOAuth2Api')
-						: await this.getCredentials('twitchApi');
+				const credentials = await this.getCredentials('twitchOAuth2Api');
 
 				const clientId = credentials.clientId as string;
-				const accessToken =
-					authentication === 'oAuth2'
-						? (credentials.accessToken as string)
-						: (credentials.oauthTokenData as IDataObject).access_token as string;
+				const accessToken = credentials.accessToken as string;
 
 				try {
 					const response = await this.helpers.httpRequest({
@@ -300,18 +263,11 @@ export class TwitchTrigger implements INodeType {
 				const webhookData = this.getWorkflowStaticData('node');
 				const event = this.getNodeParameter('event') as string;
 				const broadcasterId = this.getNodeParameter('broadcasterId') as string;
-				const authentication = this.getNodeParameter('authentication') as string;
 
-				const credentials =
-					authentication === 'oAuth2'
-						? await this.getCredentials('twitchOAuth2Api')
-						: await this.getCredentials('twitchApi');
+				const credentials = await this.getCredentials('twitchOAuth2Api');
 
 				const clientId = credentials.clientId as string;
-				const accessToken =
-					authentication === 'oAuth2'
-						? (credentials.accessToken as string)
-						: (credentials.oauthTokenData as IDataObject).access_token as string;
+				const accessToken = credentials.accessToken as string;
 
 				// Generate a random secret for webhook verification
 				const secret = Array.from({ length: 32 }, () =>
@@ -369,17 +325,10 @@ export class TwitchTrigger implements INodeType {
 					return false;
 				}
 
-				const authentication = this.getNodeParameter('authentication') as string;
-				const credentials =
-					authentication === 'oAuth2'
-						? await this.getCredentials('twitchOAuth2Api')
-						: await this.getCredentials('twitchApi');
+				const credentials = await this.getCredentials('twitchOAuth2Api');
 
 				const clientId = credentials.clientId as string;
-				const accessToken =
-					authentication === 'oAuth2'
-						? (credentials.accessToken as string)
-						: (credentials.oauthTokenData as IDataObject).access_token as string;
+				const accessToken = credentials.accessToken as string;
 
 				try {
 					await this.helpers.httpRequest({

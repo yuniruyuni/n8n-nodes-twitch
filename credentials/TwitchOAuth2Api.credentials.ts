@@ -2,7 +2,6 @@ import type {
 	Icon,
 	ICredentialDataDecryptedObject,
 	ICredentialType,
-	IDataObject,
 	IHttpRequestHelper,
 	INodeProperties,
 } from 'n8n-workflow';
@@ -444,12 +443,21 @@ export class TwitchOAuth2Api implements ICredentialType {
 	async preAuthentication(
 		this: IHttpRequestHelper,
 		credentials: ICredentialDataDecryptedObject,
-	): Promise<IDataObject> {
-		// Convert scope array to space-delimited string for OAuth2
-		const result = { ...credentials };
-		if (Array.isArray(result.scope)) {
-			result.scope = result.scope.join(' ');
-		}
-		return result;
+	) {
+		// Only return OAuth2-specific properties, excluding n8n internal properties
+		const scope = Array.isArray(credentials.scope)
+			? credentials.scope.join(' ')
+			: credentials.scope;
+
+		return {
+			clientId: credentials.clientId,
+			clientSecret: credentials.clientSecret,
+			grantType: credentials.grantType,
+			authUrl: credentials.authUrl,
+			accessTokenUrl: credentials.accessTokenUrl,
+			scope,
+			authQueryParameters: credentials.authQueryParameters,
+			authentication: credentials.authentication,
+		};
 	}
 }
