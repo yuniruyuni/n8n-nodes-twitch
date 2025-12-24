@@ -1,4 +1,5 @@
 import { NodeConnectionTypes, type IDataObject, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
+import { resolveUserIdOrUsername } from '../shared/userIdConverter';
 
 export class TwitchPolls implements INodeType {
 	description: INodeTypeDescription = {
@@ -48,7 +49,8 @@ export class TwitchPolls implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 										const title = this.getNodeParameter('title', 0) as string;
 										const choicesInput = this.getNodeParameter('choices', 0) as string;
 										const duration = this.getNodeParameter('duration', 0) as number;
@@ -128,7 +130,8 @@ export class TwitchPolls implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('getBroadcasterId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('getBroadcasterId', 0) as string;
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 										const qs: IDataObject = {
 											broadcaster_id: broadcasterId,
 										};
@@ -174,7 +177,8 @@ export class TwitchPolls implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('endBroadcasterId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('endBroadcasterId', 0) as string;
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 										const pollId = this.getNodeParameter('pollId', 0) as string;
 										const status = this.getNodeParameter('status', 0) as string;
 
@@ -212,7 +216,7 @@ export class TwitchPolls implements INodeType {
 			},
 			// Create Poll Parameters
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -222,8 +226,8 @@ export class TwitchPolls implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456789',
-				description: 'The broadcaster user ID who will own the poll',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username who will own the poll. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
 				displayName: 'Title',
@@ -322,7 +326,7 @@ export class TwitchPolls implements INodeType {
 			},
 			// Get Polls Parameters
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'getBroadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -332,8 +336,8 @@ export class TwitchPolls implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456789',
-				description: 'The broadcaster user ID whose polls to retrieve',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username whose polls to retrieve. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
 				displayName: 'Poll IDs',
@@ -366,7 +370,7 @@ export class TwitchPolls implements INodeType {
 			},
 			// End Poll Parameters
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'endBroadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -376,8 +380,8 @@ export class TwitchPolls implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456789',
-				description: 'The broadcaster user ID who owns the poll',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username who owns the poll. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
 				displayName: 'Poll ID',

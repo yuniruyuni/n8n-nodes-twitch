@@ -1,4 +1,5 @@
 import { NodeConnectionTypes, type IDataObject, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
+import { resolveUserIdOrUsername } from '../shared/userIdConverter';
 
 export class TwitchCustomRewards implements INodeType {
 	description: INodeTypeDescription = {
@@ -48,7 +49,8 @@ export class TwitchCustomRewards implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 										requestOptions.qs = { broadcaster_id: broadcasterId };
 
 										const body: IDataObject = {
@@ -128,7 +130,8 @@ export class TwitchCustomRewards implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 										const qs: IDataObject = { broadcaster_id: broadcasterId };
 
 										const additionalFields = this.getNodeParameter('additionalFields', 0, {}) as IDataObject;
@@ -170,7 +173,8 @@ export class TwitchCustomRewards implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 										const id = this.getNodeParameter('rewardId', 0) as string;
 										requestOptions.qs = { broadcaster_id: broadcasterId, id };
 
@@ -256,7 +260,8 @@ export class TwitchCustomRewards implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 										const id = this.getNodeParameter('rewardId', 0) as string;
 										requestOptions.qs = { broadcaster_id: broadcasterId, id };
 										return requestOptions;
@@ -270,13 +275,13 @@ export class TwitchCustomRewards implements INodeType {
 			},
 			// Broadcaster ID (all operations)
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456789',
-				description: 'The broadcaster user ID',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
 			},
 			// Create Parameters
 			{

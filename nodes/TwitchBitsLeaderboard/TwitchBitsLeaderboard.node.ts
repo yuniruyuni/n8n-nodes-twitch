@@ -1,4 +1,5 @@
 import { NodeConnectionTypes, type IDataObject, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
+import { resolveUserIdOrUsername } from '../shared/userIdConverter';
 
 export class TwitchBitsLeaderboard implements INodeType {
 	description: INodeTypeDescription = {
@@ -50,7 +51,7 @@ export class TwitchBitsLeaderboard implements INodeType {
 										const count = this.getNodeParameter('count', 0) as number;
 										const period = this.getNodeParameter('period', 0) as string;
 										const startedAt = this.getNodeParameter('startedAt', 0) as string;
-										const userId = this.getNodeParameter('userId', 0) as string;
+										const userIdInput = this.getNodeParameter('userId', 0) as string;
 
 										const qs: IDataObject = {};
 
@@ -63,8 +64,9 @@ export class TwitchBitsLeaderboard implements INodeType {
 										if (startedAt && startedAt.trim() !== '') {
 											qs.started_at = startedAt.trim();
 										}
-										if (userId && userId.trim() !== '') {
-											qs.user_id = userId.trim();
+										if (userIdInput && userIdInput.trim() !== '') {
+											const userId = await resolveUserIdOrUsername.call(this, userIdInput.trim());
+											qs.user_id = userId;
 										}
 
 										requestOptions.qs = qs;
@@ -152,12 +154,12 @@ export class TwitchBitsLeaderboard implements INodeType {
 				},
 			},
 			{
-				displayName: 'User ID',
+				displayName: 'User ID or Username',
 				name: 'userId',
 				type: 'string',
 				default: '',
-				placeholder: 'e.g. 123456789',
-				description: 'Filter results to a specific user ID',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'Filter results to a specific user ID or username. If a username is provided, it will be automatically converted to user ID.',
 				displayOptions: {
 					show: {
 						operation: ['get'],

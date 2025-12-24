@@ -1,4 +1,5 @@
 import { NodeConnectionTypes, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
+import { resolveUserIdOrUsername } from '../shared/userIdConverter';
 
 export class TwitchChatMessages implements INodeType {
 	description: INodeTypeDescription = {
@@ -47,9 +48,13 @@ export class TwitchChatMessages implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId') as string;
-										const senderId = this.getNodeParameter('senderId') as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+										const senderIdInput = this.getNodeParameter('senderId') as string;
 										const message = this.getNodeParameter('message') as string;
+
+										// Resolve usernames to user IDs
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+										const senderId = await resolveUserIdOrUsername.call(this, senderIdInput);
 
 										requestOptions.body = {
 											broadcaster_id: broadcasterId,
@@ -77,7 +82,7 @@ export class TwitchChatMessages implements INodeType {
 				default: 'sendMessage',
 			},
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -87,11 +92,11 @@ export class TwitchChatMessages implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456789',
-				description: 'The ID of the broadcaster whose chat room you want to send a message to',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
-				displayName: 'Sender ID',
+				displayName: 'Sender ID or Username',
 				name: 'senderId',
 				type: 'string',
 				displayOptions: {
@@ -101,8 +106,8 @@ export class TwitchChatMessages implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 987654321',
-				description: 'The ID of the user sending the message. This ID must match the user ID in the user access token.',
+				placeholder: 'e.g. 987654321 or username',
+				description: 'The sender user ID or username (must match the user access token). If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
 				displayName: 'Message',

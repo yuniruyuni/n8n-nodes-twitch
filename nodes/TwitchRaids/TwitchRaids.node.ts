@@ -1,4 +1,5 @@
 import { NodeConnectionTypes, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
+import { resolveUserIdOrUsername } from '../shared/userIdConverter';
 
 export class TwitchRaids implements INodeType {
 	description: INodeTypeDescription = {
@@ -44,10 +45,24 @@ export class TwitchRaids implements INodeType {
 							request: {
 								method: 'POST',
 								url: '/raids',
-								qs: {
-									from_broadcaster_id: '={{$parameter.fromBroadcasterId}}',
-									to_broadcaster_id: '={{$parameter.toBroadcasterId}}',
-								},
+							},
+							send: {
+								preSend: [
+									async function (this, requestOptions) {
+										const fromBroadcasterIdInput = this.getNodeParameter('fromBroadcasterId') as string;
+										const toBroadcasterIdInput = this.getNodeParameter('toBroadcasterId') as string;
+
+										const fromBroadcasterId = await resolveUserIdOrUsername.call(this, fromBroadcasterIdInput);
+										const toBroadcasterId = await resolveUserIdOrUsername.call(this, toBroadcasterIdInput);
+
+										requestOptions.qs = {
+											from_broadcaster_id: fromBroadcasterId,
+											to_broadcaster_id: toBroadcasterId,
+										};
+
+										return requestOptions;
+									},
+								],
 							},
 							output: {
 								postReceive: [
@@ -76,9 +91,20 @@ export class TwitchRaids implements INodeType {
 							request: {
 								method: 'DELETE',
 								url: '/raids',
-								qs: {
-									broadcaster_id: '={{$parameter.broadcasterId}}',
-								},
+							},
+							send: {
+								preSend: [
+									async function (this, requestOptions) {
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+
+										requestOptions.qs = {
+											broadcaster_id: broadcasterId,
+										};
+
+										return requestOptions;
+									},
+								],
 							},
 						},
 					},
@@ -87,7 +113,7 @@ export class TwitchRaids implements INodeType {
 			},
 			// Start Raid Parameters
 			{
-				displayName: 'From Broadcaster ID',
+				displayName: 'From Broadcaster ID or Username',
 				name: 'fromBroadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -97,11 +123,11 @@ export class TwitchRaids implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456789',
-				description: 'The ID of the broadcaster that is starting the raid (must be the authenticated user)',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username that is starting the raid (must be the authenticated user). If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
-				displayName: 'To Broadcaster ID',
+				displayName: 'To Broadcaster ID or Username',
 				name: 'toBroadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -111,8 +137,8 @@ export class TwitchRaids implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 987654321',
-				description: 'The ID of the broadcaster to raid',
+				placeholder: 'e.g. 987654321 or username',
+				description: 'The broadcaster user ID or username to raid. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
 				displayName: 'Note',
@@ -128,7 +154,7 @@ export class TwitchRaids implements INodeType {
 			},
 			// Cancel Raid Parameters
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -138,8 +164,8 @@ export class TwitchRaids implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456789',
-				description: 'The ID of the broadcaster that initiated the raid (must be the authenticated user)',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username that initiated the raid (must be the authenticated user). If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
 				displayName: 'Note',

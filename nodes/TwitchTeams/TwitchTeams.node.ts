@@ -1,4 +1,5 @@
 import { NodeConnectionTypes, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
+import { resolveUserIdOrUsername } from '../shared/userIdConverter';
 
 export class TwitchTeams implements INodeType {
 	description: INodeTypeDescription = {
@@ -48,7 +49,8 @@ export class TwitchTeams implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 
 										requestOptions.qs = {
 											broadcaster_id: broadcasterId,
@@ -116,13 +118,13 @@ export class TwitchTeams implements INodeType {
 				default: 'getChannelTeams',
 			},
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				required: true,
 				default: '',
-				placeholder: 'e.g. 123456789',
-				description: 'The ID of the broadcaster',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
 				displayOptions: {
 					show: {
 						operation: ['getChannelTeams'],

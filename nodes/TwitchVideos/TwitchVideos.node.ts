@@ -1,4 +1,5 @@
 import { NodeConnectionTypes, type IDataObject, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
+import { resolveUserIdOrUsername } from '../shared/userIdConverter';
 
 export class TwitchVideos implements INodeType {
 	description: INodeTypeDescription = {
@@ -53,7 +54,8 @@ export class TwitchVideos implements INodeType {
 
 										// Add required parameter based on query type
 										if (queryBy === 'userId') {
-											const userId = this.getNodeParameter('userId', 0) as string;
+											const userIdInput = this.getNodeParameter('userId', 0) as string;
+											const userId = await resolveUserIdOrUsername.call(this, userIdInput);
 											qs.user_id = userId;
 										} else if (queryBy === 'gameId') {
 											const gameId = this.getNodeParameter('gameId', 0) as string;
@@ -158,7 +160,7 @@ export class TwitchVideos implements INodeType {
 			},
 			// Get Videos - User ID parameter
 			{
-				displayName: 'User ID',
+				displayName: 'User ID or Username',
 				name: 'userId',
 				type: 'string',
 				displayOptions: {
@@ -169,8 +171,8 @@ export class TwitchVideos implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456789',
-				description: 'ID of the user who owns the videos',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'User ID or username who owns the videos. If a username is provided, it will be automatically converted to user ID.',
 			},
 			// Get Videos - Game ID parameter
 			{

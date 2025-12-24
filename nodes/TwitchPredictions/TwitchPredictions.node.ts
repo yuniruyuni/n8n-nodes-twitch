@@ -1,4 +1,5 @@
 import { NodeConnectionTypes, type IDataObject, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
+import { resolveUserIdOrUsername } from '../shared/userIdConverter';
 
 export class TwitchPredictions implements INodeType {
 	description: INodeTypeDescription = {
@@ -48,7 +49,8 @@ export class TwitchPredictions implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 										const title = this.getNodeParameter('title', 0) as string;
 										const predictionWindow = this.getNodeParameter('predictionWindow', 0) as number;
 										const outcome1Title = this.getNodeParameter('outcome1Title', 0) as string;
@@ -100,7 +102,8 @@ export class TwitchPredictions implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 										const qs: IDataObject = {
 											broadcaster_id: broadcasterId,
 										};
@@ -145,7 +148,8 @@ export class TwitchPredictions implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 										const predictionId = this.getNodeParameter('endPredictionId', 0) as string;
 										const status = this.getNodeParameter('status', 0) as string;
 
@@ -188,7 +192,7 @@ export class TwitchPredictions implements INodeType {
 			},
 			// Create Prediction Parameters
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -198,8 +202,8 @@ export class TwitchPredictions implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456789',
-				description: 'The broadcaster running the prediction',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username running the prediction. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
 				displayName: 'Title',
@@ -262,7 +266,7 @@ export class TwitchPredictions implements INodeType {
 			},
 			// Get Predictions Parameters
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -272,8 +276,8 @@ export class TwitchPredictions implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456789',
-				description: 'The broadcaster whose predictions you want to get',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username whose predictions you want to get. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
 				displayName: 'Prediction ID',
@@ -306,7 +310,7 @@ export class TwitchPredictions implements INodeType {
 			},
 			// End Prediction Parameters
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -316,8 +320,8 @@ export class TwitchPredictions implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456789',
-				description: 'The broadcaster running the prediction',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username running the prediction. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
 				displayName: 'Prediction ID',

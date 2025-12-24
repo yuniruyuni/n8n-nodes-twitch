@@ -9,6 +9,7 @@ import {
 	type IDataObject,
 } from 'n8n-workflow';
 import { createHmac, timingSafeEqual } from 'crypto';
+import { resolveUserIdOrUsername } from '../shared/userIdConverter';
 
 export class TwitchTrigger implements INodeType {
 	description: INodeTypeDescription = {
@@ -215,13 +216,13 @@ export class TwitchTrigger implements INodeType {
 				description: 'The EventSub event to listen for',
 			},
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456789',
-				description: 'The broadcaster user ID to monitor. You can get this from the User operation in the Twitch node.',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username to monitor. If a username is provided, it will be automatically converted to user ID.',
 			},
 		],
 	};
@@ -262,7 +263,10 @@ export class TwitchTrigger implements INodeType {
 				const webhookUrl = this.getNodeWebhookUrl('default');
 				const webhookData = this.getWorkflowStaticData('node');
 				const event = this.getNodeParameter('event') as string;
-				const broadcasterId = this.getNodeParameter('broadcasterId') as string;
+				const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+
+				// Resolve username to user ID if needed
+				const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 
 				const credentials = await this.getCredentials('twitchOAuth2Api');
 

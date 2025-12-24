@@ -1,4 +1,5 @@
 import { NodeConnectionTypes, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
+import { resolveUserIdOrUsername } from '../shared/userIdConverter';
 
 export class TwitchChatters implements INodeType {
 	description: INodeTypeDescription = {
@@ -44,11 +45,27 @@ export class TwitchChatters implements INodeType {
 							request: {
 								method: 'GET',
 								url: '/chat/chatters',
-								qs: {
-									broadcaster_id: '={{$parameter.broadcasterId}}',
-									moderator_id: '={{$parameter.moderatorId}}',
-									first: '={{$parameter.first}}',
-								},
+							},
+							send: {
+								preSend: [
+									async function (this, requestOptions) {
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+										const moderatorIdInput = this.getNodeParameter('moderatorId') as string;
+										const first = this.getNodeParameter('first') as number;
+
+										// Resolve usernames to user IDs
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+										const moderatorId = await resolveUserIdOrUsername.call(this, moderatorIdInput);
+
+										requestOptions.qs = {
+											broadcaster_id: broadcasterId,
+											moderator_id: moderatorId,
+											first: first,
+										};
+
+										return requestOptions;
+									},
+								],
 							},
 							output: {
 								postReceive: [
@@ -66,7 +83,7 @@ export class TwitchChatters implements INodeType {
 				default: 'get',
 			},
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -76,10 +93,11 @@ export class TwitchChatters implements INodeType {
 				},
 				default: '',
 				required: true,
-				description: 'The ID of the broadcaster whose list of chatters you want to get',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
-				displayName: 'Moderator ID',
+				displayName: 'Moderator ID or Username',
 				name: 'moderatorId',
 				type: 'string',
 				displayOptions: {
@@ -89,7 +107,8 @@ export class TwitchChatters implements INodeType {
 				},
 				default: '',
 				required: true,
-				description: 'The ID of the moderator requesting the list of chatters',
+				placeholder: 'e.g. 987654321 or username',
+				description: 'The moderator user ID or username. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
 				displayName: 'First',

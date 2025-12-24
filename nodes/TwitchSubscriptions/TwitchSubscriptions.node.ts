@@ -1,4 +1,5 @@
 import { NodeConnectionTypes, type IDataObject, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
+import { resolveUserIdOrUsername } from '../shared/userIdConverter';
 
 export class TwitchSubscriptions implements INodeType {
 	description: INodeTypeDescription = {
@@ -48,19 +49,25 @@ export class TwitchSubscriptions implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
-										const userId = this.getNodeParameter('userId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const userIdInput = this.getNodeParameter('userId', 0) as string;
 										const first = this.getNodeParameter('first', 0) as number;
 										const after = this.getNodeParameter('after', 0) as string;
+
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 
 										const qs: IDataObject = {
 											broadcaster_id: broadcasterId,
 										};
 
-										if (userId) {
-											const userIds = userId.split(',').map((id) => id.trim()).filter((id) => id);
+										if (userIdInput) {
+											const userIds = userIdInput.split(',').map((id) => id.trim()).filter((id) => id);
 											if (userIds.length > 0) {
-												qs.user_id = userIds;
+												// Resolve each user ID or username
+												const resolvedUserIds = await Promise.all(
+													userIds.map((id) => resolveUserIdOrUsername.call(this, id))
+												);
+												qs.user_id = resolvedUserIds;
 											}
 										}
 
@@ -97,8 +104,11 @@ export class TwitchSubscriptions implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
-										const userId = this.getNodeParameter('checkUserId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const userIdInput = this.getNodeParameter('checkUserId', 0) as string;
+
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+										const userId = await resolveUserIdOrUsername.call(this, userIdInput);
 
 										requestOptions.qs = {
 											broadcaster_id: broadcasterId,
@@ -131,20 +141,21 @@ export class TwitchSubscriptions implements INodeType {
 				default: 'getBroadcasterSubscriptions',
 			},
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				required: true,
 				default: '',
-				placeholder: 'e.g. 123456789',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
-				displayName: 'User IDs',
+				displayName: 'User IDs or Usernames',
 				name: 'userId',
 				type: 'string',
 				default: '',
-				placeholder: 'e.g. 123456789,987654321',
-				description: 'Filter by user IDs (comma-separated)',
+				placeholder: 'e.g. 123456789,987654321 or username1,username2',
+				description: 'Filter by user IDs or usernames (comma-separated)',
 				displayOptions: {
 					show: {
 						operation: ['getBroadcasterSubscriptions'],
@@ -152,13 +163,13 @@ export class TwitchSubscriptions implements INodeType {
 				},
 			},
 			{
-				displayName: 'User ID',
+				displayName: 'User ID or Username',
 				name: 'checkUserId',
 				type: 'string',
 				required: true,
 				default: '',
-				placeholder: 'e.g. 123456789',
-				description: 'The user ID to check',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The user ID or username to check. If a username is provided, it will be automatically converted to user ID.',
 				displayOptions: {
 					show: {
 						operation: ['checkUserSubscription'],

@@ -1,4 +1,5 @@
 import { NodeConnectionTypes, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
+import { resolveUserIdOrUsername } from '../shared/userIdConverter';
 
 export class TwitchAnnouncements implements INodeType {
 	description: INodeTypeDescription = {
@@ -48,10 +49,14 @@ export class TwitchAnnouncements implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId') as string;
-										const moderatorId = this.getNodeParameter('moderatorId') as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+										const moderatorIdInput = this.getNodeParameter('moderatorId') as string;
 										const message = this.getNodeParameter('message') as string;
 										const color = this.getNodeParameter('color', 'primary') as string;
+
+										// Resolve usernames to user IDs
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+										const moderatorId = await resolveUserIdOrUsername.call(this, moderatorIdInput);
 
 										requestOptions.qs = {
 											broadcaster_id: broadcasterId,
@@ -83,7 +88,7 @@ export class TwitchAnnouncements implements INodeType {
 				default: 'send',
 			},
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -93,11 +98,11 @@ export class TwitchAnnouncements implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456789',
-				description: 'The ID of the broadcaster whose chat room you want to send the announcement to',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
-				displayName: 'Moderator ID',
+				displayName: 'Moderator ID or Username',
 				name: 'moderatorId',
 				type: 'string',
 				displayOptions: {
@@ -107,8 +112,8 @@ export class TwitchAnnouncements implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 987654321',
-				description: 'The ID of the moderator sending the announcement (must match the user access token)',
+				placeholder: 'e.g. 987654321 or username',
+				description: 'The moderator user ID or username (must match the user access token). If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
 				displayName: 'Message',

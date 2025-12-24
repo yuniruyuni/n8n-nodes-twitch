@@ -1,4 +1,5 @@
 import { NodeConnectionTypes, type IDataObject, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
+import { resolveUserIdOrUsername } from '../shared/userIdConverter';
 
 export class TwitchRedemptions implements INodeType {
 	description: INodeTypeDescription = {
@@ -48,7 +49,8 @@ export class TwitchRedemptions implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 										const rewardId = this.getNodeParameter('rewardId', 0) as string;
 
 										const qs: IDataObject = {
@@ -101,7 +103,8 @@ export class TwitchRedemptions implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 										const rewardId = this.getNodeParameter('rewardId', 0) as string;
 										const redemptionId = this.getNodeParameter('redemptionId', 0) as string;
 										const status = this.getNodeParameter('status', 0) as string;
@@ -143,13 +146,13 @@ export class TwitchRedemptions implements INodeType {
 			},
 			// Broadcaster ID (all operations)
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456789',
-				description: 'The broadcaster user ID',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
 			},
 			// Reward ID (all operations)
 			{

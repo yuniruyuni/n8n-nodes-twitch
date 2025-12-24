@@ -1,4 +1,5 @@
 import { NodeConnectionTypes, type IDataObject, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
+import { resolveUserIdOrUsername } from '../shared/userIdConverter';
 
 export class TwitchSchedule implements INodeType {
 	description: INodeTypeDescription = {
@@ -48,7 +49,8 @@ export class TwitchSchedule implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 										const id = this.getNodeParameter('id', 0) as string;
 										const startTime = this.getNodeParameter('startTime', 0) as string;
 										const utcOffset = this.getNodeParameter('utcOffset', 0) as string;
@@ -95,7 +97,8 @@ export class TwitchSchedule implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 										const segmentStartTime = this.getNodeParameter('segmentStartTime', 0) as string;
 										const timezone = this.getNodeParameter('timezone', 0) as string;
 										const duration = this.getNodeParameter('duration', 0) as string;
@@ -151,7 +154,8 @@ export class TwitchSchedule implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 										const segmentId = this.getNodeParameter('segmentId', 0) as string;
 										const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
 
@@ -199,7 +203,8 @@ export class TwitchSchedule implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 										const segmentId = this.getNodeParameter('segmentId', 0) as string;
 
 										requestOptions.qs = {
@@ -217,13 +222,13 @@ export class TwitchSchedule implements INodeType {
 				default: 'getSchedule',
 			},
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				required: true,
 				default: '',
-				placeholder: 'e.g. 123456789',
-				description: 'The ID of the broadcaster',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
 			},
 			// Get Schedule parameters
 			{

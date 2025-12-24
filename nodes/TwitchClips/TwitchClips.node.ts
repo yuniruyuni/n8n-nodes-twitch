@@ -1,4 +1,5 @@
 import { NodeConnectionTypes, type IDataObject, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
+import { resolveUserIdOrUsername } from '../shared/userIdConverter';
 
 export class TwitchClips implements INodeType {
 	description: INodeTypeDescription = {
@@ -44,10 +45,23 @@ export class TwitchClips implements INodeType {
 							request: {
 								method: 'POST',
 								url: '/clips',
-								qs: {
-									broadcaster_id: '={{$parameter.broadcasterId}}',
-									has_delay: '={{$parameter.hasDelay}}',
-								},
+							},
+							send: {
+								preSend: [
+									async function (this, requestOptions) {
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+										const hasDelay = this.getNodeParameter('hasDelay') as boolean;
+
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+
+										requestOptions.qs = {
+											broadcaster_id: broadcasterId,
+											has_delay: hasDelay,
+										};
+
+										return requestOptions;
+									},
+								],
 							},
 							output: {
 								postReceive: [
@@ -85,7 +99,9 @@ export class TwitchClips implements INodeType {
 										const qs: IDataObject = {};
 
 										if (filterType === 'broadcasterId') {
-											qs.broadcaster_id = this.getNodeParameter('broadcasterId') as string;
+											const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+											const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+											qs.broadcaster_id = broadcasterId;
 										} else if (filterType === 'gameId') {
 											qs.game_id = this.getNodeParameter('gameId') as string;
 										} else if (filterType === 'clipId') {
@@ -130,7 +146,7 @@ export class TwitchClips implements INodeType {
 			},
 			// Create Clip Parameters
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -140,8 +156,8 @@ export class TwitchClips implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456789',
-				description: 'The broadcaster user ID whose stream will be clipped',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username whose stream will be clipped. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
 				displayName: 'Has Delay',
@@ -187,7 +203,7 @@ export class TwitchClips implements INodeType {
 				description: 'The type of filter to use when retrieving clips',
 			},
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -198,8 +214,8 @@ export class TwitchClips implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456789',
-				description: 'The broadcaster user ID',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
 				displayName: 'Game ID',

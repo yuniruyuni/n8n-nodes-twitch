@@ -1,4 +1,5 @@
 import { NodeConnectionTypes, type IDataObject, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
+import { resolveUserIdOrUsername } from '../shared/userIdConverter';
 
 export class TwitchBans implements INodeType {
 	description: INodeTypeDescription = {
@@ -48,13 +49,22 @@ export class TwitchBans implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+										const moderatorIdInput = this.getNodeParameter('moderatorId') as string;
+										const userIdInput = this.getNodeParameter('userId') as string;
+
+										// Resolve usernames to user IDs
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+										const moderatorId = await resolveUserIdOrUsername.call(this, moderatorIdInput);
+										const userId = await resolveUserIdOrUsername.call(this, userIdInput);
+
 										const qs: IDataObject = {
-											broadcaster_id: this.getNodeParameter('broadcasterId') as string,
-											moderator_id: this.getNodeParameter('moderatorId') as string,
+											broadcaster_id: broadcasterId,
+											moderator_id: moderatorId,
 										};
 
 										const data: IDataObject = {
-											user_id: this.getNodeParameter('userId') as string,
+											user_id: userId,
 										};
 
 										const duration = this.getNodeParameter('duration', 0) as number;
@@ -102,10 +112,19 @@ export class TwitchBans implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+										const moderatorIdInput = this.getNodeParameter('moderatorId') as string;
+										const userIdInput = this.getNodeParameter('userId') as string;
+
+										// Resolve usernames to user IDs
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+										const moderatorId = await resolveUserIdOrUsername.call(this, moderatorIdInput);
+										const userId = await resolveUserIdOrUsername.call(this, userIdInput);
+
 										const qs: IDataObject = {
-											broadcaster_id: this.getNodeParameter('broadcasterId') as string,
-											moderator_id: this.getNodeParameter('moderatorId') as string,
-											user_id: this.getNodeParameter('userId') as string,
+											broadcaster_id: broadcasterId,
+											moderator_id: moderatorId,
+											user_id: userId,
 										};
 
 										requestOptions.qs = qs;
@@ -128,16 +147,22 @@ export class TwitchBans implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+
 										const qs: IDataObject = {
-											broadcaster_id: this.getNodeParameter('broadcasterId') as string,
+											broadcaster_id: broadcasterId,
 										};
 
 										const userIds = this.getNodeParameter('userIds', '') as string;
 										if (userIds) {
-											// Split comma-separated user IDs and add each as a separate parameter
-											const userIdArray = userIds.split(',').map(id => id.trim()).filter(id => id);
-											if (userIdArray.length > 0) {
-												qs.user_id = userIdArray;
+											// Split comma-separated user IDs/usernames and resolve each
+											const userIdInputs = userIds.split(',').map(id => id.trim()).filter(id => id);
+											if (userIdInputs.length > 0) {
+												const resolvedUserIds = await Promise.all(
+													userIdInputs.map(input => resolveUserIdOrUsername.call(this, input))
+												);
+												qs.user_id = resolvedUserIds;
 											}
 										}
 
@@ -168,7 +193,7 @@ export class TwitchBans implements INodeType {
 			},
 			// Ban User Parameters
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -178,11 +203,11 @@ export class TwitchBans implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456789',
-				description: 'The ID of the broadcaster whose chat room you want to ban the user from',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
-				displayName: 'Moderator ID',
+				displayName: 'Moderator ID or Username',
 				name: 'moderatorId',
 				type: 'string',
 				displayOptions: {
@@ -192,11 +217,11 @@ export class TwitchBans implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 987654321',
-				description: 'The ID of the moderator making the request (must match the user access token)',
+				placeholder: 'e.g. 987654321 or username',
+				description: 'The moderator user ID or username (must match the user access token). If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
-				displayName: 'User ID',
+				displayName: 'User ID or Username',
 				name: 'userId',
 				type: 'string',
 				displayOptions: {
@@ -206,8 +231,8 @@ export class TwitchBans implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 555666777',
-				description: 'The ID of the user to ban',
+				placeholder: 'e.g. 555666777 or username',
+				description: 'The user ID or username to ban. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
 				displayName: 'Duration',
@@ -241,7 +266,7 @@ export class TwitchBans implements INodeType {
 			},
 			// Unban User Parameters
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -251,11 +276,11 @@ export class TwitchBans implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456789',
-				description: 'The ID of the broadcaster whose chat room you want to unban the user from',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
-				displayName: 'Moderator ID',
+				displayName: 'Moderator ID or Username',
 				name: 'moderatorId',
 				type: 'string',
 				displayOptions: {
@@ -265,11 +290,11 @@ export class TwitchBans implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 987654321',
-				description: 'The ID of the moderator making the request (must match the user access token)',
+				placeholder: 'e.g. 987654321 or username',
+				description: 'The moderator user ID or username (must match the user access token). If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
-				displayName: 'User ID',
+				displayName: 'User ID or Username',
 				name: 'userId',
 				type: 'string',
 				displayOptions: {
@@ -279,12 +304,12 @@ export class TwitchBans implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 555666777',
-				description: 'The ID of the user to unban',
+				placeholder: 'e.g. 555666777 or username',
+				description: 'The user ID or username to unban. If a username is provided, it will be automatically converted to user ID.',
 			},
 			// Get Banned Users Parameters
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -294,11 +319,11 @@ export class TwitchBans implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456789',
-				description: 'The ID of the broadcaster whose banned users you want to get',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
-				displayName: 'User IDs',
+				displayName: 'User IDs or Usernames',
 				name: 'userIds',
 				type: 'string',
 				displayOptions: {
@@ -307,8 +332,8 @@ export class TwitchBans implements INodeType {
 					},
 				},
 				default: '',
-				placeholder: 'e.g. 555666777,888999000',
-				description: 'Comma-separated list of user IDs to filter results',
+				placeholder: 'e.g. 555666777,888999000 or user1,user2',
+				description: 'Comma-separated list of user IDs or usernames to filter results. Usernames will be automatically converted to user IDs.',
 			},
 			{
 				displayName: 'First',

@@ -1,4 +1,5 @@
 import { ApplicationError, NodeConnectionTypes, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
+import { resolveUserIdOrUsername } from '../shared/userIdConverter';
 
 export class TwitchModerators implements INodeType {
 	description: INodeTypeDescription = {
@@ -48,11 +49,11 @@ export class TwitchModerators implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
-										const userIds = this.getNodeParameter('userIds', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const userIdsInput = this.getNodeParameter('userIds', 0) as string;
 										const first = this.getNodeParameter('first', 0) as number;
 
-										if (!broadcasterId || broadcasterId.trim() === '') {
+										if (!broadcasterIdInput || broadcasterIdInput.trim() === '') {
 											throw new ApplicationError('Broadcaster ID is required');
 										}
 
@@ -61,16 +62,22 @@ export class TwitchModerators implements INodeType {
 											throw new ApplicationError('First parameter must be between 1 and 100');
 										}
 
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput.trim());
+
 										const qs: Record<string, string | string[] | number> = {
-											broadcaster_id: broadcasterId.trim(),
+											broadcaster_id: broadcasterId,
 											first,
 										};
 
 										// Handle comma-separated user IDs
-										if (userIds && userIds.trim() !== '') {
-											const userIdList = userIds.split(',').map((v) => v.trim()).filter((v) => v !== '');
+										if (userIdsInput && userIdsInput.trim() !== '') {
+											const userIdList = userIdsInput.split(',').map((v) => v.trim()).filter((v) => v !== '');
 											if (userIdList.length > 0) {
-												qs.user_id = userIdList;
+												// Resolve each user ID or username
+												const resolvedUserIds = await Promise.all(
+													userIdList.map((id) => resolveUserIdOrUsername.call(this, id))
+												);
+												qs.user_id = resolvedUserIds;
 											}
 										}
 
@@ -105,20 +112,23 @@ export class TwitchModerators implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
-										const userId = this.getNodeParameter('userId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const userIdInput = this.getNodeParameter('userId', 0) as string;
 
-										if (!broadcasterId || broadcasterId.trim() === '') {
+										if (!broadcasterIdInput || broadcasterIdInput.trim() === '') {
 											throw new ApplicationError('Broadcaster ID is required');
 										}
 
-										if (!userId || userId.trim() === '') {
+										if (!userIdInput || userIdInput.trim() === '') {
 											throw new ApplicationError('User ID is required');
 										}
 
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput.trim());
+										const userId = await resolveUserIdOrUsername.call(this, userIdInput.trim());
+
 										requestOptions.qs = {
-											broadcaster_id: broadcasterId.trim(),
-											user_id: userId.trim(),
+											broadcaster_id: broadcasterId,
+											user_id: userId,
 										};
 
 										return requestOptions;
@@ -150,20 +160,23 @@ export class TwitchModerators implements INodeType {
 							send: {
 								preSend: [
 									async function (this, requestOptions) {
-										const broadcasterId = this.getNodeParameter('broadcasterId', 0) as string;
-										const userId = this.getNodeParameter('userId', 0) as string;
+										const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+										const userIdInput = this.getNodeParameter('userId', 0) as string;
 
-										if (!broadcasterId || broadcasterId.trim() === '') {
+										if (!broadcasterIdInput || broadcasterIdInput.trim() === '') {
 											throw new ApplicationError('Broadcaster ID is required');
 										}
 
-										if (!userId || userId.trim() === '') {
+										if (!userIdInput || userIdInput.trim() === '') {
 											throw new ApplicationError('User ID is required');
 										}
 
+										const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput.trim());
+										const userId = await resolveUserIdOrUsername.call(this, userIdInput.trim());
+
 										requestOptions.qs = {
-											broadcaster_id: broadcasterId.trim(),
-											user_id: userId.trim(),
+											broadcaster_id: broadcasterId,
+											user_id: userId,
 										};
 
 										return requestOptions;
@@ -187,7 +200,7 @@ export class TwitchModerators implements INodeType {
 			},
 			// Get operation parameters
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -197,11 +210,11 @@ export class TwitchModerators implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 141981764',
-				description: 'The ID of the broadcaster whose list of moderators you want to get',
+				placeholder: 'e.g. 141981764 or username',
+				description: 'The broadcaster user ID or username whose list of moderators you want to get. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
-				displayName: 'User IDs',
+				displayName: 'User IDs or Usernames',
 				name: 'userIds',
 				type: 'string',
 				displayOptions: {
@@ -210,8 +223,8 @@ export class TwitchModerators implements INodeType {
 					},
 				},
 				default: '',
-				placeholder: 'e.g. 123456,789012',
-				description: 'Filters the list for specific moderators. Comma-separated list of user IDs. Maximum 100.',
+				placeholder: 'e.g. 123456,789012 or username1,username2',
+				description: 'Filters the list for specific moderators. Comma-separated list of user IDs or usernames. Maximum 100.',
 			},
 			{
 				displayName: 'First',
@@ -232,7 +245,7 @@ export class TwitchModerators implements INodeType {
 			},
 			// Add operation parameters
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -242,11 +255,11 @@ export class TwitchModerators implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 141981764',
-				description: 'The ID of the broadcaster that owns the chat room',
+				placeholder: 'e.g. 141981764 or username',
+				description: 'The broadcaster user ID or username that owns the chat room. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
-				displayName: 'User ID',
+				displayName: 'User ID or Username',
 				name: 'userId',
 				type: 'string',
 				displayOptions: {
@@ -256,12 +269,12 @@ export class TwitchModerators implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456',
-				description: 'The ID of the user to add as a moderator',
+				placeholder: 'e.g. 123456 or username',
+				description: 'The user ID or username to add as a moderator. If a username is provided, it will be automatically converted to user ID.',
 			},
 			// Remove operation parameters
 			{
-				displayName: 'Broadcaster ID',
+				displayName: 'Broadcaster ID or Username',
 				name: 'broadcasterId',
 				type: 'string',
 				displayOptions: {
@@ -271,11 +284,11 @@ export class TwitchModerators implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 141981764',
-				description: 'The ID of the broadcaster that owns the chat room',
+				placeholder: 'e.g. 141981764 or username',
+				description: 'The broadcaster user ID or username that owns the chat room. If a username is provided, it will be automatically converted to user ID.',
 			},
 			{
-				displayName: 'User ID',
+				displayName: 'User ID or Username',
 				name: 'userId',
 				type: 'string',
 				displayOptions: {
@@ -285,8 +298,8 @@ export class TwitchModerators implements INodeType {
 				},
 				default: '',
 				required: true,
-				placeholder: 'e.g. 123456',
-				description: 'The ID of the user to remove as a moderator',
+				placeholder: 'e.g. 123456 or username',
+				description: 'The user ID or username to remove as a moderator. If a username is provided, it will be automatically converted to user ID.',
 			},
 		],
 	};
