@@ -1,6 +1,6 @@
 {
 	"name": "@yuniruyuni/n8n-nodes-twitch",
-	"version": "0.1.8",
+	"version": "0.1.9",
 	"description": "n8n node for Twitch API integration. Supports Twitch operations and EventSub triggers.",
 	"license": "MIT",
 	"homepage": "https://github.com/yuniruyuni/n8n-nodes-twitch",
