@@ -1,5 +1,4 @@
 import type {
-	IAuthenticateGeneric,
 	Icon,
 	ICredentialType,
 	INodeProperties,
@@ -15,15 +14,6 @@ export class TwitchOAuth2Api implements ICredentialType {
 	icon: Icon = { light: 'file:../icons/twitch.svg', dark: 'file:../icons/twitch.dark.svg' };
 
 	documentationUrl = 'https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/';
-
-	authenticate: IAuthenticateGeneric = {
-		type: 'generic',
-		properties: {
-			headers: {
-				'Client-ID': '={{$credentials.clientId}}',
-			},
-		},
-	};
 
 	properties: INodeProperties[] = [
 		{
