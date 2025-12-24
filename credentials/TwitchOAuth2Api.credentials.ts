@@ -47,6 +47,23 @@ export class TwitchOAuth2Api implements ICredentialType {
 			required: true,
 		},
 		{
+			displayName: 'Client ID',
+			name: 'clientId',
+			type: 'string',
+			default: '',
+			required: true,
+		},
+		{
+			displayName: 'Client Secret',
+			name: 'clientSecret',
+			type: 'string',
+			typeOptions: {
+				password: true,
+			},
+			default: '',
+			required: true,
+		},
+		{
 			displayName: 'Scope',
 			name: 'scope',
 			type: 'string',
