@@ -1,9 +1,7 @@
 import type {
 	Icon,
-	ICredentialDataDecryptedObject,
 	ICredentialTestRequest,
 	ICredentialType,
-	IHttpRequestHelper,
 	INodeProperties,
 } from 'n8n-workflow';
 
@@ -59,11 +57,9 @@ export class TwitchOAuth2Api implements ICredentialType {
 		{
 			displayName: 'Scope',
 			name: 'scope',
-			type: 'string',
-			default: 'user:read:email',
-			description: 'Space-separated Twitch scopes required for your application. See <a href="https://dev.twitch.tv/docs/authentication/scopes/" target="_blank">Twitch Scopes</a> for details.',
-			placeholder: 'user:read:email channel:read:subscriptions moderator:read:chatters',
-			hint: 'Enter scopes separated by spaces (e.g., "user:read:email channel:read:subscriptions")',
+			type: 'hidden',
+			default: 'analytics:read:extensions analytics:read:games bits:read channel:bot channel:manage:ads channel:read:ads channel:manage:broadcast channel:read:charity channel:edit:commercial channel:read:editors channel:manage:extensions channel:read:goals channel:read:guest_star channel:manage:guest_star channel:read:hype_train channel:moderate channel:manage:moderators channel:read:polls channel:manage:polls channel:read:predictions channel:manage:predictions channel:manage:raids channel:read:redemptions channel:manage:redemptions channel:manage:schedule channel:read:stream_key channel:read:subscriptions channel:manage:videos channel:read:vips channel:manage:vips clips:edit moderator:manage:announcements moderator:manage:automod moderator:read:automod_settings moderator:manage:automod_settings moderator:read:banned_users moderator:manage:banned_users moderator:read:blocked_terms moderator:manage:blocked_terms moderator:read:chat_messages moderator:manage:chat_messages moderator:read:chat_settings moderator:manage:chat_settings moderator:read:chatters moderator:read:followers moderator:read:shield_mode moderator:manage:shield_mode moderator:read:shoutouts moderator:manage:shoutouts moderator:read:unban_requests moderator:manage:unban_requests moderator:read:warnings moderator:manage:warnings user:edit:broadcast user:manage:blocked_users user:read:blocked_users user:read:broadcast user:manage:chat_color user:read:email user:read:emotes user:read:follows user:read:moderated_channels user:read:subscriptions user:manage:whispers',
+			description: 'OAuth2 scopes for Twitch API access. To customize scopes, use the Generic OAuth2 API credential instead. See <a href="https://dev.twitch.tv/docs/authentication/scopes/" target="_blank">Twitch Scopes</a> for details.',
 		},
 		{
 			displayName: 'Auth URI Query Parameters',
@@ -88,17 +84,4 @@ export class TwitchOAuth2Api implements ICredentialType {
 			},
 		},
 	};
-
-	async preAuthentication(
-		this: IHttpRequestHelper,
-		credentials: ICredentialDataDecryptedObject,
-	) {
-		// Ensure scope is properly formatted as space-separated string for OAuth2 flow
-		const scope = credentials.scope || 'user:read:email';
-
-		return {
-			...credentials,
-			scope,
-		};
-	}
 }
