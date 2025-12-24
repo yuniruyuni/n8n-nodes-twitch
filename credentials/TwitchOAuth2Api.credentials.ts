@@ -1,8 +1,9 @@
 import type {
 	Icon,
-	IAuthenticateGeneric,
+	ICredentialDataDecryptedObject,
 	ICredentialTestRequest,
 	ICredentialType,
+	IHttpRequestHelper,
 	INodeProperties,
 } from 'n8n-workflow';
 
@@ -78,15 +79,6 @@ export class TwitchOAuth2Api implements ICredentialType {
 		},
 	];
 
-	authenticate: IAuthenticateGeneric = {
-		type: 'generic',
-		properties: {
-			headers: {
-				'Client-ID': '={{$credentials.clientId}}',
-			},
-		},
-	};
-
 	test: ICredentialTestRequest = {
 		request: {
 			baseURL: 'https://api.twitch.tv/helix',
@@ -96,4 +88,17 @@ export class TwitchOAuth2Api implements ICredentialType {
 			},
 		},
 	};
+
+	async preAuthentication(
+		this: IHttpRequestHelper,
+		credentials: ICredentialDataDecryptedObject,
+	) {
+		// Ensure scope is properly formatted as space-separated string for OAuth2 flow
+		const scope = credentials.scope || 'user:read:email';
+
+		return {
+			...credentials,
+			scope,
+		};
+	}
 }
