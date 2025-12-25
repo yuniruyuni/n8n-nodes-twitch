@@ -1,5 +1,7 @@
-import type { INodeProperties } from 'n8n-workflow';
+import type { INodeProperties, IDataObject } from 'n8n-workflow';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
+import { resolveUserIdOrUsername } from '../../Twitch/shared/userIdConverter';
+import type { EventConditionBuilder } from './types';
 
 // Automatic reward redemption events (broadcaster_user_id only)
 const automaticRewardRedemptionEventNames = [
@@ -79,3 +81,23 @@ export const channelPointsEventFields: INodeProperties[] = [
 
 export const CHANNEL_POINTS_AUTOMATIC_EVENTS = automaticRewardRedemptionEventNames;
 export const CHANNEL_POINTS_REWARD_EVENTS = customRewardEventNames;
+
+/**
+ * Build condition object for channel points events (broadcaster + optional reward_id)
+ */
+export const buildCondition: EventConditionBuilder = async (context, event) => {
+	const condition: IDataObject = {};
+	const broadcasterIdInput = context.getNodeParameter('broadcasterId') as string;
+	const broadcasterId = await resolveUserIdOrUsername.call(context, broadcasterIdInput);
+	condition.broadcaster_user_id = broadcasterId;
+
+	// Custom reward events support optional reward_id
+	if (customRewardEventNames.includes(event)) {
+		const rewardId = context.getNodeParameter('rewardId', '') as string;
+		if (rewardId && rewardId.trim() !== '') {
+			condition.reward_id = rewardId;
+		}
+	}
+
+	return condition;
+};

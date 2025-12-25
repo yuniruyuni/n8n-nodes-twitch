@@ -1,5 +1,7 @@
-import type { INodeProperties } from 'n8n-workflow';
+import type { INodeProperties, IDataObject } from 'n8n-workflow';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
+import { resolveUserIdOrUsername } from '../../Twitch/shared/userIdConverter';
+import type { EventConditionBuilder } from './types';
 
 const hypeTrainEventNames = [
 	'channel.hype_train.begin',
@@ -32,3 +34,14 @@ export const hypeTrainEventFields: INodeProperties[] = [
 ];
 
 export const HYPE_TRAIN_EVENTS = hypeTrainEventNames;
+
+/**
+ * Build condition object for hype train events (broadcaster_user_id only)
+ */
+export const buildCondition: EventConditionBuilder = async (context) => {
+	const condition: IDataObject = {};
+	const broadcasterIdInput = context.getNodeParameter('broadcasterId') as string;
+	const broadcasterId = await resolveUserIdOrUsername.call(context, broadcasterIdInput);
+	condition.broadcaster_user_id = broadcasterId;
+	return condition;
+};

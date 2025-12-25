@@ -1,5 +1,7 @@
-import type { INodeProperties } from 'n8n-workflow';
+import type { INodeProperties, IDataObject } from 'n8n-workflow';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
+import { resolveUserIdOrUsername } from '../../Twitch/shared/userIdConverter';
+import type { EventConditionBuilder } from './types';
 
 const goalEventNames = ['channel.goal.begin', 'channel.goal.progress', 'channel.goal.end'];
 
@@ -28,3 +30,14 @@ export const goalEventFields: INodeProperties[] = [
 ];
 
 export const GOAL_EVENTS = goalEventNames;
+
+/**
+ * Build condition object for goal events (broadcaster_user_id only)
+ */
+export const buildCondition: EventConditionBuilder = async (context) => {
+	const condition: IDataObject = {};
+	const broadcasterIdInput = context.getNodeParameter('broadcasterId') as string;
+	const broadcasterId = await resolveUserIdOrUsername.call(context, broadcasterIdInput);
+	condition.broadcaster_user_id = broadcasterId;
+	return condition;
+};

@@ -9,14 +9,8 @@ import {
 	type IDataObject,
 } from 'n8n-workflow';
 import { createHmac, timingSafeEqual } from 'crypto';
-import { resolveUserIdOrUsername } from '../Twitch/shared/userIdConverter';
-import {
-	triggerProperties,
-	BROADCASTER_ONLY_EVENTS,
-	MODERATOR_EVENTS,
-	CHAT_USER_EVENTS,
-	REWARD_EVENTS,
-} from './events';
+import { triggerProperties } from './events';
+import { eventConditionBuilders } from './events/conditionBuilders';
 
 export class TwitchTrigger implements INodeType {
 	description: INodeTypeDescription = {
@@ -96,88 +90,12 @@ export class TwitchTrigger implements INodeType {
 					Math.random().toString(36).charAt(2),
 				).join('');
 
-				const condition: IDataObject = {};
-
-				// Build condition based on event type pattern
-				if (event === 'channel.raid') {
-					const raidDirection = this.getNodeParameter('raidDirection') as string;
-					const raidBroadcasterIdInput = this.getNodeParameter('raidBroadcasterId') as string;
-					const raidBroadcasterId = await resolveUserIdOrUsername.call(this, raidBroadcasterIdInput);
-
-					if (raidDirection === 'to') {
-						condition.to_broadcaster_user_id = raidBroadcasterId;
-					} else {
-						condition.from_broadcaster_user_id = raidBroadcasterId;
-					}
+				// Build condition using event-specific builder function
+				const buildCondition = eventConditionBuilders.get(event);
+				if (!buildCondition) {
+					throw new ApplicationError(`No condition builder found for event: ${event}`);
 				}
-				// Pattern 6: user_id only (2 events)
-				else if (event === 'user.update' || event === 'user.whisper.message') {
-					const userIdInput = this.getNodeParameter('userId') as string;
-					condition.user_id = await resolveUserIdOrUsername.call(this, userIdInput);
-				}
-				// Pattern 7: special events
-				else if (event === 'drop.entitlement.grant') {
-					const organizationId = this.getNodeParameter('organizationId') as string;
-					condition.organization_id = organizationId;
-
-					const categoryId = this.getNodeParameter('categoryId', '') as string;
-					if (categoryId && categoryId.trim() !== '') {
-						condition.category_id = categoryId;
-					}
-
-					const campaignId = this.getNodeParameter('campaignId', '') as string;
-					if (campaignId && campaignId.trim() !== '') {
-						condition.campaign_id = campaignId;
-					}
-				}
-				else if (event === 'extension.bits_transaction.create') {
-					const extensionClientId = this.getNodeParameter('extensionClientId') as string;
-					condition.extension_client_id = extensionClientId;
-				}
-				else if (event === 'conduit.shard.disabled') {
-					const clientId = this.getNodeParameter('clientId') as string;
-					condition.client_id = clientId;
-				}
-				// Pattern 2: moderator events
-				else if (MODERATOR_EVENTS.includes(event)) {
-					const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-					const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
-					condition.broadcaster_user_id = broadcasterId;
-
-					// Use moderatorId if provided, otherwise use broadcasterId
-					const moderatorIdInput = this.getNodeParameter('moderatorId', '') as string;
-					if (moderatorIdInput && moderatorIdInput.trim() !== '') {
-						condition.moderator_user_id = await resolveUserIdOrUsername.call(this, moderatorIdInput);
-					} else {
-						condition.moderator_user_id = broadcasterId;
-					}
-				}
-				// Pattern 3: chat user events
-				else if (CHAT_USER_EVENTS.includes(event)) {
-					const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-					const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
-					condition.broadcaster_user_id = broadcasterId;
-
-					const userIdInput = this.getNodeParameter('userId') as string;
-					condition.user_id = await resolveUserIdOrUsername.call(this, userIdInput);
-				}
-				// Pattern 4: reward events
-				else if (REWARD_EVENTS.includes(event)) {
-					const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-					const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
-					condition.broadcaster_user_id = broadcasterId;
-
-					const rewardId = this.getNodeParameter('rewardId', '') as string;
-					if (rewardId && rewardId.trim() !== '') {
-						condition.reward_id = rewardId;
-					}
-				}
-				// Pattern 1: broadcaster only events (default)
-				else if (BROADCASTER_ONLY_EVENTS.includes(event)) {
-					const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-					const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
-					condition.broadcaster_user_id = broadcasterId;
-				}
+				const condition = await buildCondition(this, event);
 
 				const requestBody = {
 					type: event,

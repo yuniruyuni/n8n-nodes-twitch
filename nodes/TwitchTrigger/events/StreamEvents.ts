@@ -1,5 +1,7 @@
-import type { INodeProperties } from 'n8n-workflow';
+import type { INodeProperties, IDataObject } from 'n8n-workflow';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
+import { resolveUserIdOrUsername } from '../../Twitch/shared/userIdConverter';
+import type { EventConditionBuilder } from './types';
 
 const streamEventNames = ['stream.online', 'stream.offline'];
 
@@ -27,3 +29,14 @@ export const streamEventFields: INodeProperties[] = [
 ];
 
 export const STREAM_EVENTS = streamEventNames;
+
+/**
+ * Build condition object for stream events (broadcaster_user_id only)
+ */
+export const buildCondition: EventConditionBuilder = async (context) => {
+	const condition: IDataObject = {};
+	const broadcasterIdInput = context.getNodeParameter('broadcasterId') as string;
+	const broadcasterId = await resolveUserIdOrUsername.call(context, broadcasterIdInput);
+	condition.broadcaster_user_id = broadcasterId;
+	return condition;
+};

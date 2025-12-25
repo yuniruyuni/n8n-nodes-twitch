@@ -1,5 +1,7 @@
-import type { INodeProperties } from 'n8n-workflow';
+import type { INodeProperties, IDataObject } from 'n8n-workflow';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
+import { resolveUserIdOrUsername } from '../../Twitch/shared/userIdConverter';
+import type { EventConditionBuilder } from './types';
 
 const chatEventNames = [
 	'channel.chat.clear',
@@ -58,3 +60,18 @@ export const chatEventFields: INodeProperties[] = [
 ];
 
 export const CHAT_EVENTS = chatEventNames;
+
+/**
+ * Build condition object for channel chat events (broadcaster + user)
+ */
+export const buildCondition: EventConditionBuilder = async (context) => {
+	const condition: IDataObject = {};
+	const broadcasterIdInput = context.getNodeParameter('broadcasterId') as string;
+	const broadcasterId = await resolveUserIdOrUsername.call(context, broadcasterIdInput);
+	condition.broadcaster_user_id = broadcasterId;
+
+	const userIdInput = context.getNodeParameter('userId') as string;
+	condition.user_id = await resolveUserIdOrUsername.call(context, userIdInput);
+
+	return condition;
+};
