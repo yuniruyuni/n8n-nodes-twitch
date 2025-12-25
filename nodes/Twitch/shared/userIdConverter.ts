@@ -20,7 +20,18 @@ export async function resolveUserIdOrUsername(
 	}
 
 	// Otherwise, treat it as a username and resolve to ID
-	const credentials = await this.getCredentials('twitchUserOAuth2Api');
+	// Try to use either twitchUserOAuth2Api or twitchAppOAuth2Api credential
+	let credentialType = 'twitchUserOAuth2Api';
+	let credentials;
+
+	try {
+		credentials = await this.getCredentials('twitchUserOAuth2Api');
+	} catch {
+		// If twitchUserOAuth2Api is not available, try twitchAppOAuth2Api
+		credentialType = 'twitchAppOAuth2Api';
+		credentials = await this.getCredentials('twitchAppOAuth2Api');
+	}
+
 	const clientId = credentials.clientId as string;
 
 	const options: IHttpRequestOptions = {
@@ -37,7 +48,7 @@ export async function resolveUserIdOrUsername(
 
 	const response = (await this.helpers.httpRequestWithAuthentication.call(
 		this,
-		'twitchUserOAuth2Api',
+		credentialType,
 		options,
 	)) as {
 		data: Array<{ id: string; login: string }>;
