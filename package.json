@@ -44,7 +44,8 @@
 		],
 		"nodes": [
 			"dist/nodes/Twitch/Twitch.node.js",
-			"dist/nodes/TwitchTrigger/TwitchTrigger.node.js"
+			"dist/nodes/TwitchAppTrigger/TwitchAppTrigger.node.js",
+			"dist/nodes/TwitchUserTrigger/TwitchUserTrigger.node.js"
 		]
 	},
 	"devDependencies": {

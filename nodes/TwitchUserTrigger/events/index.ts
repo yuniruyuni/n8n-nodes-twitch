@@ -32,21 +32,7 @@ import {
 	predictionEventFields,
 	PREDICTION_EVENTS,
 } from './PredictionEvents';
-import { raidEventOptions, raidEventFields, RAID_EVENTS } from './RaidEvents';
-import {
-	sharedChatEventOptions,
-	sharedChatEventFields,
-	SHARED_CHAT_EVENTS,
-} from './SharedChatEvents';
-import { streamEventOptions, streamEventFields, STREAM_EVENTS } from './StreamEvents';
 import { userEventOptions, userEventFields, USER_EVENTS } from './UserEvents';
-import {
-	otherEventOptions,
-	otherEventFields,
-	DROP_ENTITLEMENT_EVENTS,
-	EXTENSION_EVENTS,
-	CONDUIT_EVENTS,
-} from './OtherEvents';
 
 // Event dropdown field combining all event types
 const eventField: INodeProperties = {
@@ -82,20 +68,8 @@ const eventField: INodeProperties = {
 		// Prediction Events
 		...predictionEventOptions,
 
-		// Raid Events
-		...raidEventOptions,
-
-		// Shared Chat Events
-		...sharedChatEventOptions,
-
-		// Stream Events
-		...streamEventOptions,
-
 		// User Events
 		...userEventOptions,
-
-		// Other Events
-		...otherEventOptions,
 	],
 	default: '',
 	description: 'The EventSub event to listen for',
@@ -113,11 +87,63 @@ export const triggerProperties: INodeProperties[] = [
 	...hypeTrainEventFields,
 	...pollEventFields,
 	...predictionEventFields,
-	...raidEventFields,
-	...sharedChatEventFields,
-	...streamEventFields,
 	...userEventFields,
-	...otherEventFields,
+];
+
+// User Access Token events - events that require TwitchUserOAuth2Api
+const userEventField: INodeProperties = {
+	displayName: 'Event',
+	name: 'event',
+	type: 'options',
+	noDataExpression: true,
+	options: [
+		// Automod Events (4)
+		...automodEventOptions,
+
+		// Channel Events - all except channel.update (37)
+		...channelEventOptions.filter(opt => opt.value !== 'channel.update'),
+
+		// Channel Chat Events (8)
+		...chatEventOptions,
+
+		// Channel Points Events (6)
+		...channelPointsEventOptions,
+
+		// Charity Events (3)
+		...charityEventOptions,
+
+		// Goal Events (3)
+		...goalEventOptions,
+
+		// Hype Train Events (3)
+		...hypeTrainEventOptions,
+
+		// Poll Events (3)
+		...pollEventOptions,
+
+		// Prediction Events (4)
+		...predictionEventOptions,
+
+		// User Events - only user.whisper.message for User (1)
+		{ name: 'User Whisper Message', value: 'user.whisper.message' },
+	],
+	default: 'user.whisper.message',
+	description: 'The EventSub event to listen for (User Access Token events)',
+};
+
+// Export User trigger properties (for TwitchUserTrigger node)
+export const userTriggerProperties: INodeProperties[] = [
+	userEventField,
+	...automodEventFields,
+	...channelEventFields,
+	...chatEventFields,
+	...channelPointsEventFields,
+	...charityEventFields,
+	...goalEventFields,
+	...hypeTrainEventFields,
+	...pollEventFields,
+	...predictionEventFields,
+	...userEventFields,
 ];
 
 // Export event lists for condition building
@@ -129,8 +155,6 @@ export const BROADCASTER_ONLY_EVENTS = [
 	...HYPE_TRAIN_EVENTS,
 	...POLL_EVENTS,
 	...PREDICTION_EVENTS,
-	...SHARED_CHAT_EVENTS,
-	...STREAM_EVENTS,
 ];
 
 export const MODERATOR_EVENTS = [...AUTOMOD_EVENTS, ...CHANNEL_MODERATOR_EVENTS];
@@ -140,5 +164,3 @@ export const CHAT_USER_EVENTS = CHAT_EVENTS;
 export const REWARD_EVENTS = CHANNEL_POINTS_REWARD_EVENTS;
 
 export { USER_EVENTS };
-export { RAID_EVENTS };
-export { DROP_ENTITLEMENT_EVENTS, EXTENSION_EVENTS, CONDUIT_EVENTS };

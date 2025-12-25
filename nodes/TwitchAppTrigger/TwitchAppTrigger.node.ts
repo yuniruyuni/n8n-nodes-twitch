@@ -11,24 +11,21 @@ import {
 import { createHmac, timingSafeEqual } from 'crypto';
 import { resolveUserIdOrUsername } from '../Twitch/shared/userIdConverter';
 import {
-	triggerProperties,
+	appTriggerProperties,
 	BROADCASTER_ONLY_EVENTS,
-	MODERATOR_EVENTS,
-	CHAT_USER_EVENTS,
-	REWARD_EVENTS,
 } from './events';
 
-export class TwitchTrigger implements INodeType {
+export class TwitchAppTrigger implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Twitch Trigger',
-		name: 'twitchTrigger',
+		displayName: 'Twitch App Trigger',
+		name: 'twitchAppTrigger',
 		icon: { light: 'file:twitch.svg', dark: 'file:twitch.dark.svg' },
 		group: ['trigger'],
 		version: 1,
 		subtitle: '={{$parameter["event"]}}',
-		description: 'Listen to Twitch EventSub notifications via Webhook',
+		description: 'Listen to Twitch EventSub notifications via Webhook (App Access Token events only)',
 		defaults: {
-			name: 'Twitch Trigger',
+			name: 'Twitch App Trigger',
 		},
 		usableAsTool: true,
 		inputs: [],
@@ -47,7 +44,7 @@ export class TwitchTrigger implements INodeType {
 				path: 'webhook',
 			},
 		],
-		properties: triggerProperties,
+		properties: appTriggerProperties,
 	};
 
 	webhookMethods = {
@@ -110,8 +107,8 @@ export class TwitchTrigger implements INodeType {
 						condition.from_broadcaster_user_id = raidBroadcasterId;
 					}
 				}
-				// Pattern 6: user_id only (2 events)
-				else if (event === 'user.update' || event === 'user.whisper.message') {
+				// Pattern 6: user_id only (1 event for App)
+				else if (event === 'user.update') {
 					const userIdInput = this.getNodeParameter('userId') as string;
 					condition.user_id = await resolveUserIdOrUsername.call(this, userIdInput);
 				}
@@ -137,40 +134,6 @@ export class TwitchTrigger implements INodeType {
 				else if (event === 'conduit.shard.disabled') {
 					const clientId = this.getNodeParameter('clientId') as string;
 					condition.client_id = clientId;
-				}
-				// Pattern 2: moderator events
-				else if (MODERATOR_EVENTS.includes(event)) {
-					const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-					const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
-					condition.broadcaster_user_id = broadcasterId;
-
-					// Use moderatorId if provided, otherwise use broadcasterId
-					const moderatorIdInput = this.getNodeParameter('moderatorId', '') as string;
-					if (moderatorIdInput && moderatorIdInput.trim() !== '') {
-						condition.moderator_user_id = await resolveUserIdOrUsername.call(this, moderatorIdInput);
-					} else {
-						condition.moderator_user_id = broadcasterId;
-					}
-				}
-				// Pattern 3: chat user events
-				else if (CHAT_USER_EVENTS.includes(event)) {
-					const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-					const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
-					condition.broadcaster_user_id = broadcasterId;
-
-					const userIdInput = this.getNodeParameter('userId') as string;
-					condition.user_id = await resolveUserIdOrUsername.call(this, userIdInput);
-				}
-				// Pattern 4: reward events
-				else if (REWARD_EVENTS.includes(event)) {
-					const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-					const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
-					condition.broadcaster_user_id = broadcasterId;
-
-					const rewardId = this.getNodeParameter('rewardId', '') as string;
-					if (rewardId && rewardId.trim() !== '') {
-						condition.reward_id = rewardId;
-					}
 				}
 				// Pattern 1: broadcaster only events (default)
 				else if (BROADCASTER_ONLY_EVENTS.includes(event)) {
