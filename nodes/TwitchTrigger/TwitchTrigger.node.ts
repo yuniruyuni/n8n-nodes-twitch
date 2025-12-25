@@ -321,7 +321,22 @@ export class TwitchTrigger implements INodeType {
 
 					return true;
 				} catch (error) {
-					throw new ApplicationError(`Failed to create Twitch EventSub subscription: ${error}`);
+					const errorData = error as {
+						description?: string;
+						message?: string;
+					};
+
+					// Provide helpful error message for common issues
+					let errorMessage = errorData.description || errorData.message || String(error);
+
+					if (errorMessage.includes('https callback with standard port')) {
+						errorMessage =
+							'Twitch EventSub requires HTTPS webhook URL with port 443. ' +
+							'Local development (http://localhost) is not supported. ' +
+							'Deploy to a server with HTTPS or use a tunneling service like ngrok.';
+					}
+
+					throw new ApplicationError(`Failed to create Twitch EventSub subscription: ${errorMessage}`);
 				}
 			},
 
