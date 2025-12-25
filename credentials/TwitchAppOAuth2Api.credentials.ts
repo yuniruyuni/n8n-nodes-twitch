@@ -1,17 +1,16 @@
 import type {
-	IAuthenticateGeneric,
-	ICredentialDataDecryptedObject,
+	Icon,
 	ICredentialTestRequest,
 	ICredentialType,
-	IHttpRequestHelper,
 	INodeProperties,
-	Icon,
 } from 'n8n-workflow';
 
 export class TwitchAppOAuth2Api implements ICredentialType {
 	name = 'twitchAppOAuth2Api';
 
-	displayName = 'Twitch App API';
+	extends = ['oAuth2Api'];
+
+	displayName = 'Twitch App OAuth2 API';
 
 	icon: Icon = { light: 'file:../icons/twitch.svg', dark: 'file:../icons/twitch.dark.svg' };
 
@@ -19,14 +18,17 @@ export class TwitchAppOAuth2Api implements ICredentialType {
 
 	properties: INodeProperties[] = [
 		{
-			displayName: 'Access Token',
-			name: 'accessToken',
+			displayName: 'Grant Type',
+			name: 'grantType',
 			type: 'hidden',
-			typeOptions: {
-				expirable: true,
-				password: true,
-			},
-			default: '',
+			default: 'clientCredentials',
+		},
+		{
+			displayName: 'Access Token URL',
+			name: 'accessTokenUrl',
+			type: 'hidden',
+			default: 'https://id.twitch.tv/oauth2/token',
+			required: true,
 		},
 		{
 			displayName: 'Client ID',
@@ -45,45 +47,27 @@ export class TwitchAppOAuth2Api implements ICredentialType {
 			default: '',
 			required: true,
 		},
-	];
-
-	async preAuthentication(this: IHttpRequestHelper, credentials: ICredentialDataDecryptedObject) {
-		// Get OAuth2 token using Client Credentials flow
-		// Twitch requires application/x-www-form-urlencoded format
-		const params = new URLSearchParams({
-			client_id: credentials.clientId as string,
-			client_secret: credentials.clientSecret as string,
-			grant_type: 'client_credentials',
-		});
-
-		const response = (await this.helpers.httpRequest({
-			method: 'POST',
-			url: 'https://id.twitch.tv/oauth2/token',
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded',
-			},
-			body: params.toString(),
-		})) as { access_token: string; expires_in: number; token_type: string };
-
-		return {
-			accessToken: response.access_token,
-		};
-	}
-
-	authenticate: IAuthenticateGeneric = {
-		type: 'generic',
-		properties: {
-			headers: {
-				Authorization: '=Bearer {{$credentials.accessToken}}',
-				'Client-ID': '={{$credentials.clientId}}',
-			},
+		{
+			displayName: 'Scope',
+			name: 'scope',
+			type: 'hidden',
+			default: '',
 		},
-	};
+		{
+			displayName: 'Authentication',
+			name: 'authentication',
+			type: 'hidden',
+			default: 'body',
+		},
+	];
 
 	test: ICredentialTestRequest = {
 		request: {
 			baseURL: 'https://api.twitch.tv/helix',
-			url: '/users',
+			url: '/streams',
+			headers: {
+				'Client-ID': '={{$credentials.clientId}}',
+			},
 		},
 	};
 }
