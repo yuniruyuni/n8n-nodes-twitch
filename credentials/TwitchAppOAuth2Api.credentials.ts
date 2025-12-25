@@ -48,12 +48,6 @@ export class TwitchAppOAuth2Api implements ICredentialType {
 			required: true,
 		},
 		{
-			displayName: 'Scope',
-			name: 'scope',
-			type: 'hidden',
-			default: '',
-		},
-		{
 			displayName: 'Authentication',
 			name: 'authentication',
 			type: 'hidden',
