@@ -49,15 +49,20 @@ export class TwitchAppOAuth2Api implements ICredentialType {
 
 	async preAuthentication(this: IHttpRequestHelper, credentials: ICredentialDataDecryptedObject) {
 		// Get OAuth2 token using Client Credentials flow
+		// Twitch requires application/x-www-form-urlencoded format
+		const params = new URLSearchParams({
+			client_id: credentials.clientId as string,
+			client_secret: credentials.clientSecret as string,
+			grant_type: 'client_credentials',
+		});
+
 		const response = (await this.helpers.httpRequest({
 			method: 'POST',
 			url: 'https://id.twitch.tv/oauth2/token',
-			body: {
-				client_id: credentials.clientId,
-				client_secret: credentials.clientSecret,
-				grant_type: 'client_credentials',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
 			},
-			json: true,
+			body: params.toString(),
 		})) as { access_token: string; expires_in: number; token_type: string };
 
 		return {
