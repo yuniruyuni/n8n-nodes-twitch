@@ -235,11 +235,10 @@ export class TwitchTrigger implements INodeType {
 					return false;
 				}
 
-				const credentials = await this.getCredentials('twitchAppAccessToken');
+				const credentials = await this.getCredentials('twitchAppOAuth2Api');
 
 				const clientId = credentials.clientId as string;
-				const oauthTokenData = credentials.oauthTokenData as { access_token?: string } | undefined;
-				const accessToken = oauthTokenData?.access_token as string;
+				const accessToken = credentials.accessToken as string;
 
 				try {
 					const response = await this.helpers.httpRequest({
@@ -269,11 +268,10 @@ export class TwitchTrigger implements INodeType {
 				// Resolve username to user ID if needed
 				const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 
-				const credentials = await this.getCredentials('twitchAppAccessToken');
+				const credentials = await this.getCredentials('twitchAppOAuth2Api');
 
 				const clientId = credentials.clientId as string;
-				const oauthTokenData = credentials.oauthTokenData as { access_token?: string } | undefined;
-				const accessToken = oauthTokenData?.access_token as string;
+				const accessToken = credentials.accessToken as string;
 
 				// Generate a random secret for webhook verification
 				const secret = Array.from({ length: 32 }, () =>
@@ -331,11 +329,10 @@ export class TwitchTrigger implements INodeType {
 					return false;
 				}
 
-				const credentials = await this.getCredentials('twitchAppAccessToken');
+				const credentials = await this.getCredentials('twitchAppOAuth2Api');
 
 				const clientId = credentials.clientId as string;
-				const oauthTokenData = credentials.oauthTokenData as { access_token?: string } | undefined;
-				const accessToken = oauthTokenData?.access_token as string;
+				const accessToken = credentials.accessToken as string;
 
 				try {
 					await this.helpers.httpRequest({
