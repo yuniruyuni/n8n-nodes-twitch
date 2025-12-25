@@ -1,4 +1,4 @@
-import type { IExecuteFunctions, IExecuteSingleFunctions, IHookFunctions, IHttpRequestOptions } from 'n8n-workflow';
+import type { IExecuteFunctions, IExecuteSingleFunctions, IHookFunctions, ITriggerFunctions, IHttpRequestOptions } from 'n8n-workflow';
 
 /**
  * Convert Twitch username to user ID
@@ -6,7 +6,7 @@ import type { IExecuteFunctions, IExecuteSingleFunctions, IHookFunctions, IHttpR
  * If input is a username, calls Twitch API to resolve to ID
  */
 export async function resolveUserIdOrUsername(
-	this: IExecuteFunctions | IExecuteSingleFunctions | IHookFunctions,
+	this: IExecuteFunctions | IExecuteSingleFunctions | IHookFunctions | ITriggerFunctions,
 	input: string,
 ): Promise<string> {
 	// If input is empty, return as-is
@@ -20,18 +20,7 @@ export async function resolveUserIdOrUsername(
 	}
 
 	// Otherwise, treat it as a username and resolve to ID
-	// Try to use either twitchUserOAuth2Api or twitchAppOAuth2Api credential
-	let credentialType = 'twitchUserOAuth2Api';
-	let credentials;
-
-	try {
-		credentials = await this.getCredentials('twitchUserOAuth2Api');
-	} catch {
-		// If twitchUserOAuth2Api is not available, try twitchAppOAuth2Api
-		credentialType = 'twitchAppOAuth2Api';
-		credentials = await this.getCredentials('twitchAppOAuth2Api');
-	}
-
+	const credentials = await this.getCredentials('twitchUserOAuth2Api');
 	const clientId = credentials.clientId as string;
 
 	const options: IHttpRequestOptions = {
@@ -48,7 +37,7 @@ export async function resolveUserIdOrUsername(
 
 	const response = (await this.helpers.httpRequestWithAuthentication.call(
 		this,
-		credentialType,
+		'twitchUserOAuth2Api',
 		options,
 	)) as {
 		data: Array<{ id: string; login: string }>;

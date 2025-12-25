@@ -1,14 +1,12 @@
 import {
 	ApplicationError,
 	NodeConnectionTypes,
-	type IHookFunctions,
-	type IWebhookFunctions,
+	type ITriggerFunctions,
 	type INodeType,
 	type INodeTypeDescription,
-	type IWebhookResponseData,
 	type IDataObject,
+	type ITriggerResponse,
 } from 'n8n-workflow';
-import { createHmac, timingSafeEqual } from 'crypto';
 import { triggerProperties } from './events';
 import { eventConditionBuilders } from './events/conditionBuilders';
 
@@ -20,7 +18,7 @@ export class TwitchTrigger implements INodeType {
 		group: ['trigger'],
 		version: 1,
 		subtitle: '={{$parameter["event"]}}',
-		description: 'Listen to Twitch EventSub notifications via Webhook',
+		description: 'Listen to Twitch EventSub notifications via WebSocket',
 		defaults: {
 			name: 'Twitch Trigger',
 		},
@@ -29,222 +27,209 @@ export class TwitchTrigger implements INodeType {
 		outputs: [NodeConnectionTypes.Main],
 		credentials: [
 			{
-				name: 'twitchAppOAuth2Api',
+				name: 'twitchUserOAuth2Api',
 				required: true,
-			},
-		],
-		webhooks: [
-			{
-				name: 'default',
-				httpMethod: 'POST',
-				responseMode: 'onReceived',
-				path: 'webhook',
 			},
 		],
 		properties: triggerProperties,
 	};
 
-	webhookMethods = {
-		default: {
-			async checkExists(this: IHookFunctions): Promise<boolean> {
-				const webhookData = this.getWorkflowStaticData('node');
-				if (webhookData.subscriptionId === undefined) {
-					return false;
-				}
+	async trigger(this: ITriggerFunctions): Promise<ITriggerResponse> {
+		const event = this.getNodeParameter('event') as string;
+		const credentials = await this.getCredentials('twitchUserOAuth2Api');
+		const clientId = credentials.clientId as string;
+		const workflowStaticData = this.getWorkflowStaticData('node');
 
-				const credentials = await this.getCredentials('twitchAppOAuth2Api');
-				const clientId = credentials.clientId as string;
+		let ws: WebSocket | null = null;
+		let sessionId: string | null = null;
+		let subscriptionId: string | null = null;
+		let reconnectUrl: string | null = null;
+		let isClosing = false;
 
-				try {
-					const response = await this.helpers.httpRequestWithAuthentication.call(
-						this,
-						'twitchAppOAuth2Api',
-						{
-							method: 'GET',
-							url: `https://api.twitch.tv/helix/eventsub/subscriptions?id=${webhookData.subscriptionId}`,
-							headers: {
-								'Client-ID': clientId,
-							},
-							json: true,
+		// Build condition using event-specific builder function
+		const buildCondition = eventConditionBuilders.get(event);
+		if (!buildCondition) {
+			throw new ApplicationError(`No condition builder found for event: ${event}`);
+		}
+
+		const createSubscription = async (sid: string): Promise<string> => {
+			const condition = await buildCondition(this, event);
+
+			const requestBody = {
+				type: event,
+				version: '1',
+				condition,
+				transport: {
+					method: 'websocket',
+					session_id: sid,
+				},
+			};
+
+			try {
+				const response = await this.helpers.httpRequestWithAuthentication.call(
+					this,
+					'twitchUserOAuth2Api',
+					{
+						method: 'POST',
+						url: 'https://api.twitch.tv/helix/eventsub/subscriptions',
+						headers: {
+							'Client-ID': clientId,
+							'Content-Type': 'application/json',
 						},
-					);
-
-					const data = response as IDataObject;
-					const subscriptions = (data.data as IDataObject[]) || [];
-					return subscriptions.length > 0;
-				} catch {
-					return false;
-				}
-			},
-
-			async create(this: IHookFunctions): Promise<boolean> {
-				const webhookUrl = this.getNodeWebhookUrl('default');
-				const webhookData = this.getWorkflowStaticData('node');
-				const event = this.getNodeParameter('event') as string;
-
-				const credentials = await this.getCredentials('twitchAppOAuth2Api');
-				const clientId = credentials.clientId as string;
-
-				// Generate a random secret for webhook verification
-				const secret = Array.from({ length: 32 }, () =>
-					Math.random().toString(36).charAt(2),
-				).join('');
-
-				// Build condition using event-specific builder function
-				const buildCondition = eventConditionBuilders.get(event);
-				if (!buildCondition) {
-					throw new ApplicationError(`No condition builder found for event: ${event}`);
-				}
-				const condition = await buildCondition(this, event);
-
-				const requestBody = {
-					type: event,
-					version: '1',
-					condition,
-					transport: {
-						method: 'webhook',
-						callback: webhookUrl,
-						secret,
+						body: requestBody,
+						json: true,
 					},
+				);
+
+				const data = response as IDataObject;
+				const subscription = (data.data as IDataObject[])[0];
+				return subscription.id as string;
+			} catch (error) {
+				const errorData = error as {
+					description?: string;
+					message?: string;
 				};
 
-				try {
-					const response = await this.helpers.httpRequestWithAuthentication.call(
-						this,
-						'twitchAppOAuth2Api',
-						{
-							method: 'POST',
-							url: 'https://api.twitch.tv/helix/eventsub/subscriptions',
-							headers: {
-								'Client-ID': clientId,
-								'Content-Type': 'application/json',
-							},
-							body: requestBody,
-							json: true,
+				const errorMessage = errorData.description || errorData.message || String(error);
+				throw new ApplicationError(
+					`Failed to create Twitch EventSub subscription: ${errorMessage}`,
+				);
+			}
+		};
+
+		const deleteSubscription = async (subId: string): Promise<void> => {
+			try {
+				await this.helpers.httpRequestWithAuthentication.call(
+					this,
+					'twitchUserOAuth2Api',
+					{
+						method: 'DELETE',
+						url: `https://api.twitch.tv/helix/eventsub/subscriptions?id=${subId}`,
+						headers: {
+							'Client-ID': clientId,
 						},
-					);
+					},
+				);
+			} catch {
+				// Ignore errors during cleanup
+			}
+		};
 
-					const data = response as IDataObject;
-					const subscription = (data.data as IDataObject[])[0];
+		const connectWebSocket = (url: string): Promise<void> => {
+			return new Promise((resolve, reject) => {
+				try {
+					ws = new WebSocket(url);
 
-					webhookData.subscriptionId = subscription.id;
-					webhookData.secret = secret;
-
-					return true;
-				} catch (error) {
-					const errorData = error as {
-						description?: string;
-						message?: string;
+					ws.onopen = () => {
+						// Connection opened, wait for session_welcome
 					};
 
-					// Provide helpful error message for common issues
-					let errorMessage = errorData.description || errorData.message || String(error);
+					ws.onmessage = async (event) => {
+						try {
+							// Handle both string and Buffer data
+					const data = typeof event.data === 'string' ? event.data : event.data.toString();
+					const message = JSON.parse(data) as IDataObject;
+							const metadata = message.metadata as IDataObject;
+							const messageType = metadata.message_type as string;
 
-					if (errorMessage.includes('https callback with standard port')) {
-						errorMessage =
-							'Twitch EventSub requires HTTPS webhook URL with port 443. ' +
-							'Local development (http://localhost) is not supported. ' +
-							'Deploy to a server with HTTPS or use a tunneling service like ngrok.';
-					}
+							if (messageType === 'session_welcome') {
+								// Receive session ID and create subscription
+								const session = message.payload as IDataObject;
+								const welcomeSession = session.session as IDataObject;
+								sessionId = welcomeSession.id as string;
 
-					throw new ApplicationError(`Failed to create Twitch EventSub subscription: ${errorMessage}`);
+								// Create EventSub subscription
+								subscriptionId = await createSubscription(sessionId);
+								workflowStaticData.subscriptionId = subscriptionId;
+
+								resolve();
+							} else if (messageType === 'notification') {
+								// Emit event data to workflow
+								const payload = message.payload as IDataObject;
+								const eventData = (payload.event as IDataObject) || {};
+								this.emit([this.helpers.returnJsonArray([eventData])]);
+							} else if (messageType === 'session_keepalive') {
+								// Just keep the connection alive
+							} else if (messageType === 'session_reconnect') {
+								// Server requests reconnection
+								const payload = message.payload as IDataObject;
+								const reconnectSession = payload.session as IDataObject;
+								reconnectUrl = reconnectSession.reconnect_url as string;
+
+								// Close current connection and reconnect
+								if (ws && !isClosing) {
+									ws.close();
+								}
+							} else if (messageType === 'revocation') {
+								// Subscription was revoked
+								const payload = message.payload as IDataObject;
+								const subscription = payload.subscription as IDataObject;
+								if (subscription.id === subscriptionId) {
+									subscriptionId = null;
+									delete workflowStaticData.subscriptionId;
+								}
+							}
+						} catch {
+							// Log error but continue processing
+						}
+					};
+
+					ws.onerror = (error) => {
+						reject(new ApplicationError(`WebSocket error: ${error}`));
+					};
+
+					ws.onclose = async () => {
+						if (isClosing) {
+							return;
+						}
+
+						// Handle reconnection
+						if (reconnectUrl) {
+							const url = reconnectUrl;
+							reconnectUrl = null;
+							try {
+								await connectWebSocket(url);
+							} catch (error) {
+								reject(error);
+							}
+						} else {
+							// Unexpected close - connection lost
+							// In production, n8n will restart the workflow if needed
+							reject(
+								new ApplicationError(
+									'WebSocket connection closed unexpectedly. Workflow will be restarted.',
+								),
+							);
+						}
+					};
+				} catch (error) {
+					reject(error);
 				}
-			},
+			});
+		};
 
-			async delete(this: IHookFunctions): Promise<boolean> {
-				const webhookData = this.getWorkflowStaticData('node');
-				if (webhookData.subscriptionId === undefined) {
-					return false;
-				}
+		// Start WebSocket connection
+		await connectWebSocket('wss://eventsub.wss.twitch.tv/ws');
 
-				const credentials = await this.getCredentials('twitchAppOAuth2Api');
-				const clientId = credentials.clientId as string;
+		// Cleanup function
+		const closeFunction = async () => {
+			isClosing = true;
 
-				try {
-					await this.helpers.httpRequestWithAuthentication.call(
-						this,
-						'twitchAppOAuth2Api',
-						{
-							method: 'DELETE',
-							url: `https://api.twitch.tv/helix/eventsub/subscriptions?id=${webhookData.subscriptionId}`,
-							headers: {
-								'Client-ID': clientId,
-							},
-						},
-					);
-
-					delete webhookData.subscriptionId;
-					delete webhookData.secret;
-
-					return true;
-				} catch {
-					return false;
-				}
-			},
-		},
-	};
-
-	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
-		const webhookData = this.getWorkflowStaticData('node');
-		const bodyData = this.getBodyData();
-		const headerData = this.getHeaderData();
-		const req = this.getRequestObject();
-
-		// Get raw body for signature verification
-		const rawBody = (req as IDataObject).rawBody || JSON.stringify(bodyData);
-
-		const messageId = headerData['twitch-eventsub-message-id'] as string;
-		const messageTimestamp = headerData['twitch-eventsub-message-timestamp'] as string;
-		const messageSignature = headerData['twitch-eventsub-message-signature'] as string;
-		const messageType = headerData['twitch-eventsub-message-type'] as string;
-
-		// Verify signature
-		const secret = webhookData.secret as string;
-		if (secret && messageSignature) {
-			const hmacMessage = messageId + messageTimestamp + rawBody;
-			const expectedSignature =
-				'sha256=' +
-				createHmac('sha256', secret).update(hmacMessage).digest('hex');
-
-			const signatureBuffer = Buffer.from(expectedSignature);
-			const receivedSignatureBuffer = Buffer.from(messageSignature);
-
-			if (
-				signatureBuffer.length !== receivedSignatureBuffer.length ||
-				!timingSafeEqual(signatureBuffer, receivedSignatureBuffer)
-			) {
-				return {
-					workflowData: [],
-				};
+			// Delete subscription
+			if (subscriptionId) {
+				await deleteSubscription(subscriptionId);
+				delete workflowStaticData.subscriptionId;
 			}
-		}
 
-		// Handle challenge verification
-		if (messageType === 'webhook_callback_verification') {
-			const challenge = (bodyData as IDataObject).challenge as string;
-			return {
-				webhookResponse: challenge,
-				workflowData: [],
-			};
-		}
-
-		// Handle notification
-		if (messageType === 'notification') {
-			const event = ((bodyData as IDataObject).event as IDataObject) || {};
-			return {
-				workflowData: [this.helpers.returnJsonArray([event])],
-			};
-		}
-
-		// Handle revocation
-		if (messageType === 'revocation') {
-			return {
-				workflowData: [],
-			};
-		}
+			// Close WebSocket
+			if (ws) {
+				ws.close();
+				ws = null;
+			}
+		};
 
 		return {
-			workflowData: [],
+			closeFunction,
 		};
 	}
 }

@@ -39,7 +39,6 @@
 		"n8nNodesApiVersion": 1,
 		"strict": true,
 		"credentials": [
-			"dist/credentials/TwitchAppOAuth2Api.credentials.js",
 			"dist/credentials/TwitchUserOAuth2Api.credentials.js"
 		],
 		"nodes": [
