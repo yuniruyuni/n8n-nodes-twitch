@@ -1,6 +1,6 @@
 {
   "name": "@yuniruyuni/n8n-nodes-twitch",
-  "version": "0.1.34",
+  "version": "0.1.35",
   "description": "n8n node for Twitch API integration. Supports Twitch operations and EventSub triggers.",
   "license": "MIT",
   "homepage": "https://github.com/yuniruyuni/n8n-nodes-twitch",
@@ -15,7 +15,10 @@
     "raid",
     "subscription"
   ],
-  "author": { "name": "yuniruyuni", "email": "yuniruyuni@gmail.com" },
+  "author": {
+    "name": "yuniruyuni",
+    "email": "yuniruyuni@gmail.com"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/yuniruyuni/n8n-nodes-twitch.git"
@@ -29,14 +32,18 @@
     "release": "n8n-node release",
     "prepublishOnly": "n8n-node prerelease"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "engines": {
     "node": ">=21.0.0"
   },
   "n8n": {
     "n8nNodesApiVersion": 1,
     "strict": true,
-    "credentials": ["dist/credentials/TwitchUserOAuth2Api.credentials.js"],
+    "credentials": [
+      "dist/credentials/TwitchUserOAuth2Api.credentials.js"
+    ],
     "nodes": [
       "dist/nodes/Twitch/Twitch.node.js",
       "dist/nodes/TwitchTrigger/TwitchTrigger.node.js"
@@ -49,6 +56,10 @@
     "release-it": "^19.0.4",
     "typescript": "5.9.2"
   },
-  "peerDependencies": { "n8n-workflow": "*" },
-  "publishConfig": { "access": "public" }
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }
