@@ -3,7 +3,7 @@
 [![CI](https://github.com/yuniruyuni/n8n-nodes-twitch/actions/workflows/ci.yml/badge.svg)](https://github.com/yuniruyuni/n8n-nodes-twitch/actions/workflows/ci.yml)
 [![npm version](https://badge.fury.io/js/@yuniruyuni%2Fn8n-nodes-twitch.svg)](https://www.npmjs.com/package/@yuniruyuni/n8n-nodes-twitch)
 
-Twitch API統合のためのn8nコミュニティノードパッケージです。Twitch Helix APIの包括的なサポートと、WebSocket経由のリアルタイムEventSub通知を提供します。
+Twitch API統合のためのn8nコミュニティノードパッケージです。Twitch Helix APIの包括的なサポートと、Webhook経由のリアルタイムEventSub通知を提供します。
 
 [n8n](https://n8n.io/)は[フェアコードライセンス](https://docs.n8n.io/reference/license/)のワークフロー自動化プラットフォームです。
 
@@ -71,33 +71,29 @@ Twitch API統合のためのn8nコミュニティノードパッケージです�
 - **シールドモード:** 開始、終了
 - **シャウトアウト:** 作成、受信
 
-**45種類以上のEventSubイベントをサポート**、自動サブスクリプション管理と署名検証を実装しています。
+**76種類のEventSubイベントをサポート**、自動サブスクリプション管理と署名検証を実装しています。
 
 ## 認証
 
 2つの認証方法をサポートしています：
 
 1. **Twitch App Access Token** - サーバー間通信のためのアプリアクセストークン
-   - Client Credentials Grant Flowを使用
+   - 全EventSubイベントに対応する事前設定済みスコープを持つClient Credentials Grant Flowを使用
    - EventSub Webhookサブスクリプションに必須
+   - 全76種類のEventSubイベントをサポート
    - ユーザー認証不要
    - 必要なもの: Client IDとClient Secret
 
 2. **Twitch User Access Token** - ユーザー固有の操作のためのユーザーアクセストークン
    - Authorization Code Grant Flowを使用
    - ユーザー固有のデータにアクセスする操作に必須
-   - 包括的なスコープ選択が可能:
-     - ユーザー情報 (`user:read:email`)
-     - チャンネル管理 (`channel:manage:*`)
-     - モデレーション (`moderator:manage:*`)
-     - チャット操作 (`chat:read`, `chat:edit`)
-     - その他多数...
+   - Twitch API操作に必要な包括的なスコープが事前設定済み
    - 必要なもの: Client ID、Client Secret、OAuth Redirect URL
 
 ### どちらの認証情報を使うべきか？
 
 - **Twitchノード**: **Twitch User Access Token**を使用（ほとんどの操作でユーザー認証が必要）
-- **Twitch Trigger**: **Twitch App Access Token**を使用（EventSub WebhookにはAppトークンが必須）
+- **Twitch Trigger**: **Twitch App Access Token**を使用（EventSub Webhookにはスコープ付きAppトークンが必須）
 
 ## インストール
 
@@ -245,12 +241,12 @@ Twitch Triggerノードはn8nのWebhookシステムを使用してHTTPS経由で
 
 ## バージョン履歴
 
-### 0.1.18 (最新)
+### 0.1.32 (最新)
 
 - 包括的なTwitch Helix APIをカバーする34個のTwitch APIリソース
-- EventSub Webhookサポート（45種類以上のイベント）を持つTwitch Triggerノード
+- EventSub Webhookサポート（76種類のイベント）を持つTwitch Triggerノード
 - デュアル認証システム:
-  - EventSub Webhook用のTwitch App Access Token
+  - 全EventSub Webhookに対応する事前設定済みスコープを持つTwitch App Access Token
   - ユーザー固有操作用のTwitch User Access Token
 - Twitch Helix API構造に合わせたリソース指向アーキテクチャ
 - **n8n Cloud互換** - 外部依存関係なし
