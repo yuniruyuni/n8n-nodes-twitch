@@ -53,7 +53,7 @@ export class Twitch implements INodeType {
 		outputs: [NodeConnectionTypes.Main],
 		credentials: [
 			{
-				name: 'twitchOAuth2Api',
+				name: 'twitchUserOAuth2Api',
 				required: true,
 			},
 		],

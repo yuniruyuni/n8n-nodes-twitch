@@ -28,7 +28,7 @@ export class TwitchTrigger implements INodeType {
 		outputs: [NodeConnectionTypes.Main],
 		credentials: [
 			{
-				name: 'twitchOAuth2Api',
+				name: 'twitchAppOAuth2Api',
 				required: true,
 			},
 		],
@@ -235,10 +235,11 @@ export class TwitchTrigger implements INodeType {
 					return false;
 				}
 
-				const credentials = await this.getCredentials('twitchOAuth2Api');
+				const credentials = await this.getCredentials('twitchAppAccessToken');
 
 				const clientId = credentials.clientId as string;
-				const accessToken = credentials.accessToken as string;
+				const oauthTokenData = credentials.oauthTokenData as { access_token?: string } | undefined;
+				const accessToken = oauthTokenData?.access_token as string;
 
 				try {
 					const response = await this.helpers.httpRequest({
@@ -268,10 +269,11 @@ export class TwitchTrigger implements INodeType {
 				// Resolve username to user ID if needed
 				const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 
-				const credentials = await this.getCredentials('twitchOAuth2Api');
+				const credentials = await this.getCredentials('twitchAppAccessToken');
 
 				const clientId = credentials.clientId as string;
-				const accessToken = credentials.accessToken as string;
+				const oauthTokenData = credentials.oauthTokenData as { access_token?: string } | undefined;
+				const accessToken = oauthTokenData?.access_token as string;
 
 				// Generate a random secret for webhook verification
 				const secret = Array.from({ length: 32 }, () =>
@@ -329,10 +331,11 @@ export class TwitchTrigger implements INodeType {
 					return false;
 				}
 
-				const credentials = await this.getCredentials('twitchOAuth2Api');
+				const credentials = await this.getCredentials('twitchAppAccessToken');
 
 				const clientId = credentials.clientId as string;
-				const accessToken = credentials.accessToken as string;
+				const oauthTokenData = credentials.oauthTokenData as { access_token?: string } | undefined;
+				const accessToken = oauthTokenData?.access_token as string;
 
 				try {
 					await this.helpers.httpRequest({

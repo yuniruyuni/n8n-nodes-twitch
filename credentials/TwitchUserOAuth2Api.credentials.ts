@@ -5,12 +5,12 @@ import type {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export class TwitchOAuth2Api implements ICredentialType {
-	name = 'twitchOAuth2Api';
+export class TwitchUserOAuth2Api implements ICredentialType {
+	name = 'twitchUserOAuth2Api';
 
 	extends = ['oAuth2Api'];
 
-	displayName = 'Twitch OAuth2 API';
+	displayName = 'Twitch User OAuth2 API';
 
 	icon: Icon = { light: 'file:../icons/twitch.svg', dark: 'file:../icons/twitch.dark.svg' };
 

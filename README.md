@@ -11,7 +11,7 @@ English | [日本語](README.ja.md)
 
 ## Features
 
-### 25 Twitch API Nodes
+### 34 Twitch API Resources
 
 All nodes follow Twitch Helix API's resource-oriented structure:
 
@@ -77,15 +77,27 @@ All nodes follow Twitch Helix API's resource-oriented structure:
 
 Two authentication methods are supported:
 
-1. **Client Credentials** (TwitchApi) - App access tokens using Client ID and Secret
-2. **OAuth2** (TwitchOAuth2Api) - User access tokens with customizable scopes
+1. **Twitch App Access Token** - App access tokens for server-to-server operations
+   - Uses Client Credentials Grant Flow
+   - Required for EventSub webhook subscriptions
+   - No user authorization needed
+   - Requires: Client ID and Client Secret
 
-OAuth2 credentials include scope selection for:
-- User information (`user:read:email`)
-- Channel management (`channel:manage:*`)
-- Moderation (`moderator:manage:*`)
-- Chat operations (`chat:read`, `chat:edit`)
-- And many more...
+2. **Twitch User Access Token** - User access tokens for user-specific operations
+   - Uses Authorization Code Grant Flow
+   - Required for operations that access user-specific data
+   - Includes comprehensive scope selection:
+     - User information (`user:read:email`)
+     - Channel management (`channel:manage:*`)
+     - Moderation (`moderator:manage:*`)
+     - Chat operations (`chat:read`, `chat:edit`)
+     - And many more...
+   - Requires: Client ID, Client Secret, and OAuth redirect URL
+
+### Which credential to use?
+
+- **Twitch Node**: Use **Twitch User Access Token** (most operations require user authorization)
+- **Twitch Trigger**: Use **Twitch App Access Token** (EventSub webhooks require app tokens)
 
 ## Installation
 
@@ -126,15 +138,15 @@ For Docker installations, mount the package or add to your custom nodes director
 ### Using Twitch Nodes
 
 1. Add a Twitch node to your workflow
-2. Create new credentials (Client Credentials or OAuth2)
-3. Select the operation you want to perform
+2. Create new **Twitch User Access Token** credentials
+3. Select the resource and operation you want to perform
 4. Configure the required parameters
 5. Execute the workflow
 
 ### Using Twitch Trigger
 
 1. Add the Twitch Trigger node to your workflow
-2. Create credentials (Client Credentials or OAuth2 with appropriate scopes)
+2. Create **Twitch App Access Token** credentials
 3. Select the EventSub event type you want to listen for
 4. Configure broadcaster ID and other required parameters
 5. Activate the workflow to start receiving events
@@ -233,11 +245,16 @@ The Twitch Trigger node uses n8n's webhook system to receive EventSub notificati
 
 ## Version History
 
+### 0.1.18 (Latest)
+
+- 34 Twitch API resources covering comprehensive Twitch Helix API
+- Twitch Trigger node with EventSub Webhook support (45+ events)
+- Dual authentication system:
+  - Twitch App Access Token for EventSub webhooks
+  - Twitch User Access Token for user-specific operations
+- Resource-oriented architecture aligned with Twitch Helix API structure
+- **n8n Cloud compatible** - No external dependencies
+
 ### 0.1.0
 
 - Initial release
-- 25 Twitch API nodes covering Users, Channels, Streams, Chat, Moderation, Channel Points, and more
-- Twitch Trigger node with EventSub Webhook support (45+ events)
-- Client Credentials and OAuth2 authentication
-- Resource-oriented architecture aligned with Twitch Helix API structure
-- **n8n Cloud compatible** - No external dependencies

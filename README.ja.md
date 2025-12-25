@@ -11,7 +11,7 @@ Twitch API統合のためのn8nコミュニティノードパッケージです�
 
 ## 機能
 
-### 25個のTwitch APIノード
+### 34個のTwitch APIリソース
 
 すべてのノードはTwitch Helix APIのリソース指向構造に従っています：
 
@@ -77,15 +77,27 @@ Twitch API統合のためのn8nコミュニティノードパッケージです�
 
 2つの認証方法をサポートしています：
 
-1. **Client Credentials** (TwitchApi) - Client IDとSecretを使用したアプリアクセストークン
-2. **OAuth2** (TwitchOAuth2Api) - カスタマイズ可能なスコープを持つユーザーアクセストークン
+1. **Twitch App Access Token** - サーバー間通信のためのアプリアクセストークン
+   - Client Credentials Grant Flowを使用
+   - EventSub Webhookサブスクリプションに必須
+   - ユーザー認証不要
+   - 必要なもの: Client IDとClient Secret
 
-OAuth2認証では以下のスコープを選択できます：
-- ユーザー情報 (`user:read:email`)
-- チャンネル管理 (`channel:manage:*`)
-- モデレーション (`moderator:manage:*`)
-- チャット操作 (`chat:read`, `chat:edit`)
-- その他多数...
+2. **Twitch User Access Token** - ユーザー固有の操作のためのユーザーアクセストークン
+   - Authorization Code Grant Flowを使用
+   - ユーザー固有のデータにアクセスする操作に必須
+   - 包括的なスコープ選択が可能:
+     - ユーザー情報 (`user:read:email`)
+     - チャンネル管理 (`channel:manage:*`)
+     - モデレーション (`moderator:manage:*`)
+     - チャット操作 (`chat:read`, `chat:edit`)
+     - その他多数...
+   - 必要なもの: Client ID、Client Secret、OAuth Redirect URL
+
+### どちらの認証情報を使うべきか？
+
+- **Twitchノード**: **Twitch User Access Token**を使用（ほとんどの操作でユーザー認証が必要）
+- **Twitch Trigger**: **Twitch App Access Token**を使用（EventSub WebhookにはAppトークンが必須）
 
 ## インストール
 
@@ -126,15 +138,15 @@ Dockerインストールの場合は、パッケージをマウントするか�
 ### Twitchノードの使用
 
 1. ワークフローにTwitchノードを追加
-2. 新しい認証情報を作成（Client CredentialsまたはOAuth2）
-3. 実行したい操作を選択
+2. **Twitch User Access Token**認証情報を作成
+3. リソースと実行したい操作を選択
 4. 必要なパラメータを設定
 5. ワークフローを実行
 
 ### Twitch Triggerの使用
 
 1. ワークフローにTwitch Triggerノードを追加
-2. 認証情報を作成（Client CredentialsまたはOAuth2、適切なスコープを設定）
+2. **Twitch App Access Token**認証情報を作成
 3. リッスンしたいEventSubイベントタイプを選択
 4. broadcaster IDとその他の必要なパラメータを設定
 5. ワークフローをアクティブ化してイベントの受信を開始
@@ -233,11 +245,16 @@ Twitch Triggerノードはn8nのWebhookシステムを使用してHTTPS経由で
 
 ## バージョン履歴
 
+### 0.1.18 (最新)
+
+- 包括的なTwitch Helix APIをカバーする34個のTwitch APIリソース
+- EventSub Webhookサポート（45種類以上のイベント）を持つTwitch Triggerノード
+- デュアル認証システム:
+  - EventSub Webhook用のTwitch App Access Token
+  - ユーザー固有操作用のTwitch User Access Token
+- Twitch Helix API構造に合わせたリソース指向アーキテクチャ
+- **n8n Cloud互換** - 外部依存関係なし
+
 ### 0.1.0
 
 - 初回リリース
-- Users、Channels、Streams、Chat、Moderation、Channel Pointsなどをカバーする25個のTwitch APIノード
-- EventSub Webhookサポート（45種類以上のイベント）を持つTwitch Triggerノード
-- Client CredentialsとOAuth2認証
-- Twitch Helix API構造に合わせたリソース指向アーキテクチャ
-- **n8n Cloud互換** - 外部依存関係なし
