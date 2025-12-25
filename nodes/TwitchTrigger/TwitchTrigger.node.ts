@@ -223,6 +223,95 @@ export class TwitchTrigger implements INodeType {
 				required: true,
 				placeholder: 'e.g. 123456789 or username',
 				description: 'The broadcaster user ID or username to monitor. If a username is provided, it will be automatically converted to user ID.',
+				displayOptions: {
+					hide: {
+						event: ['channel.raid'],
+					},
+				},
+			},
+			{
+				displayName: 'Raid Direction',
+				name: 'raidDirection',
+				type: 'options',
+				options: [
+					{
+						name: 'Incoming (To Broadcaster)',
+						value: 'to',
+						description: 'Receive raids to this broadcaster',
+					},
+					{
+						name: 'Outgoing (From Broadcaster)',
+						value: 'from',
+						description: 'Monitor raids from this broadcaster',
+					},
+				],
+				default: 'to',
+				description: 'Whether to monitor incoming or outgoing raids',
+				displayOptions: {
+					show: {
+						event: ['channel.raid'],
+					},
+				},
+			},
+			{
+				displayName: 'Broadcaster ID or Username',
+				name: 'raidBroadcasterId',
+				type: 'string',
+				default: '',
+				required: true,
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The broadcaster user ID or username for raid events',
+				displayOptions: {
+					show: {
+						event: ['channel.raid'],
+					},
+				},
+			},
+			{
+				displayName: 'Moderator ID or Username',
+				name: 'moderatorId',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The moderator user ID or username. If a username is provided, it will be automatically converted to user ID. Leave empty to use broadcaster ID.',
+				displayOptions: {
+					show: {
+						event: ['channel.follow'],
+					},
+				},
+			},
+			{
+				displayName: 'User ID or Username',
+				name: 'userId',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. 123456789 or username',
+				description: 'The user ID or username for chat events. If a username is provided, it will be automatically converted to user ID. Leave empty to monitor all users.',
+				displayOptions: {
+					show: {
+						event: [
+							'channel.chat.clear',
+							'channel.chat.clear_user_messages',
+							'channel.chat.message',
+						],
+					},
+				},
+			},
+			{
+				displayName: 'Reward ID',
+				name: 'rewardId',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. 92af127c-7326-4483-a52b-b0da0be61c01',
+				description: 'The channel points custom reward ID. Leave empty to monitor all rewards.',
+				displayOptions: {
+					show: {
+						event: [
+							'channel.channel_points_custom_reward_redemption.add',
+							'channel.channel_points_custom_reward_redemption.update',
+						],
+					},
+				},
 			},
 		],
 	};
@@ -264,10 +353,6 @@ export class TwitchTrigger implements INodeType {
 				const webhookUrl = this.getNodeWebhookUrl('default');
 				const webhookData = this.getWorkflowStaticData('node');
 				const event = this.getNodeParameter('event') as string;
-				const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-
-				// Resolve username to user ID if needed
-				const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 
 				const credentials = await this.getCredentials('twitchAppOAuth2Api');
 				const clientId = credentials.clientId as string;
@@ -277,13 +362,63 @@ export class TwitchTrigger implements INodeType {
 					Math.random().toString(36).charAt(2),
 				).join('');
 
-				const condition: IDataObject = {
-					broadcaster_user_id: broadcasterId,
-				};
+				const condition: IDataObject = {};
 
-				// Some events require different condition fields
-				if (event === 'channel.follow') {
-					condition.moderator_user_id = broadcasterId;
+				// Build condition based on event type and available parameters
+				if (event === 'channel.raid') {
+					// Raid events use either to_broadcaster_user_id or from_broadcaster_user_id
+					const raidDirection = this.getNodeParameter('raidDirection') as string;
+					const raidBroadcasterIdInput = this.getNodeParameter('raidBroadcasterId') as string;
+					const raidBroadcasterId = await resolveUserIdOrUsername.call(this, raidBroadcasterIdInput);
+
+					if (raidDirection === 'to') {
+						condition.to_broadcaster_user_id = raidBroadcasterId;
+					} else {
+						condition.from_broadcaster_user_id = raidBroadcasterId;
+					}
+				} else if (event === 'channel.follow') {
+					// Follow events require both broadcaster_user_id and moderator_user_id
+					const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+					const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+					condition.broadcaster_user_id = broadcasterId;
+
+					// Use moderatorId if provided, otherwise use broadcasterId
+					const moderatorIdInput = this.getNodeParameter('moderatorId', '') as string;
+					if (moderatorIdInput && moderatorIdInput.trim() !== '') {
+						condition.moderator_user_id = await resolveUserIdOrUsername.call(this, moderatorIdInput);
+					} else {
+						condition.moderator_user_id = broadcasterId;
+					}
+				} else if (
+					event === 'channel.chat.clear' ||
+					event === 'channel.chat.clear_user_messages' ||
+					event === 'channel.chat.message'
+				) {
+					// Chat events require broadcaster_user_id and user_id
+					const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+					const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+					condition.broadcaster_user_id = broadcasterId;
+
+					const userIdInput = this.getNodeParameter('userId') as string;
+					condition.user_id = await resolveUserIdOrUsername.call(this, userIdInput);
+				} else if (
+					event === 'channel.channel_points_custom_reward_redemption.add' ||
+					event === 'channel.channel_points_custom_reward_redemption.update'
+				) {
+					// Reward redemption events can optionally filter by reward_id
+					const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+					const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+					condition.broadcaster_user_id = broadcasterId;
+
+					const rewardId = this.getNodeParameter('rewardId', '') as string;
+					if (rewardId && rewardId.trim() !== '') {
+						condition.reward_id = rewardId;
+					}
+				} else {
+					// Default: most events use only broadcaster_user_id
+					const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+					const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+					condition.broadcaster_user_id = broadcasterId;
 				}
 
 				const requestBody = {
