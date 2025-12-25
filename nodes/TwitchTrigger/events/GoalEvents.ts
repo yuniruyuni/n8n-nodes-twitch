@@ -1,0 +1,30 @@
+import type { INodeProperties } from 'n8n-workflow';
+import { updateDisplayOptions } from '../shared/updateDisplayOptions';
+
+const goalEventNames = ['channel.goal.begin', 'channel.goal.progress', 'channel.goal.end'];
+
+// These events require broadcaster_user_id only
+const broadcasterIdField: INodeProperties[] = [
+	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description:
+			'The broadcaster user ID or username to monitor. If a username is provided, it will be automatically converted to user ID.',
+	},
+];
+
+export const goalEventOptions = [
+	{ name: 'Channel Goal Begin', value: 'channel.goal.begin' },
+	{ name: 'Channel Goal End', value: 'channel.goal.end' },
+	{ name: 'Channel Goal Progress', value: 'channel.goal.progress' },
+];
+
+export const goalEventFields: INodeProperties[] = [
+	...updateDisplayOptions({ show: { event: goalEventNames } }, broadcasterIdField),
+];
+
+export const GOAL_EVENTS = goalEventNames;

@@ -10,6 +10,13 @@ import {
 } from 'n8n-workflow';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { resolveUserIdOrUsername } from '../Twitch/shared/userIdConverter';
+import {
+	triggerProperties,
+	BROADCASTER_ONLY_EVENTS,
+	MODERATOR_EVENTS,
+	CHAT_USER_EVENTS,
+	REWARD_EVENTS,
+} from './events';
 
 export class TwitchTrigger implements INodeType {
 	description: INodeTypeDescription = {
@@ -40,280 +47,7 @@ export class TwitchTrigger implements INodeType {
 				path: 'webhook',
 			},
 		],
-		properties: [
-			{
-				displayName: 'Event',
-				name: 'event',
-				type: 'options',
-				noDataExpression: true,
-				options: [
-					{
-						name: 'Channel Ban',
-						value: 'channel.ban',
-					},
-					{
-						name: 'Channel Channel Points Custom Reward Add',
-						value: 'channel.channel_points_custom_reward.add',
-					},
-					{
-						name: 'Channel Channel Points Custom Reward Redemption Add',
-						value: 'channel.channel_points_custom_reward_redemption.add',
-					},
-					{
-						name: 'Channel Channel Points Custom Reward Redemption Update',
-						value: 'channel.channel_points_custom_reward_redemption.update',
-					},
-					{
-						name: 'Channel Channel Points Custom Reward Remove',
-						value: 'channel.channel_points_custom_reward.remove',
-					},
-					{
-						name: 'Channel Channel Points Custom Reward Update',
-						value: 'channel.channel_points_custom_reward.update',
-					},
-					{
-						name: 'Channel Chat Clear',
-						value: 'channel.chat.clear',
-					},
-					{
-						name: 'Channel Chat Clear User Messages',
-						value: 'channel.chat.clear_user_messages',
-					},
-					{
-						name: 'Channel Chat Message',
-						value: 'channel.chat.message',
-					},
-					{
-						name: 'Channel Chat Message Delete',
-						value: 'channel.chat.message_delete',
-					},
-					{
-						name: 'Channel Chat Notification',
-						value: 'channel.chat.notification',
-					},
-					{
-						name: 'Channel Cheer',
-						value: 'channel.cheer',
-					},
-					{
-						name: 'Channel Follow',
-						value: 'channel.follow',
-					},
-					{
-						name: 'Channel Goal Begin',
-						value: 'channel.goal.begin',
-					},
-					{
-						name: 'Channel Goal End',
-						value: 'channel.goal.end',
-					},
-					{
-						name: 'Channel Goal Progress',
-						value: 'channel.goal.progress',
-					},
-					{
-						name: 'Channel Hype Train Begin',
-						value: 'channel.hype_train.begin',
-					},
-					{
-						name: 'Channel Hype Train End',
-						value: 'channel.hype_train.end',
-					},
-					{
-						name: 'Channel Hype Train Progress',
-						value: 'channel.hype_train.progress',
-					},
-					{
-						name: 'Channel Moderator Add',
-						value: 'channel.moderator.add',
-					},
-					{
-						name: 'Channel Moderator Remove',
-						value: 'channel.moderator.remove',
-					},
-					{
-						name: 'Channel Poll Begin',
-						value: 'channel.poll.begin',
-					},
-					{
-						name: 'Channel Poll End',
-						value: 'channel.poll.end',
-					},
-					{
-						name: 'Channel Poll Progress',
-						value: 'channel.poll.progress',
-					},
-					{
-						name: 'Channel Prediction Begin',
-						value: 'channel.prediction.begin',
-					},
-					{
-						name: 'Channel Prediction End',
-						value: 'channel.prediction.end',
-					},
-					{
-						name: 'Channel Prediction Lock',
-						value: 'channel.prediction.lock',
-					},
-					{
-						name: 'Channel Prediction Progress',
-						value: 'channel.prediction.progress',
-					},
-					{
-						name: 'Channel Raid',
-						value: 'channel.raid',
-					},
-					{
-						name: 'Channel Shield Mode Begin',
-						value: 'channel.shield_mode.begin',
-					},
-					{
-						name: 'Channel Shield Mode End',
-						value: 'channel.shield_mode.end',
-					},
-					{
-						name: 'Channel Shoutout Create',
-						value: 'channel.shoutout.create',
-					},
-					{
-						name: 'Channel Shoutout Receive',
-						value: 'channel.shoutout.receive',
-					},
-					{
-						name: 'Channel Subscribe',
-						value: 'channel.subscribe',
-					},
-					{
-						name: 'Channel Subscription End',
-						value: 'channel.subscription.end',
-					},
-					{
-						name: 'Channel Subscription Gift',
-						value: 'channel.subscription.gift',
-					},
-					{
-						name: 'Channel Subscription Message',
-						value: 'channel.subscription.message',
-					},
-					{
-						name: 'Channel Unban',
-						value: 'channel.unban',
-					},
-					{
-						name: 'Channel Update',
-						value: 'channel.update',
-					},
-					{
-						name: 'Stream Offline',
-						value: 'stream.offline',
-					},
-					{
-						name: 'Stream Online',
-						value: 'stream.online',
-					},
-				],
-				default: 'stream.online',
-				description: 'The EventSub event to listen for',
-			},
-			{
-				displayName: 'Broadcaster ID or Username',
-				name: 'broadcasterId',
-				type: 'string',
-				default: '',
-				required: true,
-				placeholder: 'e.g. 123456789 or username',
-				description: 'The broadcaster user ID or username to monitor. If a username is provided, it will be automatically converted to user ID.',
-				displayOptions: {
-					hide: {
-						event: ['channel.raid'],
-					},
-				},
-			},
-			{
-				displayName: 'Raid Direction',
-				name: 'raidDirection',
-				type: 'options',
-				options: [
-					{
-						name: 'Incoming (To Broadcaster)',
-						value: 'to',
-						description: 'Receive raids to this broadcaster',
-					},
-					{
-						name: 'Outgoing (From Broadcaster)',
-						value: 'from',
-						description: 'Monitor raids from this broadcaster',
-					},
-				],
-				default: 'to',
-				description: 'Whether to monitor incoming or outgoing raids',
-				displayOptions: {
-					show: {
-						event: ['channel.raid'],
-					},
-				},
-			},
-			{
-				displayName: 'Broadcaster ID or Username',
-				name: 'raidBroadcasterId',
-				type: 'string',
-				default: '',
-				required: true,
-				placeholder: 'e.g. 123456789 or username',
-				description: 'The broadcaster user ID or username for raid events',
-				displayOptions: {
-					show: {
-						event: ['channel.raid'],
-					},
-				},
-			},
-			{
-				displayName: 'Moderator ID or Username',
-				name: 'moderatorId',
-				type: 'string',
-				default: '',
-				placeholder: 'e.g. 123456789 or username',
-				description: 'The moderator user ID or username. If a username is provided, it will be automatically converted to user ID. Leave empty to use broadcaster ID.',
-				displayOptions: {
-					show: {
-						event: ['channel.follow'],
-					},
-				},
-			},
-			{
-				displayName: 'User ID or Username',
-				name: 'userId',
-				type: 'string',
-				default: '',
-				placeholder: 'e.g. 123456789 or username',
-				description: 'The user ID or username for chat events. If a username is provided, it will be automatically converted to user ID. Leave empty to monitor all users.',
-				displayOptions: {
-					show: {
-						event: [
-							'channel.chat.clear',
-							'channel.chat.clear_user_messages',
-							'channel.chat.message',
-						],
-					},
-				},
-			},
-			{
-				displayName: 'Reward ID',
-				name: 'rewardId',
-				type: 'string',
-				default: '',
-				placeholder: 'e.g. 92af127c-7326-4483-a52b-b0da0be61c01',
-				description: 'The channel points custom reward ID. Leave empty to monitor all rewards.',
-				displayOptions: {
-					show: {
-						event: [
-							'channel.channel_points_custom_reward_redemption.add',
-							'channel.channel_points_custom_reward_redemption.update',
-						],
-					},
-				},
-			},
-		],
+		properties: triggerProperties,
 	};
 
 	webhookMethods = {
@@ -364,9 +98,8 @@ export class TwitchTrigger implements INodeType {
 
 				const condition: IDataObject = {};
 
-				// Build condition based on event type and available parameters
+				// Build condition based on event type pattern
 				if (event === 'channel.raid') {
-					// Raid events use either to_broadcaster_user_id or from_broadcaster_user_id
 					const raidDirection = this.getNodeParameter('raidDirection') as string;
 					const raidBroadcasterIdInput = this.getNodeParameter('raidBroadcasterId') as string;
 					const raidBroadcasterId = await resolveUserIdOrUsername.call(this, raidBroadcasterIdInput);
@@ -376,8 +109,37 @@ export class TwitchTrigger implements INodeType {
 					} else {
 						condition.from_broadcaster_user_id = raidBroadcasterId;
 					}
-				} else if (event === 'channel.follow') {
-					// Follow events require both broadcaster_user_id and moderator_user_id
+				}
+				// Pattern 6: user_id only (2 events)
+				else if (event === 'user.update' || event === 'user.whisper.message') {
+					const userIdInput = this.getNodeParameter('userId') as string;
+					condition.user_id = await resolveUserIdOrUsername.call(this, userIdInput);
+				}
+				// Pattern 7: special events
+				else if (event === 'drop.entitlement.grant') {
+					const organizationId = this.getNodeParameter('organizationId') as string;
+					condition.organization_id = organizationId;
+
+					const categoryId = this.getNodeParameter('categoryId', '') as string;
+					if (categoryId && categoryId.trim() !== '') {
+						condition.category_id = categoryId;
+					}
+
+					const campaignId = this.getNodeParameter('campaignId', '') as string;
+					if (campaignId && campaignId.trim() !== '') {
+						condition.campaign_id = campaignId;
+					}
+				}
+				else if (event === 'extension.bits_transaction.create') {
+					const extensionClientId = this.getNodeParameter('extensionClientId') as string;
+					condition.extension_client_id = extensionClientId;
+				}
+				else if (event === 'conduit.shard.disabled') {
+					const clientId = this.getNodeParameter('clientId') as string;
+					condition.client_id = clientId;
+				}
+				// Pattern 2: moderator events
+				else if (MODERATOR_EVENTS.includes(event)) {
 					const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
 					const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 					condition.broadcaster_user_id = broadcasterId;
@@ -389,23 +151,18 @@ export class TwitchTrigger implements INodeType {
 					} else {
 						condition.moderator_user_id = broadcasterId;
 					}
-				} else if (
-					event === 'channel.chat.clear' ||
-					event === 'channel.chat.clear_user_messages' ||
-					event === 'channel.chat.message'
-				) {
-					// Chat events require broadcaster_user_id and user_id
+				}
+				// Pattern 3: chat user events
+				else if (CHAT_USER_EVENTS.includes(event)) {
 					const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
 					const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 					condition.broadcaster_user_id = broadcasterId;
 
 					const userIdInput = this.getNodeParameter('userId') as string;
 					condition.user_id = await resolveUserIdOrUsername.call(this, userIdInput);
-				} else if (
-					event === 'channel.channel_points_custom_reward_redemption.add' ||
-					event === 'channel.channel_points_custom_reward_redemption.update'
-				) {
-					// Reward redemption events can optionally filter by reward_id
+				}
+				// Pattern 4: reward events
+				else if (REWARD_EVENTS.includes(event)) {
 					const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
 					const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 					condition.broadcaster_user_id = broadcasterId;
@@ -414,8 +171,9 @@ export class TwitchTrigger implements INodeType {
 					if (rewardId && rewardId.trim() !== '') {
 						condition.reward_id = rewardId;
 					}
-				} else {
-					// Default: most events use only broadcaster_user_id
+				}
+				// Pattern 1: broadcaster only events (default)
+				else if (BROADCASTER_ONLY_EVENTS.includes(event)) {
 					const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
 					const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 					condition.broadcaster_user_id = broadcasterId;
