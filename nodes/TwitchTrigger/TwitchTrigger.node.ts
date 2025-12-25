@@ -236,20 +236,21 @@ export class TwitchTrigger implements INodeType {
 				}
 
 				const credentials = await this.getCredentials('twitchAppOAuth2Api');
-
 				const clientId = credentials.clientId as string;
-				const accessToken = credentials.accessToken as string;
 
 				try {
-					const response = await this.helpers.httpRequest({
-						method: 'GET',
-						url: `https://api.twitch.tv/helix/eventsub/subscriptions?id=${webhookData.subscriptionId}`,
-						headers: {
-							'Client-ID': clientId,
-							Authorization: `Bearer ${accessToken}`,
+					const response = await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'twitchAppOAuth2Api',
+						{
+							method: 'GET',
+							url: `https://api.twitch.tv/helix/eventsub/subscriptions?id=${webhookData.subscriptionId}`,
+							headers: {
+								'Client-ID': clientId,
+							},
+							json: true,
 						},
-						json: true,
-					});
+					);
 
 					const data = response as IDataObject;
 					const subscriptions = (data.data as IDataObject[]) || [];
@@ -269,9 +270,7 @@ export class TwitchTrigger implements INodeType {
 				const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
 
 				const credentials = await this.getCredentials('twitchAppOAuth2Api');
-
 				const clientId = credentials.clientId as string;
-				const accessToken = credentials.accessToken as string;
 
 				// Generate a random secret for webhook verification
 				const secret = Array.from({ length: 32 }, () =>
@@ -299,17 +298,20 @@ export class TwitchTrigger implements INodeType {
 				};
 
 				try {
-					const response = await this.helpers.httpRequest({
-						method: 'POST',
-						url: 'https://api.twitch.tv/helix/eventsub/subscriptions',
-						headers: {
-							'Client-ID': clientId,
-							Authorization: `Bearer ${accessToken}`,
-							'Content-Type': 'application/json',
+					const response = await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'twitchAppOAuth2Api',
+						{
+							method: 'POST',
+							url: 'https://api.twitch.tv/helix/eventsub/subscriptions',
+							headers: {
+								'Client-ID': clientId,
+								'Content-Type': 'application/json',
+							},
+							body: requestBody,
+							json: true,
 						},
-						body: requestBody,
-						json: true,
-					});
+					);
 
 					const data = response as IDataObject;
 					const subscription = (data.data as IDataObject[])[0];
@@ -330,19 +332,20 @@ export class TwitchTrigger implements INodeType {
 				}
 
 				const credentials = await this.getCredentials('twitchAppOAuth2Api');
-
 				const clientId = credentials.clientId as string;
-				const accessToken = credentials.accessToken as string;
 
 				try {
-					await this.helpers.httpRequest({
-						method: 'DELETE',
-						url: `https://api.twitch.tv/helix/eventsub/subscriptions?id=${webhookData.subscriptionId}`,
-						headers: {
-							'Client-ID': clientId,
-							Authorization: `Bearer ${accessToken}`,
+					await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'twitchAppOAuth2Api',
+						{
+							method: 'DELETE',
+							url: `https://api.twitch.tv/helix/eventsub/subscriptions?id=${webhookData.subscriptionId}`,
+							headers: {
+								'Client-ID': clientId,
+							},
 						},
-					});
+					);
 
 					delete webhookData.subscriptionId;
 					delete webhookData.secret;
