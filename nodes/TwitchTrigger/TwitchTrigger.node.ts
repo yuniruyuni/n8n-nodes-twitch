@@ -124,11 +124,9 @@ export class TwitchTrigger implements INodeType {
 						// Connection opened, wait for session_welcome
 					};
 
-					ws.onmessage = async (event) => {
+					ws.onmessage = async (event: MessageEvent) => {
 						try {
-							// Handle both string and Buffer data
-					const data = typeof event.data === 'string' ? event.data : event.data.toString();
-					const message = JSON.parse(data) as IDataObject;
+							const message = JSON.parse(event.data as string) as IDataObject;
 							const metadata = message.metadata as IDataObject;
 							const messageType = metadata.message_type as string;
 
@@ -170,12 +168,12 @@ export class TwitchTrigger implements INodeType {
 								}
 							}
 						} catch {
-							// Log error but continue processing
+							// Silently ignore parsing errors and continue processing
 						}
 					};
 
-					ws.onerror = (error) => {
-						reject(new ApplicationError(`WebSocket error: ${error}`));
+					ws.onerror = () => {
+						reject(new ApplicationError(`WebSocket error occurred`));
 					};
 
 					ws.onclose = async () => {

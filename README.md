@@ -3,7 +3,7 @@
 [![CI](https://github.com/yuniruyuni/n8n-nodes-twitch/actions/workflows/ci.yml/badge.svg)](https://github.com/yuniruyuni/n8n-nodes-twitch/actions/workflows/ci.yml)
 [![npm version](https://badge.fury.io/js/@yuniruyuni%2Fn8n-nodes-twitch.svg)](https://www.npmjs.com/package/@yuniruyuni/n8n-nodes-twitch)
 
-This is an n8n community node package for Twitch API integration. It provides comprehensive support for Twitch Helix API operations and real-time EventSub notifications via Webhook.
+This is an n8n community node package for Twitch API integration. It provides comprehensive support for Twitch Helix API operations and real-time EventSub notifications via WebSocket.
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
@@ -57,7 +57,7 @@ All nodes follow Twitch Helix API's resource-oriented structure:
 
 ### EventSub Trigger Node
 
-**Twitch Trigger** - Real-time event notifications via Webhook:
+**Twitch Trigger** - Real-time event notifications via WebSocket:
 
 - **Stream Events:** online, offline
 - **Channel Events:** update, follow, subscribe, subscription end/gift/message, cheer, raid, ban, unban
@@ -71,29 +71,18 @@ All nodes follow Twitch Helix API's resource-oriented structure:
 - **Shield Mode:** begin, end
 - **Shoutout:** create, receive
 
-**Supports 76 EventSub events** with automatic subscription management and signature verification.
+**Supports 76 EventSub events** with automatic subscription management.
 
 ## Authentication
 
-Two authentication methods are supported:
-
-1. **Twitch App Access Token** - App access tokens for server-to-server operations
-   - Uses Client Credentials Grant Flow with pre-configured scopes for all EventSub events
-   - Required for EventSub webhook subscriptions
-   - Supports all 76 EventSub events
-   - No user authorization needed
-   - Requires: Client ID and Client Secret
-
-2. **Twitch User Access Token** - User access tokens for user-specific operations
-   - Uses Authorization Code Grant Flow
-   - Required for operations that access user-specific data
-   - Pre-configured with comprehensive scopes for Twitch API operations
-   - Requires: Client ID, Client Secret, and OAuth redirect URL
-
-### Which credential to use?
-
-- **Twitch Node**: Use **Twitch User Access Token** (most operations require user authorization)
-- **Twitch Trigger**: Use **Twitch App Access Token** (EventSub webhooks require app tokens with scopes)
+**Twitch User Access Token** - User access tokens for all operations
+- Uses Authorization Code Grant Flow
+- Required for both API operations and EventSub WebSocket subscriptions
+- Pre-configured with comprehensive scopes (80 scopes) covering:
+  - All 76 EventSub events
+  - All Twitch Helix API operations
+  - Chat, moderation, channel management, and more
+- Requires: Client ID, Client Secret, and OAuth redirect URL
 
 ## Installation
 
@@ -115,12 +104,12 @@ For Docker installations, mount the package or add to your custom nodes director
 
 ### n8n Cloud
 
-**Fully compatible** - This package uses the declarative routing pattern with no external dependencies. The Twitch Trigger node uses webhooks for EventSub notifications, which work seamlessly on n8n Cloud.
+**Fully compatible** - This package uses Node.js global WebSocket (Node.js 21+) for EventSub notifications. No external dependencies required.
 
 ## Compatibility
 
 - **n8n version:** 1.0.0 or higher
-- **Node.js version:** 18.10.0 or higher (recommended: 20.x)
+- **Node.js version:** 21.0.0 or higher (required for global WebSocket support)
 
 ## Usage
 
@@ -129,7 +118,7 @@ For Docker installations, mount the package or add to your custom nodes director
 1. Go to [Twitch Developer Console](https://dev.twitch.tv/console/apps)
 2. Create a new application or use an existing one
 3. Note your Client ID and Client Secret
-4. For OAuth2, set the OAuth Redirect URL to your n8n instance (e.g., `https://your-n8n.com/rest/oauth2-credential/callback`)
+4. Set the OAuth Redirect URL to your n8n instance (e.g., `https://your-n8n.com/rest/oauth2-credential/callback`)
 
 ### Using Twitch Nodes
 
@@ -142,22 +131,23 @@ For Docker installations, mount the package or add to your custom nodes director
 ### Using Twitch Trigger
 
 1. Add the Twitch Trigger node to your workflow
-2. Create **Twitch App Access Token** credentials
+2. Create **Twitch User Access Token** credentials
 3. Select the EventSub event type you want to listen for
 4. Configure broadcaster ID and other required parameters
 5. Activate the workflow to start receiving events
 
-The trigger uses webhooks to receive real-time events from Twitch. n8n automatically provides a secure HTTPS webhook URL (no manual webhook setup required on your end). When you activate the workflow, the node automatically:
-- Creates an EventSub subscription on Twitch
-- Verifies the webhook with Twitch's challenge mechanism
-- Validates event signatures for security
+The trigger uses WebSocket to receive real-time events from Twitch. When you activate the workflow, the node automatically:
+- Connects to Twitch EventSub WebSocket (`wss://eventsub.wss.twitch.tv/ws`)
+- Receives a session ID and creates an EventSub subscription
+- Receives real-time event notifications via WebSocket
+- Handles reconnections automatically
 - Automatically cleans up the subscription when the workflow is deactivated
 
 ## Development
 
 ### Prerequisites
 
-- Node.js 18.10.0 or higher
+- Node.js 21.0.0 or higher (required for global WebSocket support)
 - npm
 
 ### Setup
@@ -219,14 +209,13 @@ This provides an interactive release process managed by `n8n-node release`.
 
 ## Architecture
 
-This package uses the **declarative/low-code style** for all nodes:
+This package uses the **declarative/low-code style** for Twitch API operations:
 
 - Direct calls to Twitch Helix API (`https://api.twitch.tv/helix`)
 - n8n's `routing` property for HTTP requests
-- **No external dependencies** - fully compatible with n8n Cloud
 - Resource-oriented structure aligned with Twitch Helix API
 
-The Twitch Trigger node uses n8n's webhook system to receive EventSub notifications via HTTPS, with built-in signature verification for security.
+The Twitch Trigger node uses Node.js global WebSocket (available in Node.js 21+) to receive EventSub notifications via WebSocket (`wss://eventsub.wss.twitch.tv/ws`). No external dependencies required.
 
 ## Resources
 
@@ -238,19 +227,3 @@ The Twitch Trigger node uses n8n's webhook system to receive EventSub notificati
 ## License
 
 [MIT](LICENSE.md)
-
-## Version History
-
-### 0.1.32 (Latest)
-
-- 34 Twitch API resources covering comprehensive Twitch Helix API
-- Twitch Trigger node with EventSub Webhook support (76 events)
-- Dual authentication system:
-  - Twitch App Access Token with pre-configured scopes for all EventSub webhooks
-  - Twitch User Access Token for user-specific operations
-- Resource-oriented architecture aligned with Twitch Helix API structure
-- **n8n Cloud compatible** - No external dependencies
-
-### 0.1.0
-
-- Initial release

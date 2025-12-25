@@ -1,62 +1,54 @@
 {
-	"name": "@yuniruyuni/n8n-nodes-twitch",
-	"version": "0.1.34",
-	"description": "n8n node for Twitch API integration. Supports Twitch operations and EventSub triggers.",
-	"license": "MIT",
-	"homepage": "https://github.com/yuniruyuni/n8n-nodes-twitch",
-	"keywords": [
-		"n8n-community-node-package",
-		"n8n",
-		"twitch",
-		"eventsub",
-		"websocket",
-		"streaming",
-		"chat",
-		"raid",
-		"subscription"
-	],
-	"author": {
-		"name": "yuniruyuni",
-		"email": "yuniruyuni@gmail.com"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/yuniruyuni/n8n-nodes-twitch.git"
-	},
-	"scripts": {
-		"build": "n8n-node build",
-		"build:watch": "tsc --watch",
-		"dev": "n8n-node dev",
-		"lint": "n8n-node lint",
-		"lint:fix": "n8n-node lint --fix",
-		"release": "n8n-node release",
-		"prepublishOnly": "n8n-node prerelease"
-	},
-	"files": [
-		"dist"
-	],
-	"n8n": {
-		"n8nNodesApiVersion": 1,
-		"strict": true,
-		"credentials": [
-			"dist/credentials/TwitchUserOAuth2Api.credentials.js"
-		],
-		"nodes": [
-			"dist/nodes/Twitch/Twitch.node.js",
-			"dist/nodes/TwitchTrigger/TwitchTrigger.node.js"
-		]
-	},
-	"devDependencies": {
-		"@n8n/node-cli": "*",
-		"eslint": "9.32.0",
-		"prettier": "3.6.2",
-		"release-it": "^19.0.4",
-		"typescript": "5.9.2"
-	},
-	"peerDependencies": {
-		"n8n-workflow": "*"
-	},
-	"publishConfig": {
-		"access": "public"
-	}
+  "name": "@yuniruyuni/n8n-nodes-twitch",
+  "version": "0.1.34",
+  "description": "n8n node for Twitch API integration. Supports Twitch operations and EventSub triggers.",
+  "license": "MIT",
+  "homepage": "https://github.com/yuniruyuni/n8n-nodes-twitch",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "twitch",
+    "eventsub",
+    "websocket",
+    "streaming",
+    "chat",
+    "raid",
+    "subscription"
+  ],
+  "author": { "name": "yuniruyuni", "email": "yuniruyuni@gmail.com" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yuniruyuni/n8n-nodes-twitch.git"
+  },
+  "scripts": {
+    "build": "n8n-node build",
+    "build:watch": "tsc --watch",
+    "dev": "n8n-node dev",
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
+    "release": "n8n-node release",
+    "prepublishOnly": "n8n-node prerelease"
+  },
+  "files": ["dist"],
+  "engines": {
+    "node": ">=21.0.0"
+  },
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "strict": true,
+    "credentials": ["dist/credentials/TwitchUserOAuth2Api.credentials.js"],
+    "nodes": [
+      "dist/nodes/Twitch/Twitch.node.js",
+      "dist/nodes/TwitchTrigger/TwitchTrigger.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@n8n/node-cli": "*",
+    "eslint": "9.32.0",
+    "prettier": "3.6.2",
+    "release-it": "^19.0.4",
+    "typescript": "5.9.2"
+  },
+  "peerDependencies": { "n8n-workflow": "*" },
+  "publishConfig": { "access": "public" }
 }
