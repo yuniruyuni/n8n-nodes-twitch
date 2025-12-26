@@ -11,6 +11,7 @@
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';
+import { createLimitBasedPagination } from '../shared/pagination';
 
 // Field definitions for each operation
 const getVideosFields: INodeProperties[] = [
@@ -79,37 +80,34 @@ const getVideosFields: INodeProperties[] = [
 		description: 'Video ID(s). Separate multiple IDs with commas. Maximum 100 IDs.',
 	},
 	{
+		displayName: 'Return All',
+		name: 'returnAll',
+		type: 'boolean',
+		default: false,
+		description: 'Whether to return all results or only up to a given limit',
+	},
+	{
+		displayName: 'Limit',
+		name: 'limit',
+		type: 'number',
+		displayOptions: {
+			show: {
+				returnAll: [false],
+			},
+		},
+		default: 50,
+		typeOptions: {
+			minValue: 1,
+		},
+		description: 'Max number of results to return',
+	},
+	{
 		displayName: 'Additional Fields',
 		name: 'additionalFields',
 		type: 'collection',
 		placeholder: 'Add Field',
 		default: {},
 		options: [
-			{
-				displayName: 'After',
-				name: 'after',
-				type: 'string',
-				default: '',
-				description: 'Cursor for forward pagination. Only applies when querying by user ID.',
-			},
-			{
-				displayName: 'Before',
-				name: 'before',
-				type: 'string',
-				default: '',
-				description: 'Cursor for backward pagination. Only applies when querying by user ID.',
-			},
-			{
-				displayName: 'First',
-				name: 'first',
-				type: 'number',
-				default: 20,
-				typeOptions: {
-					minValue: 1,
-					maxValue: 100,
-				},
-				description: 'Maximum number of items to return',
-			},
 			{
 				displayName: 'Language',
 				name: 'language',
@@ -242,6 +240,8 @@ export const videoOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const queryBy = this.getNodeParameter('queryBy', 0) as string;
+								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
+								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 100) as number);
 								const qs: IDataObject = {};
 
 								// Add required parameter based on query type
@@ -260,9 +260,9 @@ export const videoOperations: INodeProperties[] = [
 								// Add optional parameters
 								const additionalFields = this.getNodeParameter('additionalFields', 0, {}) as IDataObject;
 
-								if (additionalFields.first) {
-									qs.first = additionalFields.first;
-								}
+								// Optimal page size: API max when returnAll, otherwise min(limit, API max)
+								qs.first = returnAll ? 100 : Math.min(limit, 100);
+
 								if (additionalFields.language) {
 									qs.language = additionalFields.language;
 								}
@@ -275,17 +275,14 @@ export const videoOperations: INodeProperties[] = [
 								if (additionalFields.type) {
 									qs.type = additionalFields.type;
 								}
-								if (additionalFields.after) {
-									qs.after = additionalFields.after;
-								}
-								if (additionalFields.before) {
-									qs.before = additionalFields.before;
-								}
 
 								requestOptions.qs = qs;
 								return requestOptions;
 							},
 						],
+					},
+					operations: {
+						pagination: createLimitBasedPagination(100),
 					},
 					output: {
 						postReceive: [
@@ -293,6 +290,12 @@ export const videoOperations: INodeProperties[] = [
 								type: 'rootProperty',
 								properties: {
 									property: 'data',
+								},
+							},
+							{
+								type: 'limit',
+								properties: {
+									maxResults: '={{$parameter.returnAll ? undefined : $parameter.limit}}',
 								},
 							},
 						],

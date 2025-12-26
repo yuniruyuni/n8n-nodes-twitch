@@ -14,7 +14,8 @@ import { ApplicationError } from 'n8n-workflow';
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';
-import { validateRequired, validateRange, validateOptional, parseCommaSeparated } from '../shared/validators';
+import { validateRequired, validateRange, parseCommaSeparated } from '../shared/validators';
+import { createLimitBasedPagination } from '../shared/pagination';
 
 // Field definitions for each operation
 const getFields: INodeProperties[] = [
@@ -36,23 +37,26 @@ const getFields: INodeProperties[] = [
 		description: 'Filters the list for specific moderators. Comma-separated list of user IDs or usernames. Maximum 100.',
 	},
 	{
-		displayName: 'First',
-		name: 'first',
-		type: 'number',
-		default: 20,
-		typeOptions: {
-			minValue: 1,
-			maxValue: 100,
-		},
-		description: 'Maximum number of items to return per page',
+		displayName: 'Return All',
+		name: 'returnAll',
+		type: 'boolean',
+		default: false,
+		description: 'Whether to return all results or only up to a given limit',
 	},
 	{
-		displayName: 'After',
-		name: 'after',
-		type: 'string',
-		default: '',
-		placeholder: 'e.g. eyJiIjpudWxsLCJhIjp7IkN1cnNvciI6...',
-		description: 'The cursor used to get the next page of results',
+		displayName: 'Limit',
+		name: 'limit',
+		type: 'number',
+		displayOptions: {
+			show: {
+				returnAll: [false],
+			},
+		},
+		default: 50,
+		typeOptions: {
+			minValue: 1,
+		},
+		description: 'Max number of results to return',
 	},
 ];
 
@@ -67,23 +71,26 @@ const getModeratedChannelsFields: INodeProperties[] = [
 		description: 'The user ID or login name. Returns the list of channels that this user has moderator privileges in. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'First',
-		name: 'first',
-		type: 'number',
-		default: 20,
-		typeOptions: {
-			minValue: 1,
-			maxValue: 100,
-		},
-		description: 'Maximum number of items to return per page',
+		displayName: 'Return All',
+		name: 'returnAll',
+		type: 'boolean',
+		default: false,
+		description: 'Whether to return all results or only up to a given limit',
 	},
 	{
-		displayName: 'After',
-		name: 'after',
-		type: 'string',
-		default: '',
-		placeholder: 'e.g. eyJiIjpudWxsLCJhIjp7IkN1cnNvciI6...',
-		description: 'The cursor used to get the next page of results',
+		displayName: 'Limit',
+		name: 'limit',
+		type: 'number',
+		displayOptions: {
+			show: {
+				returnAll: [false],
+			},
+		},
+		default: 50,
+		typeOptions: {
+			minValue: 1,
+		},
+		description: 'Max number of results to return',
 	},
 ];
 
@@ -156,17 +163,18 @@ export const moderatorOperations: INodeProperties[] = [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
 								const userIdsInput = this.getNodeParameter('userIds', 0) as string;
-								const first = this.getNodeParameter('first', 0) as number;
-								const after = this.getNodeParameter('after', 0) as string;
+								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
+								const limit = returnAll ? 1000 : (this.getNodeParameter('limit', 0) as number);
 
 								const broadcasterIdTrimmed = validateRequired(broadcasterIdInput, 'Broadcaster ID');
-								validateRange(first, 1, 100, 'First parameter');
+								validateRange(limit, 1, Number.MAX_SAFE_INTEGER, 'Limit parameter');
 
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdTrimmed);
 
 								const qs: Record<string, string | string[] | number> = {
 									broadcaster_id: broadcasterId,
-									first,
+									// Optimal page size: API max when returnAll, otherwise min(limit, API max)
+									first: returnAll ? 100 : Math.min(limit, 100),
 								};
 
 								// Handle comma-separated user IDs
@@ -179,17 +187,14 @@ export const moderatorOperations: INodeProperties[] = [
 									qs.user_id = resolvedUserIds;
 								}
 
-								// Add pagination cursor if provided
-								const afterTrimmed = validateOptional(after);
-								if (afterTrimmed) {
-									qs.after = afterTrimmed;
-								}
-
 								requestOptions.qs = qs;
 
 								return requestOptions;
 							},
 						],
+					},
+					operations: {
+						pagination: createLimitBasedPagination(100),
 					},
 					output: {
 						postReceive: [
@@ -197,6 +202,12 @@ export const moderatorOperations: INodeProperties[] = [
 								type: 'rootProperty',
 								properties: {
 									property: 'data',
+								},
+							},
+							{
+								type: 'limit',
+								properties: {
+									maxResults: '={{$parameter.returnAll ? undefined : $parameter.limit}}',
 								},
 							},
 						],
@@ -217,24 +228,19 @@ export const moderatorOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const userIdInput = this.getNodeParameter('userId', 0) as string;
-								const first = this.getNodeParameter('first', 0) as number;
-								const after = this.getNodeParameter('after', 0) as string;
+								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
+								const limit = returnAll ? 1000 : (this.getNodeParameter('limit', 0) as number);
 
 								const userIdTrimmed = validateRequired(userIdInput, 'User ID');
-								validateRange(first, 1, 100, 'First parameter');
+								validateRange(limit, 1, Number.MAX_SAFE_INTEGER, 'Limit parameter');
 
 								const userId = await resolveUserIdOrLogin.call(this, userIdTrimmed);
 
 								const qs: Record<string, string | number> = {
 									user_id: userId,
-									first,
+									// Optimal page size: API max when returnAll, otherwise min(limit, API max)
+									first: returnAll ? 100 : Math.min(limit, 100),
 								};
-
-								// Add pagination cursor if provided
-								const afterTrimmed = validateOptional(after);
-								if (afterTrimmed) {
-									qs.after = afterTrimmed;
-								}
 
 								requestOptions.qs = qs;
 
@@ -242,12 +248,21 @@ export const moderatorOperations: INodeProperties[] = [
 							},
 						],
 					},
+					operations: {
+						pagination: createLimitBasedPagination(100),
+					},
 					output: {
 						postReceive: [
 							{
 								type: 'rootProperty',
 								properties: {
 									property: 'data',
+								},
+							},
+							{
+								type: 'limit',
+								properties: {
+									maxResults: '={{$parameter.returnAll ? undefined : $parameter.limit}}',
 								},
 							},
 						],

@@ -9,6 +9,7 @@
 
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
+import { createLimitBasedPagination } from '../shared/pagination';
 
 export const chatterOperations: INodeProperties[] = [
 	{
@@ -37,8 +38,8 @@ export const chatterOperations: INodeProperties[] = [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
 								const moderatorIdInput = this.getNodeParameter('moderatorId') as string;
-								const first = this.getNodeParameter('first', 100) as number;
-								const after = this.getNodeParameter('after', '') as string;
+								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
+								const limit = returnAll ? 1000 : (this.getNodeParameter('limit', 100) as number);
 
 								// Resolve usernames to user IDs
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
@@ -47,17 +48,16 @@ export const chatterOperations: INodeProperties[] = [
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,
 									moderator_id: moderatorId,
-									first: first,
+									// Optimal page size: API max when returnAll, otherwise min(limit, API max)
+									first: returnAll ? 1000 : Math.min(limit, 1000),
 								};
-
-								// Add optional pagination cursor if provided
-								if (after) {
-									requestOptions.qs.after = after;
-								}
 
 								return requestOptions;
 							},
 						],
+					},
+					operations: {
+						pagination: createLimitBasedPagination(1000),
 					},
 					output: {
 						postReceive: [
@@ -65,6 +65,12 @@ export const chatterOperations: INodeProperties[] = [
 								type: 'rootProperty',
 								properties: {
 									property: 'data',
+								},
+							},
+							{
+								type: 'limit',
+								properties: {
+									maxResults: '={{$parameter.returnAll ? undefined : $parameter.limit}}',
 								},
 							},
 						],
@@ -107,33 +113,33 @@ export const chatterFields: INodeProperties[] = [
 		description: 'Broadcaster user ID or login name or one of the broadcaster\'s moderators. This ID must match the user ID in the user access token.',
 	},
 	{
+		displayName: 'Return All',
+		name: 'returnAll',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				resource: ['chatter'],
+				operation: ['get'],
+			},
+		},
+		default: false,
+		description: 'Whether to return all results or only up to a given limit',
+	},
+	{
 		displayName: 'Limit',
-		name: 'first',
+		name: 'limit',
 		type: 'number',
 		displayOptions: {
 			show: {
 				resource: ['chatter'],
 				operation: ['get'],
+				returnAll: [false],
 			},
 		},
-		default: 100,
-		description: 'The maximum number of items to return per page. Min: 1, Max: 1000, Default: 100.',
+		default: 50,
+		description: 'Max number of results to return',
 		typeOptions: {
 			minValue: 1,
-			maxValue: 1000,
 		},
-	},
-	{
-		displayName: 'Cursor',
-		name: 'after',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['chatter'],
-				operation: ['get'],
-			},
-		},
-		default: '',
-		description: 'The cursor used to get the next page of results',
 	},
 ];

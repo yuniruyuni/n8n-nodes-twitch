@@ -13,6 +13,7 @@
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';
+import { createLimitBasedPagination } from '../shared/pagination';
 
 // Field definitions for each operation
 const getFields: INodeProperties[] = [
@@ -154,31 +155,26 @@ const getBlockListFields: INodeProperties[] = [
 		description: 'Broadcaster user ID or login name whose list of blocked users you want to get. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'Additional Fields',
-		name: 'additionalFields',
-		type: 'collection',
-		placeholder: 'Add Field',
-		default: {},
-		options: [
-			{
-				displayName: 'First',
-				name: 'first',
-				type: 'number',
-				default: 20,
-				typeOptions: {
-					minValue: 1,
-					maxValue: 100,
-				},
-				description: 'Maximum number of items to return per page (1-100, default: 20)',
+		displayName: 'Return All',
+		name: 'returnAll',
+		type: 'boolean',
+		default: false,
+		description: 'Whether to return all results or only up to a given limit',
+	},
+	{
+		displayName: 'Limit',
+		name: 'limit',
+		type: 'number',
+		displayOptions: {
+			show: {
+				returnAll: [false],
 			},
-			{
-				displayName: 'After',
-				name: 'after',
-				type: 'string',
-				default: '',
-				description: 'Cursor for pagination',
-			},
-		],
+		},
+		default: 50,
+		typeOptions: {
+			minValue: 1,
+		},
+		description: 'Max number of results to return',
 	},
 ];
 
@@ -235,22 +231,26 @@ const getFollowedChannelsFields: INodeProperties[] = [
 		description: 'A broadcaster\'s ID. Use this parameter to see whether the user follows this broadcaster.',
 	},
 	{
-		displayName: 'Limit',
-		name: 'first',
-		type: 'number',
-		default: 20,
-		description: 'The maximum number of items to return per page (1-100). Default is 20.',
-		typeOptions: {
-			minValue: 1,
-			maxValue: 100,
-		},
+		displayName: 'Return All',
+		name: 'returnAll',
+		type: 'boolean',
+		default: false,
+		description: 'Whether to return all results or only up to a given limit',
 	},
 	{
-		displayName: 'After',
-		name: 'after',
-		type: 'string',
-		default: '',
-		description: 'The cursor used to get the next page of results',
+		displayName: 'Limit',
+		name: 'limit',
+		type: 'number',
+		displayOptions: {
+			show: {
+				returnAll: [false],
+			},
+		},
+		default: 50,
+		typeOptions: {
+			minValue: 1,
+		},
+		description: 'Max number of results to return',
 	},
 ];
 
@@ -423,25 +423,20 @@ export const userOperations: INodeProperties[] = [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
-								const additionalFields = this.getNodeParameter('additionalFields', {}) as {
-									first?: number;
-									after?: string;
-								};
+								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
+								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 50) as number);
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,
+									first: returnAll ? 100 : Math.min(limit, 100),
 								};
-
-								if (additionalFields.first) {
-									requestOptions.qs.first = additionalFields.first;
-								}
-								if (additionalFields.after) {
-									requestOptions.qs.after = additionalFields.after;
-								}
 
 								return requestOptions;
 							},
 						],
+					},
+					operations: {
+						pagination: createLimitBasedPagination(100),
 					},
 					output: {
 						postReceive: [
@@ -449,6 +444,12 @@ export const userOperations: INodeProperties[] = [
 								type: 'rootProperty',
 								properties: {
 									property: 'data',
+								},
+							},
+							{
+								type: 'limit',
+								properties: {
+									maxResults: '={{$parameter.returnAll ? undefined : $parameter.limit}}',
 								},
 							},
 						],
@@ -492,14 +493,16 @@ export const userOperations: INodeProperties[] = [
 							async function (this, requestOptions) {
 								const userIdInput = this.getNodeParameter('userId') as string;
 								const userId = await resolveUserIdOrLogin.call(this, userIdInput);
+								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
+								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 50) as number);
 
 								const qs: {
 									user_id: string;
 									broadcaster_id?: string;
-									first?: number;
-									after?: string;
+									first: number;
 								} = {
 									user_id: userId,
+									first: returnAll ? 100 : Math.min(limit, 100),
 								};
 
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', '') as string;
@@ -508,19 +511,28 @@ export const userOperations: INodeProperties[] = [
 									qs.broadcaster_id = broadcasterId;
 								}
 
-								const first = this.getNodeParameter('first', 20) as number;
-								if (first !== 20) {
-									qs.first = first;
-								}
-
-								const after = this.getNodeParameter('after', '') as string;
-								if (after !== '') {
-									qs.after = after;
-								}
-
 								requestOptions.qs = qs;
 
 								return requestOptions;
+							},
+						],
+					},
+					operations: {
+						pagination: createLimitBasedPagination(100),
+					},
+					output: {
+						postReceive: [
+							{
+								type: 'rootProperty',
+								properties: {
+									property: 'data',
+								},
+							},
+							{
+								type: 'limit',
+								properties: {
+									maxResults: '={{$parameter.returnAll ? undefined : $parameter.limit}}',
+								},
 							},
 						],
 					},

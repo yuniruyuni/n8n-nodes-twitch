@@ -11,6 +11,7 @@
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';
+import { createLimitBasedPagination } from '../shared/pagination';
 
 // Field definitions for each operation
 const getBroadcasterSubscriptionsFields: INodeProperties[] = [
@@ -32,31 +33,26 @@ const getBroadcasterSubscriptionsFields: INodeProperties[] = [
 		description: 'Filter by user IDs or usernames (comma-separated)',
 	},
 	{
-		displayName: 'First',
-		name: 'first',
+		displayName: 'Return All',
+		name: 'returnAll',
+		type: 'boolean',
+		default: false,
+		description: 'Whether to return all results or only up to a given limit',
+	},
+	{
+		displayName: 'Limit',
+		name: 'limit',
 		type: 'number',
-		default: 20,
+		displayOptions: {
+			show: {
+				returnAll: [false],
+			},
+		},
+		default: 50,
 		typeOptions: {
 			minValue: 1,
-			maxValue: 100,
 		},
-		description: 'Maximum number of items to return',
-	},
-	{
-		displayName: 'After',
-		name: 'after',
-		type: 'string',
-		default: '',
-		placeholder: 'e.g. eyJiIjpudWxsLCJhIjp7Ik9mZnNldCI6MjB9fQ',
-		description: 'Cursor for forward pagination. Do not specify if you set the User ID parameter.',
-	},
-	{
-		displayName: 'Before',
-		name: 'before',
-		type: 'string',
-		default: '',
-		placeholder: 'e.g. eyJiIjpudWxsLCJhIjp7Ik9mZnNldCI6MjB9fQ',
-		description: 'Cursor for backward pagination. Do not specify if you set the User ID parameter.',
+		description: 'Max number of results to return',
 	},
 ];
 
@@ -108,9 +104,8 @@ export const subscriptionOperations: INodeProperties[] = [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
 								const userIdInput = this.getNodeParameter('userId', 0) as string;
-								const first = this.getNodeParameter('first', 0) as number;
-								const after = this.getNodeParameter('after', 0) as string;
-								const before = this.getNodeParameter('before', 0) as string;
+								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
+								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 100) as number);
 
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 
@@ -129,14 +124,16 @@ export const subscriptionOperations: INodeProperties[] = [
 									}
 								}
 
-								if (first) qs.first = first;
-								if (after) qs.after = after;
-								if (before) qs.before = before;
+								// Optimal page size: API max when returnAll, otherwise min(limit, API max)
+								qs.first = returnAll ? 100 : Math.min(limit, 100);
 
 								requestOptions.qs = qs;
 								return requestOptions;
 							},
 						],
+					},
+					operations: {
+						pagination: createLimitBasedPagination(100),
 					},
 					output: {
 						postReceive: [
@@ -144,6 +141,12 @@ export const subscriptionOperations: INodeProperties[] = [
 								type: 'rootProperty',
 								properties: {
 									property: 'data',
+								},
+							},
+							{
+								type: 'limit',
+								properties: {
+									maxResults: '={{$parameter.returnAll ? undefined : $parameter.limit}}',
 								},
 							},
 						],

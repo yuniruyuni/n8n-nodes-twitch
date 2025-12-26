@@ -11,6 +11,7 @@
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';
+import { createLimitBasedPagination } from '../shared/pagination';
 
 // Field definitions for each operation
 const createClipFields: INodeProperties[] = [
@@ -111,6 +112,28 @@ const getClipsFields: INodeProperties[] = [
 		description: 'Clip ID(s). One or more clip IDs separated by commas (max 100).',
 	},
 	{
+		displayName: 'Return All',
+		name: 'returnAll',
+		type: 'boolean',
+		default: false,
+		description: 'Whether to return all results or only up to a given limit',
+	},
+	{
+		displayName: 'Limit',
+		name: 'limit',
+		type: 'number',
+		displayOptions: {
+			show: {
+				returnAll: [false],
+			},
+		},
+		default: 50,
+		typeOptions: {
+			minValue: 1,
+		},
+		description: 'Max number of results to return',
+	},
+	{
 		displayName: 'Started At',
 		name: 'startedAt',
 		type: 'string',
@@ -147,33 +170,6 @@ const getClipsFields: INodeProperties[] = [
 		},
 		default: false,
 		description: 'Whether to filter by featured clips only',
-	},
-	{
-		displayName: 'First',
-		name: 'first',
-		type: 'number',
-		default: 20,
-		typeOptions: {
-			minValue: 1,
-			maxValue: 100,
-		},
-		description: 'Maximum number of clips to return (1-100). Default is 20.',
-	},
-	{
-		displayName: 'After',
-		name: 'after',
-		type: 'string',
-		default: '',
-		placeholder: 'e.g. eyJiIjpudWxsLCJhIjp7Ik9mZnNldCI6MjB9fQ',
-		description: 'Cursor for forward pagination. Get this from the pagination object in the previous response.',
-	},
-	{
-		displayName: 'Before',
-		name: 'before',
-		type: 'string',
-		default: '',
-		placeholder: 'e.g. eyJiIjpudWxsLCJhIjp7Ik9mZnNldCI6MjB9fQ',
-		description: 'Cursor for backward pagination. Get this from the pagination object in the previous response.',
 	},
 ];
 
@@ -252,6 +248,8 @@ export const clipOperations: INodeProperties[] = [
 							async function (this, requestOptions) {
 								// Build query parameters based on filter type
 								const filterType = this.getNodeParameter('filterType') as string;
+								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
+								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 100) as number);
 								const qs: IDataObject = {};
 
 								if (filterType === 'broadcasterId') {
@@ -283,25 +281,16 @@ export const clipOperations: INodeProperties[] = [
 									qs.is_featured = isFeatured;
 								}
 
-								const first = this.getNodeParameter('first', 20) as number;
-								if (first) {
-									qs.first = first;
-								}
-
-								const after = this.getNodeParameter('after', '') as string;
-								if (after && after.trim() !== '') {
-									qs.after = after.trim();
-								}
-
-								const before = this.getNodeParameter('before', '') as string;
-								if (before && before.trim() !== '') {
-									qs.before = before.trim();
-								}
+								// Optimal page size: API max when returnAll, otherwise min(limit, API max)
+								qs.first = returnAll ? 100 : Math.min(limit, 100);
 
 								requestOptions.qs = qs;
 								return requestOptions;
 							},
 						],
+					},
+					operations: {
+						pagination: createLimitBasedPagination(100),
 					},
 					output: {
 						postReceive: [
@@ -309,6 +298,12 @@ export const clipOperations: INodeProperties[] = [
 								type: 'rootProperty',
 								properties: {
 									property: 'data',
+								},
+							},
+							{
+								type: 'limit',
+								properties: {
+									maxResults: '={{$parameter.returnAll ? undefined : $parameter.limit}}',
 								},
 							},
 						],

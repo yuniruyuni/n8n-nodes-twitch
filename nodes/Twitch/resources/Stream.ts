@@ -12,6 +12,7 @@
 import type { INodeProperties, IDataObject } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';
+import { createLimitBasedPagination } from '../shared/pagination';
 
 // Field definitions for each operation
 
@@ -82,6 +83,28 @@ const getStreamsFields: INodeProperties[] = [
 		description: 'Game/category IDs to filter by (comma-separated, max 100)',
 	},
 	{
+		displayName: 'Return All',
+		name: 'returnAll',
+		type: 'boolean',
+		default: false,
+		description: 'Whether to return all results or only up to a given limit',
+	},
+	{
+		displayName: 'Limit',
+		name: 'limit',
+		type: 'number',
+		displayOptions: {
+			show: {
+				returnAll: [false],
+			},
+		},
+		default: 50,
+		typeOptions: {
+			minValue: 1,
+		},
+		description: 'Max number of results to return',
+	},
+	{
 		displayName: 'Additional Fields',
 		name: 'additionalFields',
 		type: 'collection',
@@ -89,37 +112,12 @@ const getStreamsFields: INodeProperties[] = [
 		placeholder: 'Add Field',
 		options: [
 			{
-				displayName: 'After',
-				name: 'after',
-				type: 'string',
-				default: '',
-				description: 'Cursor for forward pagination',
-			},
-			{
-				displayName: 'Before',
-				name: 'before',
-				type: 'string',
-				default: '',
-				description: 'Cursor for backward pagination',
-			},
-			{
 				displayName: 'Languages',
 				name: 'languages',
 				type: 'string',
 				default: '',
 				placeholder: 'e.g. en,es,de',
 				description: 'Language codes to filter by (comma-separated, max 100)',
-			},
-			{
-				displayName: 'Limit',
-				name: 'first',
-				type: 'number',
-				default: 20,
-				typeOptions: {
-					minValue: 1,
-					maxValue: 100,
-				},
-				description: 'Maximum number of items to return (1-100)',
 			},
 			{
 				displayName: 'Type',
@@ -154,31 +152,26 @@ const getFollowedStreamsFields: INodeProperties[] = [
 		description: 'User ID or login name whose followed streams to get. If a login name is provided, it will be automatically converted to user ID. This must match the user ID in the access token.',
 	},
 	{
-		displayName: 'Additional Fields',
-		name: 'additionalFields',
-		type: 'collection',
-		default: {},
-		placeholder: 'Add Field',
-		options: [
-			{
-				displayName: 'After',
-				name: 'after',
-				type: 'string',
-				default: '',
-				description: 'Cursor for forward pagination',
+		displayName: 'Return All',
+		name: 'returnAll',
+		type: 'boolean',
+		default: false,
+		description: 'Whether to return all results or only up to a given limit',
+	},
+	{
+		displayName: 'Limit',
+		name: 'limit',
+		type: 'number',
+		default: 50,
+		displayOptions: {
+			show: {
+				returnAll: [false],
 			},
-			{
-				displayName: 'Limit',
-				name: 'first',
-				type: 'number',
-				default: 100,
-				typeOptions: {
-					minValue: 1,
-					maxValue: 100,
-				},
-				description: 'Maximum number of items to return (1-100)',
-			},
-		],
+		},
+		typeOptions: {
+			minValue: 1,
+		},
+		description: 'Max number of results to return',
 	},
 ];
 
@@ -268,38 +261,26 @@ const getMarkersFields: INodeProperties[] = [
 		description: 'Video ID to get markers from',
 	},
 	{
-		displayName: 'Additional Fields',
-		name: 'additionalFields',
-		type: 'collection',
-		default: {},
-		placeholder: 'Add Field',
-		options: [
-			{
-				displayName: 'After',
-				name: 'after',
-				type: 'string',
-				default: '',
-				description: 'Cursor for forward pagination',
+		displayName: 'Return All',
+		name: 'returnAll',
+		type: 'boolean',
+		default: false,
+		description: 'Whether to return all results or only up to a given limit',
+	},
+	{
+		displayName: 'Limit',
+		name: 'limit',
+		type: 'number',
+		default: 50,
+		displayOptions: {
+			show: {
+				returnAll: [false],
 			},
-			{
-				displayName: 'Before',
-				name: 'before',
-				type: 'string',
-				default: '',
-				description: 'Cursor for backward pagination',
-			},
-			{
-				displayName: 'Limit',
-				name: 'first',
-				type: 'number',
-				default: 20,
-				typeOptions: {
-					minValue: 1,
-					maxValue: 100,
-				},
-				description: 'Maximum number of items to return (1-100)',
-			},
-		],
+		},
+		typeOptions: {
+			minValue: 1,
+		},
+		description: 'Max number of results to return',
 	},
 ];
 
@@ -330,6 +311,8 @@ export const streamOperations: INodeProperties[] = [
 							async function (this, requestOptions) {
 								const filterBy = this.getNodeParameter('filterBy', 0) as string;
 								const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
+								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
+								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 50) as number);
 
 								requestOptions.qs = requestOptions.qs || {};
 
@@ -378,19 +361,15 @@ export const streamOperations: INodeProperties[] = [
 										requestOptions.qs.language = languages;
 									}
 								}
-								if (additionalFields.first) {
-									requestOptions.qs.first = additionalFields.first as number;
-								}
-								if (additionalFields.after) {
-									requestOptions.qs.after = additionalFields.after as string;
-								}
-								if (additionalFields.before) {
-									requestOptions.qs.before = additionalFields.before as string;
-								}
+								// Optimal page size: API max when returnAll, otherwise min(limit, API max)
+								requestOptions.qs.first = returnAll ? 100 : Math.min(limit, 100);
 
 								return requestOptions;
 							},
 						],
+					},
+					operations: {
+						pagination: createLimitBasedPagination(100),
 					},
 					output: {
 						postReceive: [
@@ -398,6 +377,12 @@ export const streamOperations: INodeProperties[] = [
 								type: 'rootProperty',
 								properties: {
 									property: 'data',
+								},
+							},
+							{
+								type: 'limit',
+								properties: {
+									maxResults: '={{$parameter.returnAll ? undefined : $parameter.limit}}',
 								},
 							},
 						],
@@ -419,21 +404,21 @@ export const streamOperations: INodeProperties[] = [
 							async function (this, requestOptions) {
 								const userIdInput = this.getNodeParameter('userId', 0) as string;
 								const userId = await resolveUserIdOrLogin.call(this, userIdInput);
-								const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
+								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
+								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 50) as number);
 
 								requestOptions.qs = requestOptions.qs || {};
 								requestOptions.qs.user_id = userId;
 
-								if (additionalFields.first) {
-									requestOptions.qs.first = additionalFields.first as number;
-								}
-								if (additionalFields.after) {
-									requestOptions.qs.after = additionalFields.after as string;
-								}
+								// Optimal page size: API max when returnAll, otherwise min(limit, API max)
+								requestOptions.qs.first = returnAll ? 100 : Math.min(limit, 100);
 
 								return requestOptions;
 							},
 						],
+					},
+					operations: {
+						pagination: createLimitBasedPagination(100),
 					},
 					output: {
 						postReceive: [
@@ -441,6 +426,12 @@ export const streamOperations: INodeProperties[] = [
 								type: 'rootProperty',
 								properties: {
 									property: 'data',
+								},
+							},
+							{
+								type: 'limit',
+								properties: {
+									maxResults: '={{$parameter.returnAll ? undefined : $parameter.limit}}',
 								},
 							},
 						],
@@ -536,7 +527,8 @@ export const streamOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const filterBy = this.getNodeParameter('filterBy', 0) as string;
-								const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
+								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
+								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 50) as number);
 
 								requestOptions.qs = requestOptions.qs || {};
 
@@ -549,19 +541,15 @@ export const streamOperations: INodeProperties[] = [
 									requestOptions.qs.video_id = videoId;
 								}
 
-								if (additionalFields.first) {
-									requestOptions.qs.first = additionalFields.first as number;
-								}
-								if (additionalFields.after) {
-									requestOptions.qs.after = additionalFields.after as string;
-								}
-								if (additionalFields.before) {
-									requestOptions.qs.before = additionalFields.before as string;
-								}
+								// Optimal page size: API max when returnAll, otherwise min(limit, API max)
+								requestOptions.qs.first = returnAll ? 100 : Math.min(limit, 100);
 
 								return requestOptions;
 							},
 						],
+					},
+					operations: {
+						pagination: createLimitBasedPagination(100),
 					},
 					output: {
 						postReceive: [
@@ -569,6 +557,12 @@ export const streamOperations: INodeProperties[] = [
 								type: 'rootProperty',
 								properties: {
 									property: 'data',
+								},
+							},
+							{
+								type: 'limit',
+								properties: {
+									maxResults: '={{$parameter.returnAll ? undefined : $parameter.limit}}',
 								},
 							},
 						],
