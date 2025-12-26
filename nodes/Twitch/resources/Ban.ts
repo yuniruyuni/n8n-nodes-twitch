@@ -1,3 +1,16 @@
+/**
+ * Ban Resource
+ *
+ * Operations for Twitch Ban API endpoints:
+ * - Ban User
+ * - Unban User
+ * - Get Banned Users
+ * - Get Unban Requests
+ * - Resolve Unban Request
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#ban-user
+ */
+
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

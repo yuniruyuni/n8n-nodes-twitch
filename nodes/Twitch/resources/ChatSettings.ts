@@ -1,3 +1,16 @@
+/**
+ * Chat Settings Resource
+ *
+ * Operations for Twitch Chat Settings API endpoints:
+ * - Get Chat Settings
+ * - Update Chat Settings
+ * - Get User Chat Color
+ * - Update User Chat Color
+ * - Get Shared Chat Session
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-chat-settings
+ */
+
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

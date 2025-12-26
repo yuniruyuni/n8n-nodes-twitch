@@ -1,3 +1,13 @@
+/**
+ * Subscription Resource
+ *
+ * Operations for Twitch Subscription API endpoints:
+ * - Get Broadcaster Subscriptions
+ * - Check User Subscription
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-broadcaster-subscriptions
+ */
+
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

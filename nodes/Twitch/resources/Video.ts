@@ -1,3 +1,13 @@
+/**
+ * Video Resource
+ *
+ * Operations for Twitch Video API endpoints:
+ * - Get Videos
+ * - Delete Videos
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-videos
+ */
+
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

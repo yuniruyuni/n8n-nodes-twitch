@@ -1,3 +1,14 @@
+/**
+ * Prediction Resource
+ *
+ * Operations for Twitch Prediction API endpoints:
+ * - Create Prediction
+ * - Get Predictions
+ * - End Prediction
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#create-prediction
+ */
+
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

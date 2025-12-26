@@ -1,3 +1,13 @@
+/**
+ * Hype Train Resource
+ *
+ * Operations for Twitch Hype Train API endpoints:
+ * - Get Hype Train Events
+ * - Get Hype Train Status
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-hype-train-events
+ */
+
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

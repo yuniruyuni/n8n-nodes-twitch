@@ -1,3 +1,13 @@
+/**
+ * Clip Resource
+ *
+ * Operations for Twitch Clip API endpoints:
+ * - Create Clip
+ * - Get Clips
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#create-clip
+ */
+
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

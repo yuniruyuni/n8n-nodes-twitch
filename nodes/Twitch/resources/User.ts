@@ -1,3 +1,15 @@
+/**
+ * User Resource
+ *
+ * Operations for Twitch Users API endpoints:
+ * - Get user information by ID or login name
+ * - Update user profile description
+ * - Get and manage user block list
+ * - Get and update user extensions
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-users
+ */
+
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

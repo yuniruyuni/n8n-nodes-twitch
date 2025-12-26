@@ -1,3 +1,12 @@
+/**
+ * Whisper Resource
+ *
+ * Operations for Twitch Whisper API endpoints:
+ * - Send Whisper
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#send-whisper
+ */
+
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

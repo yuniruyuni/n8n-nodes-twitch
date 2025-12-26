@@ -1,3 +1,14 @@
+/**
+ * Ad Resource
+ *
+ * Operations for Twitch Ad API endpoints:
+ * - Start Commercial
+ * - Get Ad Schedule
+ * - Snooze Next Ad
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#start-commercial
+ */
+
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

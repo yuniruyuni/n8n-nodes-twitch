@@ -1,3 +1,15 @@
+/**
+ * Custom Reward Resource
+ *
+ * Operations for Twitch Channel Points Custom Reward API endpoints:
+ * - Create Custom Reward
+ * - Get Custom Rewards
+ * - Update Custom Reward
+ * - Delete Custom Reward
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#create-custom-rewards
+ */
+
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

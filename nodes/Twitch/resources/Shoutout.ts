@@ -1,3 +1,12 @@
+/**
+ * Shoutout Resource
+ *
+ * Operations for Twitch Shoutout API endpoints:
+ * - Send Shoutout
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#send-a-shoutout
+ */
+
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

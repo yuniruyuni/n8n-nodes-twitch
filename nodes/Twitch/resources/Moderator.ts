@@ -1,3 +1,15 @@
+/**
+ * Moderator Resource
+ *
+ * Operations for Twitch Moderator API endpoints:
+ * - Get Moderators
+ * - Get Moderated Channels
+ * - Add Moderator
+ * - Remove Moderator
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-moderators
+ */
+
 import { ApplicationError } from 'n8n-workflow';
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';

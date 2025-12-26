@@ -1,3 +1,13 @@
+/**
+ * Game Resource
+ *
+ * Operations for Twitch Game API endpoints:
+ * - Get Games
+ * - Get Top Games
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-games
+ */
+
 import { ApplicationError } from 'n8n-workflow';
 import type { INodeProperties } from 'n8n-workflow';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

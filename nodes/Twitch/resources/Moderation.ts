@@ -1,3 +1,18 @@
+/**
+ * Moderation Resource
+ *
+ * Operations for Twitch Moderation API endpoints:
+ * - Check AutoMod Status
+ * - Manage Held AutoMod Message
+ * - Get/Update AutoMod Settings
+ * - Get/Add/Remove Blocked Terms
+ * - Delete Chat Messages
+ * - Get/Update Shield Mode Status
+ * - Warn Chat User
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#check-automod-status
+ */
+
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

@@ -1,3 +1,14 @@
+/**
+ * VIP Resource
+ *
+ * Operations for Twitch VIP API endpoints:
+ * - Get VIPs
+ * - Add VIP
+ * - Remove VIP
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-vips
+ */
+
 import { ApplicationError } from 'n8n-workflow';
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';

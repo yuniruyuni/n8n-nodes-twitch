@@ -1,3 +1,13 @@
+/**
+ * Search Resource
+ *
+ * Operations for Twitch Search API endpoints:
+ * - Search Channels
+ * - Search Categories
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#search-channels
+ */
+
 import type { INodeProperties } from 'n8n-workflow';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';
 

@@ -1,3 +1,15 @@
+/**
+ * Channel Resource
+ *
+ * Operations for Twitch Channels API endpoints:
+ * - Get channel information
+ * - Update channel information (game, title, language, etc.)
+ * - Get and manage channel editors
+ * - Get followed channels
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-channel-information
+ */
+
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

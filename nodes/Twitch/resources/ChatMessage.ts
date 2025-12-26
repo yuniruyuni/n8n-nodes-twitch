@@ -1,3 +1,12 @@
+/**
+ * Chat Message Resource
+ *
+ * Operations for Twitch Chat Message API endpoints:
+ * - Send Message
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#send-chat-message
+ */
+
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

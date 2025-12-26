@@ -1,3 +1,13 @@
+/**
+ * Charity Resource
+ *
+ * Operations for Twitch Charity API endpoints:
+ * - Get Charity Campaign
+ * - Get Charity Campaign Donations
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-charity-campaign
+ */
+
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

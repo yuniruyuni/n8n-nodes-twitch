@@ -1,3 +1,15 @@
+/**
+ * Emote Resource
+ *
+ * Operations for Twitch Emote API endpoints:
+ * - Get Channel Emotes
+ * - Get Emote Sets
+ * - Get Global Emotes
+ * - Get User Emotes
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-channel-emotes
+ */
+
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 

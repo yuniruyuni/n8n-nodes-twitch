@@ -1,3 +1,12 @@
+/**
+ * Cheermote Resource
+ *
+ * Operations for Twitch Cheermote API endpoints:
+ * - Get Cheermotes
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-cheermotes
+ */
+
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 

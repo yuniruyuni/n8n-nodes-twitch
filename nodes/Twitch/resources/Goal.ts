@@ -1,3 +1,12 @@
+/**
+ * Goal Resource
+ *
+ * Operations for Twitch Creator Goals API endpoints:
+ * - Get Creator Goals
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-creator-goals
+ */
+
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

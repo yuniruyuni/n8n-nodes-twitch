@@ -1,3 +1,13 @@
+/**
+ * Redemption Resource
+ *
+ * Operations for Twitch Channel Points Redemption API endpoints:
+ * - Get Reward Redemptions
+ * - Update Redemption Status
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-custom-reward-redemption
+ */
+
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

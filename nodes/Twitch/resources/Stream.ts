@@ -1,3 +1,14 @@
+/**
+ * Stream Resource
+ *
+ * Operations for Twitch Streams API endpoints:
+ * - Get stream information (online/offline status, viewer count, etc.)
+ * - Create stream markers
+ * - Get followed streams
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-streams
+ */
+
 import type { INodeProperties, IDataObject } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

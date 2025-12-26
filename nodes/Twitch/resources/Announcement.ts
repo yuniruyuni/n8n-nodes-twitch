@@ -1,3 +1,12 @@
+/**
+ * Announcement Resource
+ *
+ * Operations for Twitch Announcement API endpoints:
+ * - Send Announcement
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#send-chat-announcement
+ */
+
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

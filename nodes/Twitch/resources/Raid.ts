@@ -1,3 +1,13 @@
+/**
+ * Raid Resource
+ *
+ * Operations for Twitch Raid API endpoints:
+ * - Start Raid
+ * - Cancel Raid
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#start-a-raid
+ */
+
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

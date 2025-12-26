@@ -1,3 +1,17 @@
+/**
+ * Schedule Resource
+ *
+ * Operations for Twitch Stream Schedule API endpoints:
+ * - Get Stream Schedule
+ * - Create Schedule Segment
+ * - Update Schedule Segment
+ * - Delete Schedule Segment
+ * - Update Schedule Settings
+ * - Get iCalendar
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-channel-stream-schedule
+ */
+
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

@@ -1,3 +1,13 @@
+/**
+ * Team Resource
+ *
+ * Operations for Twitch Team API endpoints:
+ * - Get Channel Teams
+ * - Get Team
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-channel-teams
+ */
+
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

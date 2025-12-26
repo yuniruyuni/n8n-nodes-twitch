@@ -1,3 +1,12 @@
+/**
+ * Bits Leaderboard Resource
+ *
+ * Operations for Twitch Bits Leaderboard API endpoints:
+ * - Get Bits Leaderboard
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-bits-leaderboard
+ */
+
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

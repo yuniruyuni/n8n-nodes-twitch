@@ -1,3 +1,13 @@
+/**
+ * Analytics Resource
+ *
+ * Operations for Twitch Analytics API endpoints:
+ * - Get Extension Analytics
+ * - Get Game Analytics
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-extension-analytics
+ */
+
 import type { INodeProperties, IDataObject } from 'n8n-workflow';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';
 

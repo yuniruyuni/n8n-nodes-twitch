@@ -1,3 +1,12 @@
+/**
+ * Chatter Resource
+ *
+ * Operations for Twitch Chatter API endpoints:
+ * - Get Chatters
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-chatters
+ */
+
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 

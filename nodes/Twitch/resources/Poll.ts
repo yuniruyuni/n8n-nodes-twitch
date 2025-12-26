@@ -1,3 +1,14 @@
+/**
+ * Poll Resource
+ *
+ * Operations for Twitch Poll API endpoints:
+ * - Create Poll
+ * - Get Polls
+ * - End Poll
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#create-poll
+ */
+
 import type { INodeProperties, IDataObject } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';

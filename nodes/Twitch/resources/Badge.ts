@@ -1,3 +1,13 @@
+/**
+ * Badge Resource
+ *
+ * Operations for Twitch Badge API endpoints:
+ * - Get Channel Chat Badges
+ * - Get Global Chat Badges
+ *
+ * @see https://dev.twitch.tv/docs/api/reference#get-channel-chat-badges
+ */
+
 import type { INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 
