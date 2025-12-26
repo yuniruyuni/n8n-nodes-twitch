@@ -10,7 +10,7 @@ const getCampaignFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The ID of the broadcaster that\'s currently running a charity campaign. This ID must match the user ID in the access token.',
 	},
 ];
@@ -22,7 +22,7 @@ const getDonationsFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The ID of the broadcaster that\'s currently running a charity campaign. This ID must match the user ID in the access token.',
 	},
 	{

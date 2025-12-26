@@ -58,7 +58,7 @@ const getFields: INodeProperties[] = [
 		name: 'userId',
 		type: 'string',
 		default: '',
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'User ID or username that cheered bits. If count is greater than 1, response may include users ranked above and below this user. Leave empty for top leaders.',
 	},
 ];

@@ -10,7 +10,7 @@ const sendFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 12826 or username',
+		placeholder: 'e.g. 12826 or torpedo09',
 		description: 'The ID of the broadcaster that owns the chat room to send the announcement to. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
@@ -19,7 +19,7 @@ const sendFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 141981764 or username',
+		placeholder: 'e.g. 141981764 or torpedo09',
 		description: 'The ID of a user who has permission to moderate the broadcaster\'s chat room, or the broadcaster\'s ID if they\'re sending the announcement. This ID must match the user ID in the user access token. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{

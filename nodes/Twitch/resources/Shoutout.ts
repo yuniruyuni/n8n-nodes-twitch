@@ -10,7 +10,7 @@ const sendFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 12345 or username',
+		placeholder: 'e.g. 12345 or torpedo09',
 		description: 'The ID of the broadcaster that\'s sending the Shoutout. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
@@ -19,7 +19,7 @@ const sendFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 626262 or username',
+		placeholder: 'e.g. 626262 or torpedo09',
 		description: 'The ID of the broadcaster that\'s receiving the Shoutout. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
@@ -28,7 +28,7 @@ const sendFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 98765 or username',
+		placeholder: 'e.g. 98765 or torpedo09',
 		description: 'The ID of the broadcaster or a user that is one of the broadcaster\'s moderators. This ID must match the user ID in the access token. If a login name is provided, it will be automatically converted to user ID.',
 	},
 ];

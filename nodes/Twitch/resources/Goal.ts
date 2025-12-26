@@ -10,7 +10,7 @@ const getCreatorGoalsFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The ID of the broadcaster that created the goals. This ID must match the user ID in the user access token.',
 	},
 ];

@@ -10,7 +10,7 @@ const createPredictionFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
@@ -61,7 +61,7 @@ const getPredictionsFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
@@ -100,7 +100,7 @@ const endPredictionFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{

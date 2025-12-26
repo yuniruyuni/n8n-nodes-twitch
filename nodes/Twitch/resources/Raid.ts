@@ -10,7 +10,7 @@ const startRaidFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The broadcaster user ID or login name that is starting the raid (must be the authenticated user). If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
@@ -19,7 +19,7 @@ const startRaidFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 987654321 or username',
+		placeholder: 'e.g. 987654321 or torpedo09',
 		description: 'The broadcaster user ID or login name to raid. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
@@ -38,7 +38,7 @@ const cancelRaidFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{

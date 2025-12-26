@@ -9,7 +9,7 @@ const sharedBroadcasterIdField: INodeProperties = {
 	type: 'string',
 	default: '',
 	required: true,
-	placeholder: 'e.g. 123456789 or username',
+	placeholder: 'e.g. 123456789 or torpedo09',
 	description: 'Broadcaster user ID or login name. Usernames will be automatically converted to user IDs.',
 };
 
@@ -29,7 +29,7 @@ const sharedUserIdField: INodeProperties = {
 	type: 'string',
 	default: '',
 	required: true,
-	placeholder: 'e.g. 555666777 or username',
+	placeholder: 'e.g. 555666777 or torpedo09',
 	description: 'User ID or login name. Usernames will be automatically converted to user IDs.',
 };
 

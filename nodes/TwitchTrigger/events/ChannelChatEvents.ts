@@ -17,27 +17,27 @@ const chatEventNames = [
 // These events require broadcaster_user_id + user_id
 const broadcasterIdField: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description:
-			'The broadcaster user ID or username to monitor. If a username is provided, it will be automatically converted to user ID.',
+			'The broadcaster user ID or login name to monitor. If a login name is provided, it will be automatically converted to user ID.',
 	},
 ];
 
 const userIdField: INodeProperties[] = [
 	{
-		displayName: 'User ID or Username',
+		displayName: 'User',
 		name: 'userId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description:
-			'The user ID or username. If a username is provided, it will be automatically converted to user ID.',
+			'The user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 ];
 

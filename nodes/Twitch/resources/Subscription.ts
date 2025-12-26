@@ -10,7 +10,7 @@ const getBroadcasterSubscriptionsFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
@@ -57,7 +57,7 @@ const checkUserSubscriptionFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
@@ -66,7 +66,7 @@ const checkUserSubscriptionFields: INodeProperties[] = [
 		type: 'string',
 		required: true,
 		default: '',
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The user ID or login name to check. If a login name is provided, it will be automatically converted to user ID.',
 	},
 ];

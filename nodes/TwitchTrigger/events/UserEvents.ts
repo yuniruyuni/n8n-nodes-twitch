@@ -8,14 +8,14 @@ const userEventNames = ['user.update', 'user.whisper.message'];
 // These events require user_id only
 const userIdField: INodeProperties[] = [
 	{
-		displayName: 'User ID or Username',
+		displayName: 'User',
 		name: 'userId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description:
-			'The user ID or username. If a username is provided, it will be automatically converted to user ID.',
+			'The user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 ];
 

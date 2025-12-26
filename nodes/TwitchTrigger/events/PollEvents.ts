@@ -8,14 +8,14 @@ const pollEventNames = ['channel.poll.begin', 'channel.poll.progress', 'channel.
 // These events require broadcaster_user_id only
 const broadcasterIdField: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description:
-			'The broadcaster user ID or username to monitor. If a username is provided, it will be automatically converted to user ID.',
+			'The broadcaster user ID or login name to monitor. If a login name is provided, it will be automatically converted to user ID.',
 	},
 ];
 

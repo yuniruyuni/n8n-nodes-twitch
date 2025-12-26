@@ -11,7 +11,7 @@ const getFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
@@ -50,7 +50,7 @@ const addFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
@@ -59,7 +59,7 @@ const addFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The user ID or login name to give VIP status to. If a login name is provided, it will be automatically converted to user ID.',
 	},
 ];
@@ -71,7 +71,7 @@ const removeFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
@@ -80,7 +80,7 @@ const removeFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The user ID or login name to remove VIP status from. If a login name is provided, it will be automatically converted to user ID.',
 	},
 ];

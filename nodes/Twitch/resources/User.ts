@@ -211,7 +211,7 @@ const getFollowedChannelsFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'A user\'s ID or username. If a login name is provided, it will be automatically converted to user ID. Returns the list of broadcasters that this user follows. This ID must match the user ID in the user OAuth token.',
 	},
 	{
@@ -219,7 +219,7 @@ const getFollowedChannelsFields: INodeProperties[] = [
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'A broadcaster\'s ID. Use this parameter to see whether the user follows this broadcaster.',
 	},
 	{

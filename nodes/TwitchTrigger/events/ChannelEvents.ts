@@ -43,26 +43,26 @@ const moderatorEventNames = [
 
 const broadcasterIdField: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description:
-			'The broadcaster user ID or username to monitor. If a username is provided, it will be automatically converted to user ID.',
+			'The broadcaster user ID or login name to monitor. If a login name is provided, it will be automatically converted to user ID.',
 	},
 ];
 
 const moderatorIdField: INodeProperties[] = [
 	{
-		displayName: 'Moderator ID or Username',
+		displayName: 'Moderator',
 		name: 'moderatorId',
 		type: 'string',
 		default: '',
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description:
-			'The moderator user ID or username. If a username is provided, it will be automatically converted to user ID. Leave empty to use broadcaster ID.',
+			'The moderator user ID or login name. If a login name is provided, it will be automatically converted to user ID. Leave empty to use broadcaster ID.',
 	},
 ];
 

@@ -10,7 +10,7 @@ const getScheduleFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
@@ -65,7 +65,7 @@ const createSegmentFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
@@ -136,7 +136,7 @@ const updateSegmentFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
@@ -213,7 +213,7 @@ const deleteSegmentFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
@@ -234,7 +234,7 @@ const updateScheduleSettingsFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
@@ -286,7 +286,7 @@ const getICalendarFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 ];

@@ -10,7 +10,7 @@ const startCommercialFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 141981764 or username',
+		placeholder: 'e.g. 141981764 or torpedo09',
 		description: 'The ID of the partner or affiliate broadcaster that wants to run the commercial. This ID must match the user ID found in the OAuth token. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
@@ -41,7 +41,7 @@ const getAdScheduleFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The broadcaster ID to get ad schedule for. This must match the user ID in the OAuth token. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
@@ -60,7 +60,7 @@ const snoozeNextAdFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The broadcaster ID to snooze the next ad for. This must match the user ID in the OAuth token. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{

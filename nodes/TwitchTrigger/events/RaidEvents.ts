@@ -27,13 +27,13 @@ const raidFields: INodeProperties[] = [
 		description: 'Whether to monitor incoming or outgoing raids',
 	},
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'raidBroadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username for raid events',
+		placeholder: 'e.g. 123456789 or torpedo09',
+		description: 'The broadcaster user ID or login name for raid events',
 	},
 ];
 

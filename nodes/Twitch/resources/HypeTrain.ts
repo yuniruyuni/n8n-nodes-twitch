@@ -10,7 +10,7 @@ const getEventsFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The ID of the broadcaster that\'s running the Hype Train. This ID must match the User ID in the user access token.',
 	},
 	{
@@ -41,7 +41,7 @@ const getStatusFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The User ID of the channel broadcaster',
 	},
 ];
