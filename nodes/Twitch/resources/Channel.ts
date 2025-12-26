@@ -143,12 +143,12 @@ const getFollowersFields: INodeProperties[] = [
 		description: 'The broadcaster\'s ID. Returns the list of users that follow this broadcaster.',
 	},
 	{
-		displayName: 'User ID',
+		displayName: 'User ID or Username',
 		name: 'userId',
 		type: 'string',
 		default: '',
-		placeholder: 'e.g. 123456789',
-		description: 'A user\'s ID. Use this parameter to see whether the user follows this broadcaster. If specified, the response contains this user if they follow the broadcaster.',
+		placeholder: 'e.g. 123456789 or username',
+		description: 'A user\'s ID or username. If a username is provided, it will be automatically converted to user ID. Use this parameter to see whether the user follows this broadcaster. If specified, the response contains this user if they follow the broadcaster.',
 	},
 	{
 		displayName: 'Limit',
@@ -336,8 +336,9 @@ export const channelOperations: INodeProperties[] = [
 									broadcaster_id: broadcasterId,
 								};
 
-								const userId = this.getNodeParameter('userId', '') as string;
-								if (userId !== '') {
+								const userIdInput = this.getNodeParameter('userId', '') as string;
+								if (userIdInput !== '') {
+									const userId = await resolveUserIdOrUsername.call(this, userIdInput);
 									qs.user_id = userId;
 								}
 

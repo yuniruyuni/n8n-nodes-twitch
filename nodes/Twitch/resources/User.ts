@@ -62,13 +62,13 @@ const updateFields: INodeProperties[] = [
 
 const blockFields: INodeProperties[] = [
 	{
-		displayName: 'Target User ID',
+		displayName: 'Target User ID or Username',
 		name: 'targetUserId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 198704263',
-		description: 'The ID of the user to block',
+		placeholder: 'e.g. 198704263 or username',
+		description: 'The ID or username of the user to block. If a username is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -121,25 +121,25 @@ const blockFields: INodeProperties[] = [
 
 const unblockFields: INodeProperties[] = [
 	{
-		displayName: 'Target User ID',
+		displayName: 'Target User ID or Username',
 		name: 'targetUserId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 198704263',
-		description: 'The ID of the user to unblock',
+		placeholder: 'e.g. 198704263 or username',
+		description: 'The ID or username of the user to unblock. If a username is provided, it will be automatically converted to user ID.',
 	},
 ];
 
 const getBlockListFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID',
+		displayName: 'Broadcaster ID or Username',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 141981764',
-		description: 'The ID of the broadcaster whose list of blocked users you want to get',
+		placeholder: 'e.g. 141981764 or username',
+		description: 'The ID or username of the broadcaster whose list of blocked users you want to get. If a username is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -172,12 +172,12 @@ const getBlockListFields: INodeProperties[] = [
 
 const getActiveExtensionsFields: INodeProperties[] = [
 	{
-		displayName: 'User ID',
+		displayName: 'User ID or Username',
 		name: 'userId',
 		type: 'string',
 		default: '',
-		placeholder: 'e.g. 141981764',
-		description: 'The ID of the broadcaster whose active extensions you want to get. Optional if using user access token.',
+		placeholder: 'e.g. 141981764 or username',
+		description: 'The ID or username of the broadcaster whose active extensions you want to get. If a username is provided, it will be automatically converted to user ID. Optional if using user access token.',
 	},
 ];
 
@@ -194,25 +194,25 @@ const updateExtensionsFields: INodeProperties[] = [
 
 const getAuthorizationFields: INodeProperties[] = [
 	{
-		displayName: 'User IDs',
+		displayName: 'User IDs or Usernames',
 		name: 'userIds',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 141981764,197886470',
-		description: 'User ID(s) to check authorization for. For multiple users, separate with commas. Maximum 10 IDs.',
+		placeholder: 'e.g. 141981764,197886470 or user1,user2',
+		description: 'User ID(s) or username(s) to check authorization for. If usernames are provided, they will be automatically converted to user IDs. For multiple users, separate with commas. Maximum 10 users.',
 	},
 ];
 
 const getFollowedChannelsFields: INodeProperties[] = [
 	{
-		displayName: 'User ID',
+		displayName: 'User ID or Username',
 		name: 'userId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789',
-		description: 'A user\'s ID. Returns the list of broadcasters that this user follows. This ID must match the user ID in the user OAuth token.',
+		placeholder: 'e.g. 123456789 or username',
+		description: 'A user\'s ID or username. If a username is provided, it will be automatically converted to user ID. Returns the list of broadcasters that this user follows. This ID must match the user ID in the user OAuth token.',
 	},
 	{
 		displayName: 'Broadcaster ID or Username',
@@ -263,11 +263,31 @@ export const userOperations: INodeProperties[] = [
 					request: {
 						method: 'PUT',
 						url: '/users/blocks',
-						qs: {
-							target_user_id: '={{$parameter.targetUserId}}',
-							source_context: '={{$parameter.additionalFields?.sourceContext}}',
-							reason: '={{$parameter.additionalFields?.reason}}',
-						},
+					},
+					send: {
+						preSend: [
+							async function (this, requestOptions) {
+								const targetUserIdInput = this.getNodeParameter('targetUserId') as string;
+								const targetUserId = await resolveUserIdOrUsername.call(this, targetUserIdInput);
+								const additionalFields = this.getNodeParameter('additionalFields', {}) as {
+									sourceContext?: string;
+									reason?: string;
+								};
+
+								requestOptions.qs = {
+									target_user_id: targetUserId,
+								};
+
+								if (additionalFields.sourceContext) {
+									requestOptions.qs.source_context = additionalFields.sourceContext;
+								}
+								if (additionalFields.reason) {
+									requestOptions.qs.reason = additionalFields.reason;
+								}
+
+								return requestOptions;
+							},
+						],
 					},
 				},
 			},
@@ -321,9 +341,22 @@ export const userOperations: INodeProperties[] = [
 					request: {
 						method: 'GET',
 						url: '/users/extensions',
-						qs: {
-							user_id: '={{$parameter.userId}}',
-						},
+					},
+					send: {
+						preSend: [
+							async function (this, requestOptions) {
+								const userIdInput = this.getNodeParameter('userId', '') as string;
+
+								if (userIdInput !== '') {
+									const userId = await resolveUserIdOrUsername.call(this, userIdInput);
+									requestOptions.qs = {
+										user_id: userId,
+									};
+								}
+
+								return requestOptions;
+							},
+						],
 					},
 				},
 			},
@@ -340,8 +373,11 @@ export const userOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const userIds = this.getNodeParameter('userIds', 0) as string;
-								const ids = userIds.split(',').map((id) => id.trim());
+								const userIdsInput = this.getNodeParameter('userIds', 0) as string;
+								const inputs = userIdsInput.split(',').map((id) => id.trim());
+								const ids = await Promise.all(
+									inputs.map((input) => resolveUserIdOrUsername.call(this, input))
+								);
 								requestOptions.qs = requestOptions.qs || {};
 								requestOptions.qs.user_id = ids;
 								return requestOptions;
@@ -369,11 +405,31 @@ export const userOperations: INodeProperties[] = [
 					request: {
 						method: 'GET',
 						url: '/users/blocks',
-						qs: {
-							broadcaster_id: '={{$parameter.broadcasterId}}',
-							first: '={{$parameter.additionalFields?.first}}',
-							after: '={{$parameter.additionalFields?.after}}',
-						},
+					},
+					send: {
+						preSend: [
+							async function (this, requestOptions) {
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const additionalFields = this.getNodeParameter('additionalFields', {}) as {
+									first?: number;
+									after?: string;
+								};
+
+								requestOptions.qs = {
+									broadcaster_id: broadcasterId,
+								};
+
+								if (additionalFields.first) {
+									requestOptions.qs.first = additionalFields.first;
+								}
+								if (additionalFields.after) {
+									requestOptions.qs.after = additionalFields.after;
+								}
+
+								return requestOptions;
+							},
+						],
 					},
 					output: {
 						postReceive: [
@@ -422,7 +478,8 @@ export const userOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const userId = this.getNodeParameter('userId') as string;
+								const userIdInput = this.getNodeParameter('userId') as string;
+								const userId = await resolveUserIdOrUsername.call(this, userIdInput);
 
 								const qs: {
 									user_id: string;
@@ -466,9 +523,20 @@ export const userOperations: INodeProperties[] = [
 					request: {
 						method: 'DELETE',
 						url: '/users/blocks',
-						qs: {
-							target_user_id: '={{$parameter.targetUserId}}',
-						},
+					},
+					send: {
+						preSend: [
+							async function (this, requestOptions) {
+								const targetUserIdInput = this.getNodeParameter('targetUserId') as string;
+								const targetUserId = await resolveUserIdOrUsername.call(this, targetUserIdInput);
+
+								requestOptions.qs = {
+									target_user_id: targetUserId,
+								};
+
+								return requestOptions;
+							},
+						],
 					},
 				},
 			},

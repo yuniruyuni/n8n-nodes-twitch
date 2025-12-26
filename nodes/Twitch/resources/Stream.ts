@@ -1,4 +1,5 @@
 import type { INodeProperties, IDataObject } from 'n8n-workflow';
+import { resolveUserIdOrUsername } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
@@ -133,13 +134,13 @@ const getStreamsFields: INodeProperties[] = [
 // Get Followed Streams
 const getFollowedStreamsFields: INodeProperties[] = [
 	{
-		displayName: 'User ID',
+		displayName: 'User ID or Username',
 		name: 'userId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 141981764',
-		description: 'The ID of the user whose followed streams to get (must match token user ID)',
+		placeholder: 'e.g. 141981764 or username',
+		description: 'The ID or username of the user whose followed streams to get. If a username is provided, it will be automatically converted to user ID. This must match the user ID in the access token.',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -173,26 +174,26 @@ const getFollowedStreamsFields: INodeProperties[] = [
 // Get Stream Key
 const getStreamKeyFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID',
+		displayName: 'Broadcaster ID or Username',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 141981764',
-		description: 'The ID of the broadcaster (must match user ID in access token)',
+		placeholder: 'e.g. 141981764 or username',
+		description: 'The ID or username of the broadcaster. If a username is provided, it will be automatically converted to user ID. This must match the user ID in the access token.',
 	},
 ];
 
 // Create Stream Marker
 const createMarkerFields: INodeProperties[] = [
 	{
-		displayName: 'User ID',
+		displayName: 'User ID or Username',
 		name: 'userId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123',
-		description: 'The ID of the broadcaster streaming content (must match token user ID or be editor)',
+		placeholder: 'e.g. 123 or username',
+		description: 'The ID or username of the broadcaster streaming content. If a username is provided, it will be automatically converted to user ID. This must match the user ID in the access token or be an editor.',
 	},
 	{
 		displayName: 'Description',
@@ -228,7 +229,7 @@ const getMarkersFields: INodeProperties[] = [
 		description: 'Get markers by user (most recent stream) or specific video',
 	},
 	{
-		displayName: 'User ID',
+		displayName: 'User ID or Username',
 		name: 'userId',
 		type: 'string',
 		default: '',
@@ -238,8 +239,8 @@ const getMarkersFields: INodeProperties[] = [
 			},
 		},
 		required: true,
-		placeholder: 'e.g. 123',
-		description: 'User ID to get markers from their most recent stream',
+		placeholder: 'e.g. 123 or username',
+		description: 'User ID or username to get markers from their most recent stream. If a username is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Video ID',
@@ -405,7 +406,8 @@ export const streamOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const userId = this.getNodeParameter('userId', 0) as string;
+								const userIdInput = this.getNodeParameter('userId', 0) as string;
+								const userId = await resolveUserIdOrUsername.call(this, userIdInput);
 								const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
 
 								requestOptions.qs = requestOptions.qs || {};
@@ -443,9 +445,20 @@ export const streamOperations: INodeProperties[] = [
 					request: {
 						method: 'GET',
 						url: '/streams/key',
-						qs: {
-							broadcaster_id: '={{$parameter.broadcasterId}}',
-						},
+					},
+					send: {
+						preSend: [
+							async function (this, requestOptions) {
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+
+								requestOptions.qs = {
+									broadcaster_id: broadcasterId,
+								};
+
+								return requestOptions;
+							},
+						],
 					},
 					output: {
 						postReceive: [
@@ -472,7 +485,8 @@ export const streamOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const userId = this.getNodeParameter('userId', 0) as string;
+								const userIdInput = this.getNodeParameter('userId', 0) as string;
+								const userId = await resolveUserIdOrUsername.call(this, userIdInput);
 								const description = this.getNodeParameter('description', 0) as string;
 
 								const body: { user_id: string; description?: string } = { user_id: userId };
@@ -516,7 +530,8 @@ export const streamOperations: INodeProperties[] = [
 								requestOptions.qs = requestOptions.qs || {};
 
 								if (filterBy === 'userId') {
-									const userId = this.getNodeParameter('userId', 0) as string;
+									const userIdInput = this.getNodeParameter('userId', 0) as string;
+									const userId = await resolveUserIdOrUsername.call(this, userIdInput);
 									requestOptions.qs.user_id = userId;
 								} else if (filterBy === 'videoId') {
 									const videoId = this.getNodeParameter('videoId', 0) as string;
