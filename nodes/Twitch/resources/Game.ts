@@ -1,6 +1,6 @@
 import { ApplicationError } from 'n8n-workflow';
 import type { INodeProperties } from 'n8n-workflow';
-import { updateDisplayOptions } from '../shared/updateDisplayOptions';
+import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';
 
 // Field definitions for each operation
 const getGamesFields: INodeProperties[] = [

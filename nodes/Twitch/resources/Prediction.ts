@@ -1,6 +1,6 @@
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
-import { updateDisplayOptions } from '../shared/updateDisplayOptions';
+import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';
 
 // Field definitions for each operation
 const createPredictionFields: INodeProperties[] = [

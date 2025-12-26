@@ -1,5 +1,5 @@
 import type { INodeProperties, IDataObject } from 'n8n-workflow';
-import { updateDisplayOptions } from '../shared/updateDisplayOptions';
+import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';
 import type { EventConditionBuilder } from './types';
 
 // Drop entitlement grant event
