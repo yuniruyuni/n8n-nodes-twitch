@@ -1,4 +1,5 @@
 import type { INodeProperties } from 'n8n-workflow';
+import { resolveUserIdOrUsername } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
@@ -203,6 +204,44 @@ const getAuthorizationFields: INodeProperties[] = [
 	},
 ];
 
+const getFollowedChannelsFields: INodeProperties[] = [
+	{
+		displayName: 'User ID',
+		name: 'userId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789',
+		description: 'A user\'s ID. Returns the list of broadcasters that this user follows. This ID must match the user ID in the user OAuth token.',
+	},
+	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		placeholder: 'e.g. 123456789 or username',
+		description: 'A broadcaster\'s ID. Use this parameter to see whether the user follows this broadcaster.',
+	},
+	{
+		displayName: 'Limit',
+		name: 'first',
+		type: 'number',
+		default: 20,
+		description: 'The maximum number of items to return per page (1-100). Default is 20.',
+		typeOptions: {
+			minValue: 1,
+			maxValue: 100,
+		},
+	},
+	{
+		displayName: 'After',
+		name: 'after',
+		type: 'string',
+		default: '',
+		description: 'The cursor used to get the next page of results',
+	},
+];
+
 export const userOperations: INodeProperties[] = [
 	{
 		displayName: 'Operation',
@@ -371,6 +410,54 @@ export const userOperations: INodeProperties[] = [
 				},
 			},
 			{
+				name: 'Get Followed Channels',
+				value: 'getFollowedChannels',
+				action: 'Get followed channels',
+				description: 'Get a list of broadcasters that the specified user follows (requires user:read:follows scope)',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '/channels/followed',
+					},
+					send: {
+						preSend: [
+							async function (this, requestOptions) {
+								const userId = this.getNodeParameter('userId') as string;
+
+								const qs: {
+									user_id: string;
+									broadcaster_id?: string;
+									first?: number;
+									after?: string;
+								} = {
+									user_id: userId,
+								};
+
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId', '') as string;
+								if (broadcasterIdInput !== '') {
+									const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+									qs.broadcaster_id = broadcasterId;
+								}
+
+								const first = this.getNodeParameter('first', 20) as number;
+								if (first !== 20) {
+									qs.first = first;
+								}
+
+								const after = this.getNodeParameter('after', '') as string;
+								if (after !== '') {
+									qs.after = after;
+								}
+
+								requestOptions.qs = qs;
+
+								return requestOptions;
+							},
+						],
+					},
+				},
+			},
+			{
 				name: 'Unblock',
 				value: 'unblock',
 				action: 'Unblock a user',
@@ -456,5 +543,9 @@ export const userFields: INodeProperties[] = [
 	...updateDisplayOptions(
 		{ show: { resource: ['user'], operation: ['getAuthorization'] } },
 		getAuthorizationFields,
+	),
+	...updateDisplayOptions(
+		{ show: { resource: ['user'], operation: ['getFollowedChannels'] } },
+		getFollowedChannelsFields,
 	),
 ];
