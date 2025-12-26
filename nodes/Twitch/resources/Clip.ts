@@ -5,6 +5,15 @@ import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 // Field definitions for each operation
 const createClipFields: INodeProperties[] = [
 	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The ID or username of the broadcaster whose stream you want to create a clip from. If a username is provided, it will be automatically converted to user ID. This ID must match the user ID in the access token or the user must be an editor for the channel.',
+	},
+	{
 		displayName: 'Title',
 		name: 'title',
 		type: 'string',
@@ -50,7 +59,21 @@ const getClipsFields: INodeProperties[] = [
 		],
 		default: 'broadcasterId',
 		required: true,
-		description: 'The type of filter to use when retrieving clips',
+		description: 'The type of filter to use when retrieving clips. These filters are mutually exclusive - you can only use one at a time.',
+	},
+	{
+		displayName: 'Broadcaster ID or Username',
+		name: 'broadcasterId',
+		type: 'string',
+		displayOptions: {
+			show: {
+				filterType: ['broadcasterId'],
+			},
+		},
+		default: '',
+		required: true,
+		placeholder: 'e.g. 123456789 or username',
+		description: 'The ID or username of the broadcaster whose clips you want to get. If a username is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Game ID',
@@ -64,6 +87,7 @@ const getClipsFields: INodeProperties[] = [
 		default: '',
 		required: true,
 		placeholder: 'e.g. 987654321',
+		description: 'The ID of the game whose clips you want to get',
 	},
 	{
 		displayName: 'Clip ID',
