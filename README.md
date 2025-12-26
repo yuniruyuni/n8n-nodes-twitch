@@ -86,25 +86,31 @@ All nodes follow Twitch Helix API's resource-oriented structure:
 
 ## Installation
 
-### Self-Hosted n8n
+### Install from n8n (Recommended)
 
-Install via npm in your n8n installation directory:
+1. Go to **Settings** > **Community Nodes**
+2. Click **Install**
+3. Enter `@yuniruyuni/n8n-nodes-twitch` in the package name field
+4. Click **Install**
 
+This works for both n8n Cloud and self-hosted instances.
+
+### Install manually (For development)
+
+If you're developing or debugging this package:
+
+**Via npm:**
 ```bash
 npm install @yuniruyuni/n8n-nodes-twitch
 ```
 
-Or add to your n8n environment:
-
+**Via custom extensions path:**
 ```bash
 N8N_CUSTOM_EXTENSIONS="/path/to/@yuniruyuni/n8n-nodes-twitch"
 ```
 
-For Docker installations, mount the package or add to your custom nodes directory.
-
-### n8n Cloud
-
-**Fully compatible** - This package uses Node.js global WebSocket (Node.js 21+) for EventSub notifications. No external dependencies required.
+**For Docker:**
+Mount the package directory or add it to your custom nodes directory.
 
 ## Compatibility
 
