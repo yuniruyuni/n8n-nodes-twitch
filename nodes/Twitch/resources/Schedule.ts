@@ -89,11 +89,14 @@ const createSegmentFields: INodeProperties[] = [
 	{
 		displayName: 'Duration',
 		name: 'duration',
-		type: 'string',
+		type: 'number',
 		required: true,
-		default: '',
+		default: 60,
 		placeholder: 'e.g. 240',
 		description: 'Duration in minutes',
+		typeOptions: {
+			minValue: 1,
+		},
 	},
 	{
 		displayName: 'Additional Fields',
@@ -166,10 +169,13 @@ const updateSegmentFields: INodeProperties[] = [
 			{
 				displayName: 'Duration',
 				name: 'duration',
-				type: 'string',
-				default: '',
+				type: 'number',
+				default: 60,
 				placeholder: 'e.g. 240',
 				description: 'Duration in minutes',
+				typeOptions: {
+					minValue: 1,
+				},
 			},
 			{
 				displayName: 'Is Canceled',
@@ -368,7 +374,7 @@ export const scheduleOperations: INodeProperties[] = [
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const segmentStartTime = this.getNodeParameter('segmentStartTime', 0) as string;
 								const timezone = this.getNodeParameter('timezone', 0) as string;
-								const duration = this.getNodeParameter('duration', 0) as string;
+								const duration = this.getNodeParameter('duration', 0) as number;
 								const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
 
 								requestOptions.qs = {
