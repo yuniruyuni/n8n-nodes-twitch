@@ -1,5 +1,7 @@
 import {
 	ApplicationError,
+	LoggerProxy,
+	NodeOperationError,
 	NodeConnectionTypes,
 	type ITriggerFunctions,
 	type INodeType,
@@ -91,7 +93,16 @@ export class TwitchTrigger implements INodeType {
 				};
 
 				const errorMessage = errorData.description || errorData.message || String(error);
-				throw new ApplicationError(
+
+				LoggerProxy.error('Failed to create Twitch EventSub subscription', {
+					error: errorMessage,
+					event: event,
+					workflowId: this.getWorkflow().id,
+					nodeType: 'n8n-nodes-twitch.twitchTrigger',
+				});
+
+				throw new NodeOperationError(
+					this.getNode(),
 					`Failed to create Twitch EventSub subscription: ${errorMessage}`,
 				);
 			}
@@ -110,8 +121,14 @@ export class TwitchTrigger implements INodeType {
 						},
 					},
 				);
-			} catch {
-				// Ignore errors during cleanup
+			} catch (error) {
+				// Cleanup should be best effort - log but don't throw
+				LoggerProxy.warn('Failed to delete EventSub subscription during workflow deactivation', {
+					error: error instanceof Error ? error.message : String(error),
+					subscriptionId: subId,
+					workflowId: this.getWorkflow().id,
+					nodeType: 'n8n-nodes-twitch.twitchTrigger',
+				});
 			}
 		};
 
@@ -167,8 +184,14 @@ export class TwitchTrigger implements INodeType {
 									delete workflowStaticData.subscriptionId;
 								}
 							}
-						} catch {
-							// Silently ignore parsing errors and continue processing
+						} catch (error) {
+							// Log parsing errors but continue processing other messages
+							LoggerProxy.debug('Failed to parse WebSocket message from Twitch EventSub', {
+								error: error instanceof Error ? error.message : String(error),
+								rawMessage: event.data,
+								workflowId: this.getWorkflow().id,
+								nodeType: 'n8n-nodes-twitch.twitchTrigger',
+							});
 						}
 					};
 
