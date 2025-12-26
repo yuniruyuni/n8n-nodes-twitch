@@ -1,6 +1,6 @@
 import type { INodeProperties, IDataObject } from 'n8n-workflow';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
-import { resolveUserIdOrUsername } from '../../Twitch/shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../../Twitch/shared/userIdConverter';
 import type { EventConditionBuilder } from './types';
 
 const userEventNames = ['user.update', 'user.whisper.message'];
@@ -36,6 +36,6 @@ export const USER_EVENTS = userEventNames;
 export const buildCondition: EventConditionBuilder = async (context) => {
 	const condition: IDataObject = {};
 	const userIdInput = context.getNodeParameter('userId') as string;
-	condition.user_id = await resolveUserIdOrUsername.call(context, userIdInput);
+	condition.user_id = await resolveUserIdOrLogin.call(context, userIdInput);
 	return condition;
 };

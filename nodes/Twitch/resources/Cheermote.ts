@@ -1,5 +1,5 @@
 import type { INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 
 export const cheermoteOperations: INodeProperties[] = [
 	{
@@ -29,7 +29,7 @@ export const cheermoteOperations: INodeProperties[] = [
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', '') as string;
 
 								if (broadcasterIdInput) {
-									const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+									const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 									requestOptions.qs = {
 										broadcaster_id: broadcasterId,
 									};
@@ -64,7 +64,7 @@ export const cheermoteFields: INodeProperties[] = [
 		default: '',
 		placeholder: 'Enter broadcaster username or ID',
 		description:
-			'The ID or username of the broadcaster whose custom Cheermotes you want to get. If not specified, the response contains only global Cheermotes. If specified and the broadcaster uploaded Cheermotes, they will be included in the response.',
+			'Broadcaster user ID or login name whose custom Cheermotes you want to get. If not specified, the response contains only global Cheermotes. If specified and the broadcaster uploaded Cheermotes, they will be included in the response.',
 		displayOptions: {
 			show: {
 				resource: ['cheermote'],

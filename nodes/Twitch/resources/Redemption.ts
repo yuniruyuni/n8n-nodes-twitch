@@ -1,26 +1,26 @@
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
 const getFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'Reward ID',
+		displayName: 'Reward',
 		name: 'rewardId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 92af127c-7326-4483-a52b-b0da0be61c01',
-		description: 'The ID of the custom reward',
+		description: 'Reward ID. ID of the custom reward.',
 	},
 	{
 		displayName: 'Filter By',
@@ -68,7 +68,7 @@ const getFields: INodeProperties[] = [
 		description: 'Filter redemptions by status. Note: Canceled and fulfilled redemptions are returned for only a few days after they\'re canceled or fulfilled.',
 	},
 	{
-		displayName: 'Redemption IDs',
+		displayName: 'Redemptions',
 		name: 'redemptionIds',
 		type: 'string',
 		displayOptions: {
@@ -129,25 +129,25 @@ const getFields: INodeProperties[] = [
 
 const updateFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'Reward ID',
+		displayName: 'Reward',
 		name: 'rewardId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 92af127c-7326-4483-a52b-b0da0be61c01',
-		description: 'The ID of the custom reward',
+		description: 'Reward ID. ID of the custom reward.',
 	},
 	{
-		displayName: 'Redemption IDs',
+		displayName: 'Redemptions',
 		name: 'redemptionIds',
 		type: 'string',
 		default: '',
@@ -202,7 +202,7 @@ export const redemptionOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const rewardId = this.getNodeParameter('rewardId', 0) as string;
 								const filterBy = this.getNodeParameter('filterBy', 0) as string;
 
@@ -270,7 +270,7 @@ export const redemptionOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const rewardId = this.getNodeParameter('rewardId', 0) as string;
 								const redemptionIdsInput = this.getNodeParameter('redemptionIds', 0) as string;
 								const status = this.getNodeParameter('status', 0) as string;

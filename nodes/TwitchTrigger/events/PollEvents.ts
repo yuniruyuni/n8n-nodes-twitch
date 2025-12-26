@@ -1,6 +1,6 @@
 import type { INodeProperties, IDataObject } from 'n8n-workflow';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
-import { resolveUserIdOrUsername } from '../../Twitch/shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../../Twitch/shared/userIdConverter';
 import type { EventConditionBuilder } from './types';
 
 const pollEventNames = ['channel.poll.begin', 'channel.poll.progress', 'channel.poll.end'];
@@ -37,7 +37,7 @@ export const POLL_EVENTS = pollEventNames;
 export const buildCondition: EventConditionBuilder = async (context) => {
 	const condition: IDataObject = {};
 	const broadcasterIdInput = context.getNodeParameter('broadcasterId') as string;
-	const broadcasterId = await resolveUserIdOrUsername.call(context, broadcasterIdInput);
+	const broadcasterId = await resolveUserIdOrLogin.call(context, broadcasterIdInput);
 	condition.broadcaster_user_id = broadcasterId;
 	return condition;
 };

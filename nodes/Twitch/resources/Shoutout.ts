@@ -1,35 +1,35 @@
 import type { INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
 const sendFields: INodeProperties[] = [
 	{
-		displayName: 'From Broadcaster ID or Username',
+		displayName: 'From Broadcaster',
 		name: 'fromBroadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 12345 or username',
-		description: 'The ID of the broadcaster that\'s sending the Shoutout. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The ID of the broadcaster that\'s sending the Shoutout. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'To Broadcaster ID or Username',
+		displayName: 'To Broadcaster',
 		name: 'toBroadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 626262 or username',
-		description: 'The ID of the broadcaster that\'s receiving the Shoutout. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The ID of the broadcaster that\'s receiving the Shoutout. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'Moderator ID or Username',
+		displayName: 'Moderator',
 		name: 'moderatorId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 98765 or username',
-		description: 'The ID of the broadcaster or a user that is one of the broadcaster\'s moderators. This ID must match the user ID in the access token. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The ID of the broadcaster or a user that is one of the broadcaster\'s moderators. This ID must match the user ID in the access token. If a login name is provided, it will be automatically converted to user ID.',
 	},
 ];
 
@@ -63,9 +63,9 @@ export const shoutoutOperations: INodeProperties[] = [
 								const moderatorIdInput = this.getNodeParameter('moderatorId') as string;
 
 								// Resolve usernames to user IDs
-								const fromBroadcasterId = await resolveUserIdOrUsername.call(this, fromBroadcasterIdInput);
-								const toBroadcasterId = await resolveUserIdOrUsername.call(this, toBroadcasterIdInput);
-								const moderatorId = await resolveUserIdOrUsername.call(this, moderatorIdInput);
+								const fromBroadcasterId = await resolveUserIdOrLogin.call(this, fromBroadcasterIdInput);
+								const toBroadcasterId = await resolveUserIdOrLogin.call(this, toBroadcasterIdInput);
+								const moderatorId = await resolveUserIdOrLogin.call(this, moderatorIdInput);
 
 								requestOptions.qs = {
 									from_broadcaster_id: fromBroadcasterId,

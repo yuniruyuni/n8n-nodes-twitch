@@ -1,20 +1,20 @@
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
 const getScheduleFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'Segment IDs',
+		displayName: 'Segments',
 		name: 'id',
 		type: 'string',
 		default: '',
@@ -60,13 +60,13 @@ const getScheduleFields: INodeProperties[] = [
 
 const createSegmentFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Start Time',
@@ -103,7 +103,7 @@ const createSegmentFields: INodeProperties[] = [
 		default: {},
 		options: [
 			{
-				displayName: 'Category ID',
+				displayName: 'Category',
 				name: 'categoryId',
 				type: 'string',
 				default: '',
@@ -131,22 +131,22 @@ const createSegmentFields: INodeProperties[] = [
 
 const updateSegmentFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'Segment ID',
+		displayName: 'Segment',
 		name: 'segmentId',
 		type: 'string',
 		required: true,
 		default: '',
 		placeholder: 'e.g. eyJzZWdtZW50SUQiOiI...',
-		description: 'The ID of the segment',
+		description: 'Segment ID. ID of the segment.',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -156,7 +156,7 @@ const updateSegmentFields: INodeProperties[] = [
 		default: {},
 		options: [
 			{
-				displayName: 'Category ID',
+				displayName: 'Category',
 				name: 'categoryId',
 				type: 'string',
 				default: '',
@@ -208,34 +208,34 @@ const updateSegmentFields: INodeProperties[] = [
 
 const deleteSegmentFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'Segment ID',
+		displayName: 'Segment',
 		name: 'segmentId',
 		type: 'string',
 		required: true,
 		default: '',
 		placeholder: 'e.g. eyJzZWdtZW50SUQiOiI...',
-		description: 'The ID of the segment',
+		description: 'Segment ID. ID of the segment.',
 	},
 ];
 
 const updateScheduleSettingsFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -281,13 +281,13 @@ const updateScheduleSettingsFields: INodeProperties[] = [
 
 const getICalendarFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 ];
 
@@ -317,7 +317,7 @@ export const scheduleOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const id = this.getNodeParameter('id', 0) as string;
 								const startTime = this.getNodeParameter('startTime', 0) as string;
 								const utcOffset = this.getNodeParameter('utcOffset', 0) as string;
@@ -365,7 +365,7 @@ export const scheduleOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const segmentStartTime = this.getNodeParameter('segmentStartTime', 0) as string;
 								const timezone = this.getNodeParameter('timezone', 0) as string;
 								const duration = this.getNodeParameter('duration', 0) as string;
@@ -422,7 +422,7 @@ export const scheduleOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const segmentId = this.getNodeParameter('segmentId', 0) as string;
 								const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
 
@@ -471,7 +471,7 @@ export const scheduleOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const segmentId = this.getNodeParameter('segmentId', 0) as string;
 
 								requestOptions.qs = {
@@ -499,7 +499,7 @@ export const scheduleOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
 
 								const qs: IDataObject = {
@@ -540,7 +540,7 @@ export const scheduleOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,

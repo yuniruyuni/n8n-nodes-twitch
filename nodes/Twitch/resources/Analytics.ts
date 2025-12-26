@@ -27,7 +27,7 @@ const getExtensionAnalyticsFields: INodeProperties[] = [
 				description: 'The reporting window\'s end date (RFC3339 format). Required if started_at is specified. Must be earlier than today minus 1-2 days.',
 			},
 			{
-				displayName: 'Extension ID',
+				displayName: 'Extension',
 				name: 'extensionId',
 				type: 'string',
 				default: '',
@@ -93,7 +93,7 @@ const getGameAnalyticsFields: INodeProperties[] = [
 				description: 'The reporting window\'s end date (RFC3339 format). Required if started_at is specified. Must be earlier than today minus 1-2 days.',
 			},
 			{
-				displayName: 'Game ID',
+				displayName: 'Game',
 				name: 'gameId',
 				type: 'string',
 				default: '',

@@ -1,5 +1,5 @@
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
@@ -54,7 +54,7 @@ const getFields: INodeProperties[] = [
 		description: 'Start date for the period (RFC3339 format). Only used when period is not "all". Note: Date is converted to PST, so adjust for timezone offset.',
 	},
 	{
-		displayName: 'User ID or Username',
+		displayName: 'User',
 		name: 'userId',
 		type: 'string',
 		default: '',
@@ -105,7 +105,7 @@ export const bitsLeaderboardOperations: INodeProperties[] = [
 									qs.started_at = startedAt.trim();
 								}
 								if (userIdInput && userIdInput.trim() !== '') {
-									const userId = await resolveUserIdOrUsername.call(this, userIdInput.trim());
+									const userId = await resolveUserIdOrLogin.call(this, userIdInput.trim());
 									qs.user_id = userId;
 								}
 

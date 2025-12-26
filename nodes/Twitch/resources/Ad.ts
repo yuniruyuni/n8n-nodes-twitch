@@ -1,17 +1,17 @@
 import type { INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
 const startCommercialFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 141981764 or username',
-		description: 'The ID of the partner or affiliate broadcaster that wants to run the commercial. This ID must match the user ID found in the OAuth token. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The ID of the partner or affiliate broadcaster that wants to run the commercial. This ID must match the user ID found in the OAuth token. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Length',
@@ -36,13 +36,13 @@ const startCommercialFields: INodeProperties[] = [
 
 const getAdScheduleFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster ID to get ad schedule for. This must match the user ID in the OAuth token. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster ID to get ad schedule for. This must match the user ID in the OAuth token. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Note',
@@ -55,13 +55,13 @@ const getAdScheduleFields: INodeProperties[] = [
 
 const snoozeNextAdFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster ID to snooze the next ad for. This must match the user ID in the OAuth token. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster ID to snooze the next ad for. This must match the user ID in the OAuth token. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Note',
@@ -100,7 +100,7 @@ export const adOperations: INodeProperties[] = [
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
 								const length = this.getNodeParameter('length') as number;
 
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 
 								requestOptions.body = {
 									broadcaster_id: broadcasterId,
@@ -137,7 +137,7 @@ export const adOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,
@@ -173,7 +173,7 @@ export const adOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,

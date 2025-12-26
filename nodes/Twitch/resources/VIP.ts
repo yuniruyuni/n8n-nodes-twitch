@@ -1,18 +1,18 @@
 import { ApplicationError } from 'n8n-workflow';
 import type { INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
 const getFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'User IDs or Usernames',
@@ -45,43 +45,43 @@ const getFields: INodeProperties[] = [
 
 const addFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'User ID or Username',
+		displayName: 'User',
 		name: 'userId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The user ID or username to give VIP status to. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The user ID or login name to give VIP status to. If a login name is provided, it will be automatically converted to user ID.',
 	},
 ];
 
 const removeFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'User ID or Username',
+		displayName: 'User',
 		name: 'userId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The user ID or username to remove VIP status from. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The user ID or login name to remove VIP status from. If a login name is provided, it will be automatically converted to user ID.',
 	},
 ];
 
@@ -124,7 +124,7 @@ export const vipOperations: INodeProperties[] = [
 									throw new ApplicationError('First parameter must be between 1 and 100');
 								}
 
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput.trim());
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput.trim());
 
 								const qs: Record<string, string | string[] | number> = {
 									broadcaster_id: broadcasterId,
@@ -139,9 +139,9 @@ export const vipOperations: INodeProperties[] = [
 										if (userIdList.length > 100) {
 											throw new ApplicationError('Maximum 100 user IDs allowed');
 										}
-										// Resolve each user ID or username
+										// Resolve each user ID or login name
 										const resolvedUserIds = await Promise.all(
-											userIdList.map((id) => resolveUserIdOrUsername.call(this, id))
+											userIdList.map((id) => resolveUserIdOrLogin.call(this, id))
 										);
 										qs.user_id = resolvedUserIds;
 									}
@@ -194,8 +194,8 @@ export const vipOperations: INodeProperties[] = [
 									throw new ApplicationError('User ID is required');
 								}
 
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput.trim());
-								const userId = await resolveUserIdOrUsername.call(this, userIdInput.trim());
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput.trim());
+								const userId = await resolveUserIdOrLogin.call(this, userIdInput.trim());
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,
@@ -242,8 +242,8 @@ export const vipOperations: INodeProperties[] = [
 									throw new ApplicationError('User ID is required');
 								}
 
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput.trim());
-								const userId = await resolveUserIdOrUsername.call(this, userIdInput.trim());
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput.trim());
+								const userId = await resolveUserIdOrLogin.call(this, userIdInput.trim());
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,

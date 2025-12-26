@@ -1,6 +1,6 @@
 import type { INodeProperties, IDataObject } from 'n8n-workflow';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
-import { resolveUserIdOrUsername } from '../../Twitch/shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../../Twitch/shared/userIdConverter';
 import type { EventConditionBuilder } from './types';
 
 // Channel events with broadcaster_user_id only
@@ -119,14 +119,14 @@ export const CHANNEL_MODERATOR_EVENTS = moderatorEventNames;
 export const buildCondition: EventConditionBuilder = async (context, event) => {
 	const condition: IDataObject = {};
 	const broadcasterIdInput = context.getNodeParameter('broadcasterId') as string;
-	const broadcasterId = await resolveUserIdOrUsername.call(context, broadcasterIdInput);
+	const broadcasterId = await resolveUserIdOrLogin.call(context, broadcasterIdInput);
 	condition.broadcaster_user_id = broadcasterId;
 
 	// Moderator events require moderator_user_id
 	if (moderatorEventNames.includes(event)) {
 		const moderatorIdInput = context.getNodeParameter('moderatorId', '') as string;
 		if (moderatorIdInput && moderatorIdInput.trim() !== '') {
-			condition.moderator_user_id = await resolveUserIdOrUsername.call(context, moderatorIdInput);
+			condition.moderator_user_id = await resolveUserIdOrLogin.call(context, moderatorIdInput);
 		} else {
 			condition.moderator_user_id = broadcasterId;
 		}

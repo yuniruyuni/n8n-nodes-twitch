@@ -1,26 +1,26 @@
 import type { INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
 const sendWhisperFields: INodeProperties[] = [
 	{
-		displayName: 'From User ID or Username',
+		displayName: 'From User',
 		name: 'fromUserId',
 		type: 'string',
 		required: true,
 		default: '',
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The ID or username of the user sending the whisper. If a username is provided, it will be automatically converted to user ID. This user must have a verified phone number. This ID must match the user ID in the OAuth2 access token.',
+		placeholder: 'e.g. 123456789 or torpedo09',
+		description: 'User ID or login name of the user sending the whisper. If a login name is provided, it will be automatically converted to user ID. This user must have a verified phone number. This ID must match the user ID in the OAuth2 access token.',
 	},
 	{
-		displayName: 'To User ID or Username',
+		displayName: 'To User',
 		name: 'toUserId',
 		type: 'string',
 		required: true,
 		default: '',
-		placeholder: 'e.g. 987654321 or username',
-		description: 'The ID or username of the user to receive the whisper. If a username is provided, it will be automatically converted to user ID.',
+		placeholder: 'e.g. 987654321 or torpedo09',
+		description: 'User ID or login name of the user to receive the whisper. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Message',
@@ -59,9 +59,9 @@ export const whisperOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const fromUserIdInput = this.getNodeParameter('fromUserId', 0) as string;
-								const fromUserId = await resolveUserIdOrUsername.call(this, fromUserIdInput);
+								const fromUserId = await resolveUserIdOrLogin.call(this, fromUserIdInput);
 								const toUserIdInput = this.getNodeParameter('toUserId', 0) as string;
-								const toUserId = await resolveUserIdOrUsername.call(this, toUserIdInput);
+								const toUserId = await resolveUserIdOrLogin.call(this, toUserIdInput);
 								const message = this.getNodeParameter('message', 0) as string;
 
 								requestOptions.qs = {

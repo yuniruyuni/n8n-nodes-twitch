@@ -1,26 +1,26 @@
 import type { INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
 const startRaidFields: INodeProperties[] = [
 	{
-		displayName: 'From Broadcaster ID or Username',
+		displayName: 'From Broadcaster',
 		name: 'fromBroadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username that is starting the raid (must be the authenticated user). If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name that is starting the raid (must be the authenticated user). If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'To Broadcaster ID or Username',
+		displayName: 'To Broadcaster',
 		name: 'toBroadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 987654321 or username',
-		description: 'The broadcaster user ID or username to raid. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name to raid. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Note',
@@ -33,13 +33,13 @@ const startRaidFields: INodeProperties[] = [
 
 const cancelRaidFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Note',
@@ -78,8 +78,8 @@ export const raidOperations: INodeProperties[] = [
 								const fromBroadcasterIdInput = this.getNodeParameter('fromBroadcasterId') as string;
 								const toBroadcasterIdInput = this.getNodeParameter('toBroadcasterId') as string;
 
-								const fromBroadcasterId = await resolveUserIdOrUsername.call(this, fromBroadcasterIdInput);
-								const toBroadcasterId = await resolveUserIdOrUsername.call(this, toBroadcasterIdInput);
+								const fromBroadcasterId = await resolveUserIdOrLogin.call(this, fromBroadcasterIdInput);
+								const toBroadcasterId = await resolveUserIdOrLogin.call(this, toBroadcasterIdInput);
 
 								requestOptions.qs = {
 									from_broadcaster_id: fromBroadcasterId,
@@ -116,7 +116,7 @@ export const raidOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,

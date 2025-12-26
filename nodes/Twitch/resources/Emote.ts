@@ -1,5 +1,5 @@
 import type { INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 
 export const emoteOperations: INodeProperties[] = [
 	{
@@ -27,7 +27,7 @@ export const emoteOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,
 								};
@@ -117,7 +117,7 @@ export const emoteOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const userIdInput = this.getNodeParameter('userId') as string;
-								const userId = await resolveUserIdOrUsername.call(this, userIdInput);
+								const userId = await resolveUserIdOrLogin.call(this, userIdInput);
 								requestOptions.qs = {
 									user_id: userId,
 								};
@@ -133,7 +133,7 @@ export const emoteOperations: INodeProperties[] = [
 								}
 
 								if (additionalFields.broadcasterId) {
-									const broadcasterId = await resolveUserIdOrUsername.call(
+									const broadcasterId = await resolveUserIdOrLogin.call(
 										this,
 										additionalFields.broadcasterId,
 									);
@@ -175,12 +175,12 @@ export const emoteFields: INodeProperties[] = [
 			},
 		},
 		default: '',
-		description: 'The ID or username of the broadcaster whose emotes you want to get',
+		description: 'Broadcaster user ID or login name whose emotes you want to get',
 	},
 
 	// Get Emote Sets fields
 	{
-		displayName: 'Emote Set IDs',
+		displayName: 'Emote Sets',
 		name: 'emoteSetIds',
 		type: 'string',
 		required: true,
@@ -209,7 +209,7 @@ export const emoteFields: INodeProperties[] = [
 		},
 		default: '',
 		description:
-			'The ID or username of the user. This ID must match the user ID in the user access token. Requires user:read:emotes scope.',
+			'User ID or login name. This ID must match the user ID in the user access token. Requires user:read:emotes scope.',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -237,7 +237,7 @@ export const emoteFields: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				description:
-					'The ID or username of a broadcaster you wish to get follower emotes of. Using this will guarantee inclusion of the broadcaster\'s follower emotes.',
+					'The User ID or login name of a broadcaster you wish to get follower emotes of. Using this will guarantee inclusion of the broadcaster\'s follower emotes.',
 			},
 		],
 	},

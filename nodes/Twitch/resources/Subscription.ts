@@ -1,20 +1,20 @@
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
 const getBroadcasterSubscriptionsFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'User ID or Username',
+		displayName: 'User',
 		name: 'userId',
 		type: 'string',
 		default: '',
@@ -52,22 +52,22 @@ const getBroadcasterSubscriptionsFields: INodeProperties[] = [
 
 const checkUserSubscriptionFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'User ID or Username',
+		displayName: 'User',
 		name: 'checkUserId',
 		type: 'string',
 		required: true,
 		default: '',
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The user ID or username to check. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The user ID or login name to check. If a login name is provided, it will be automatically converted to user ID.',
 	},
 ];
 
@@ -102,7 +102,7 @@ export const subscriptionOperations: INodeProperties[] = [
 								const after = this.getNodeParameter('after', 0) as string;
 								const before = this.getNodeParameter('before', 0) as string;
 
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 
 								const qs: IDataObject = {
 									broadcaster_id: broadcasterId,
@@ -111,9 +111,9 @@ export const subscriptionOperations: INodeProperties[] = [
 								if (userIdInput) {
 									const userIds = userIdInput.split(',').map((id) => id.trim()).filter((id) => id);
 									if (userIds.length > 0) {
-										// Resolve each user ID or username
+										// Resolve each user ID or login name
 										const resolvedUserIds = await Promise.all(
-											userIds.map((id) => resolveUserIdOrUsername.call(this, id))
+											userIds.map((id) => resolveUserIdOrLogin.call(this, id))
 										);
 										qs.user_id = resolvedUserIds;
 									}
@@ -156,8 +156,8 @@ export const subscriptionOperations: INodeProperties[] = [
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
 								const userIdInput = this.getNodeParameter('checkUserId', 0) as string;
 
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
-								const userId = await resolveUserIdOrUsername.call(this, userIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
+								const userId = await resolveUserIdOrLogin.call(this, userIdInput);
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,

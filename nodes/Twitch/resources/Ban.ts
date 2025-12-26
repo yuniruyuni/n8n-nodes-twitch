@@ -1,36 +1,36 @@
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Shared parameter definitions
 const sharedBroadcasterIdField: INodeProperties = {
-	displayName: 'Broadcaster ID or Username',
+	displayName: 'Broadcaster',
 	name: 'broadcasterId',
 	type: 'string',
 	default: '',
 	required: true,
 	placeholder: 'e.g. 123456789 or username',
-	description: 'The ID or username of the broadcaster. Usernames will be automatically converted to user IDs.',
+	description: 'Broadcaster user ID or login name. Usernames will be automatically converted to user IDs.',
 };
 
 const sharedModeratorIdField: INodeProperties = {
-	displayName: 'Moderator ID or Username',
+	displayName: 'Moderator',
 	name: 'moderatorId',
 	type: 'string',
 	default: '',
 	required: true,
 	placeholder: 'e.g. 987654321 or moderator_name',
-	description: 'The ID or username of the moderator. This must match the user in the access token. Usernames will be automatically converted to user IDs.',
+	description: 'Moderator user ID or login name. This must match the user in the access token. Usernames will be automatically converted to user IDs.',
 };
 
 const sharedUserIdField: INodeProperties = {
-	displayName: 'User ID or Username',
+	displayName: 'User',
 	name: 'userId',
 	type: 'string',
 	default: '',
 	required: true,
 	placeholder: 'e.g. 555666777 or username',
-	description: 'The ID or username of the user. Usernames will be automatically converted to user IDs.',
+	description: 'User ID or login name. Usernames will be automatically converted to user IDs.',
 };
 
 // Field definitions for each operation
@@ -113,12 +113,12 @@ const getUnbanRequestsFields: INodeProperties[] = [
 		description: 'Filter by unban request status',
 	},
 	{
-		displayName: 'User ID or Username',
+		displayName: 'User',
 		name: 'filterUserId',
 		type: 'string',
 		default: '',
 		placeholder: 'e.g. 123456789 or username',
-		description: 'Filter by user ID or username. Usernames will be automatically converted to user IDs.',
+		description: 'Filter by user ID or login name. Usernames will be automatically converted to user IDs.',
 	},
 	{
 		displayName: 'First',
@@ -144,7 +144,7 @@ const getUnbanRequestsFields: INodeProperties[] = [
 
 const resolveUnbanRequestFields: INodeProperties[] = [
 	{
-		displayName: 'Unban Request ID',
+		displayName: 'Unban Request',
 		name: 'unbanRequestId',
 		type: 'string',
 		default: '',
@@ -204,9 +204,9 @@ export const banOperations: INodeProperties[] = [
 								const userIdInput = this.getNodeParameter('userId') as string;
 
 								// Resolve usernames to user IDs
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
-								const moderatorId = await resolveUserIdOrUsername.call(this, moderatorIdInput);
-								const userId = await resolveUserIdOrUsername.call(this, userIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
+								const moderatorId = await resolveUserIdOrLogin.call(this, moderatorIdInput);
+								const userId = await resolveUserIdOrLogin.call(this, userIdInput);
 
 								const qs: IDataObject = {
 									broadcaster_id: broadcasterId,
@@ -267,9 +267,9 @@ export const banOperations: INodeProperties[] = [
 								const userIdInput = this.getNodeParameter('userId') as string;
 
 								// Resolve usernames to user IDs
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
-								const moderatorId = await resolveUserIdOrUsername.call(this, moderatorIdInput);
-								const userId = await resolveUserIdOrUsername.call(this, userIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
+								const moderatorId = await resolveUserIdOrLogin.call(this, moderatorIdInput);
+								const userId = await resolveUserIdOrLogin.call(this, userIdInput);
 
 								const qs: IDataObject = {
 									broadcaster_id: broadcasterId,
@@ -298,7 +298,7 @@ export const banOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 
 								const qs: IDataObject = {
 									broadcaster_id: broadcasterId,
@@ -310,7 +310,7 @@ export const banOperations: INodeProperties[] = [
 									const userIdInputs = userIds.split(',').map(id => id.trim()).filter(id => id);
 									if (userIdInputs.length > 0) {
 										const resolvedUserIds = await Promise.all(
-											userIdInputs.map(input => resolveUserIdOrUsername.call(this, input))
+											userIdInputs.map(input => resolveUserIdOrLogin.call(this, input))
 										);
 										qs.user_id = resolvedUserIds;
 									}
@@ -365,8 +365,8 @@ export const banOperations: INodeProperties[] = [
 								const moderatorIdInput = this.getNodeParameter('moderatorId') as string;
 
 								// Resolve usernames to user IDs
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
-								const moderatorId = await resolveUserIdOrUsername.call(this, moderatorIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
+								const moderatorId = await resolveUserIdOrLogin.call(this, moderatorIdInput);
 
 								const qs: IDataObject = {
 									broadcaster_id: broadcasterId,
@@ -376,7 +376,7 @@ export const banOperations: INodeProperties[] = [
 
 								const filterUserId = this.getNodeParameter('filterUserId', '') as string;
 								if (filterUserId) {
-									const userId = await resolveUserIdOrUsername.call(this, filterUserId);
+									const userId = await resolveUserIdOrLogin.call(this, filterUserId);
 									qs.user_id = userId;
 								}
 
@@ -424,8 +424,8 @@ export const banOperations: INodeProperties[] = [
 								const moderatorIdInput = this.getNodeParameter('moderatorId') as string;
 
 								// Resolve usernames to user IDs
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
-								const moderatorId = await resolveUserIdOrUsername.call(this, moderatorIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
+								const moderatorId = await resolveUserIdOrLogin.call(this, moderatorIdInput);
 
 								const qs: IDataObject = {
 									broadcaster_id: broadcasterId,

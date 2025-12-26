@@ -1,37 +1,37 @@
 import type { INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
 const getInfoFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID. You may specify multiple IDs separated by commas (up to 100).',
+		placeholder: 'e.g. 123456789 or torpedo09',
+		description: 'Broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID. You may specify multiple IDs separated by commas (up to 100).',
 	},
 ];
 
 const updateInfoFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. This ID must match the user ID in the user access token.',
+		placeholder: 'e.g. 123456789 or torpedo09',
+		description: 'Broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID. This ID must match the user ID in the user access token.',
 	},
 	{
-		displayName: 'Game ID',
+		displayName: 'Game',
 		name: 'gameId',
 		type: 'string',
 		default: '',
 		placeholder: 'e.g. 509670',
-		description: 'The ID of the game that the user plays. Use "0" or empty string to unset.',
+		description: 'Game ID. ID of the game that the user plays. Use "0" or empty string to unset.',
 	},
 	{
 		displayName: 'Broadcaster Language',
@@ -80,7 +80,7 @@ const updateInfoFields: INodeProperties[] = [
 				displayName: 'Label',
 				values: [
 					{
-						displayName: 'Label ID',
+						displayName: 'Label',
 						name: 'id',
 						type: 'options',
 						default: 'DrugsIntoxication',
@@ -134,21 +134,21 @@ const updateInfoFields: INodeProperties[] = [
 
 const getFollowersFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster\'s ID. Returns the list of users that follow this broadcaster.',
+		placeholder: 'e.g. 123456789 or torpedo09',
+		description: 'Broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID. Returns the list of users that follow this broadcaster.',
 	},
 	{
-		displayName: 'User ID or Username',
+		displayName: 'User',
 		name: 'userId',
 		type: 'string',
 		default: '',
-		placeholder: 'e.g. 123456789 or username',
-		description: 'A user\'s ID or username. If a username is provided, it will be automatically converted to user ID. Use this parameter to see whether the user follows this broadcaster. If specified, the response contains this user if they follow the broadcaster.',
+		placeholder: 'e.g. 123456789 or torpedo09',
+		description: 'User ID or login name. If a login name is provided, it will be automatically converted to user ID. Use this parameter to see whether the user follows this broadcaster. If specified, the response contains this user if they follow the broadcaster.',
 	},
 	{
 		displayName: 'Limit',
@@ -172,13 +172,13 @@ const getFollowersFields: INodeProperties[] = [
 
 const getEditorsFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The ID of the broadcaster that owns the channel. This ID must match the user ID in the access token.',
+		placeholder: 'e.g. 123456789 or torpedo09',
+		description: 'Broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID. This ID must match the user ID in the access token.',
 	},
 ];
 
@@ -212,7 +212,7 @@ export const channelOperations: INodeProperties[] = [
 								// Support multiple IDs separated by commas
 								const ids = broadcasterIdInput.split(',').map(id => id.trim());
 								const resolvedIds = await Promise.all(
-									ids.map(id => resolveUserIdOrUsername.call(this, id))
+									ids.map(id => resolveUserIdOrLogin.call(this, id))
 								);
 
 								requestOptions.qs = {
@@ -249,7 +249,7 @@ export const channelOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,
@@ -325,7 +325,7 @@ export const channelOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 
 								const qs: {
 									broadcaster_id: string;
@@ -338,7 +338,7 @@ export const channelOperations: INodeProperties[] = [
 
 								const userIdInput = this.getNodeParameter('userId', '') as string;
 								if (userIdInput !== '') {
-									const userId = await resolveUserIdOrUsername.call(this, userIdInput);
+									const userId = await resolveUserIdOrLogin.call(this, userIdInput);
 									qs.user_id = userId;
 								}
 
@@ -374,7 +374,7 @@ export const channelOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,

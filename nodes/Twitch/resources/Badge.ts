@@ -1,5 +1,5 @@
 import type { INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 
 export const badgeOperations: INodeProperties[] = [
 	{
@@ -27,7 +27,7 @@ export const badgeOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,
 								};
@@ -88,6 +88,6 @@ export const badgeFields: INodeProperties[] = [
 			},
 		},
 		default: '',
-		description: 'The ID or username of the broadcaster whose chat badges you want to get',
+		description: 'Broadcaster user ID or login name whose chat badges you want to get',
 	},
 ];

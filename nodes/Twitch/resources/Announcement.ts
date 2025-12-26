@@ -1,26 +1,26 @@
 import type { INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
 const sendFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 12826 or username',
-		description: 'The ID of the broadcaster that owns the chat room to send the announcement to. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The ID of the broadcaster that owns the chat room to send the announcement to. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'Moderator ID or Username',
+		displayName: 'Moderator',
 		name: 'moderatorId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 141981764 or username',
-		description: 'The ID of a user who has permission to moderate the broadcaster\'s chat room, or the broadcaster\'s ID if they\'re sending the announcement. This ID must match the user ID in the user access token. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The ID of a user who has permission to moderate the broadcaster\'s chat room, or the broadcaster\'s ID if they\'re sending the announcement. This ID must match the user ID in the user access token. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Message',
@@ -93,8 +93,8 @@ export const announcementOperations: INodeProperties[] = [
 								const color = this.getNodeParameter('color', 'primary') as string;
 
 								// Resolve usernames to user IDs
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
-								const moderatorId = await resolveUserIdOrUsername.call(this, moderatorIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
+								const moderatorId = await resolveUserIdOrLogin.call(this, moderatorIdInput);
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,

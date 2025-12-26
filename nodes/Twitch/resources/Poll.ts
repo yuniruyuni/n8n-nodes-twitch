@@ -1,17 +1,17 @@
 import type { INodeProperties, IDataObject } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
 const createPollFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Title',
@@ -81,13 +81,13 @@ const createPollFields: INodeProperties[] = [
 
 const getPollsFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'getBroadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username whose polls to retrieve',
+		description: 'The broadcaster user ID or login name whose polls to retrieve',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -97,7 +97,7 @@ const getPollsFields: INodeProperties[] = [
 		default: {},
 		options: [
 			{
-				displayName: 'Poll IDs',
+				displayName: 'Polls',
 				name: 'pollIds',
 				type: 'string',
 				default: '',
@@ -129,22 +129,22 @@ const getPollsFields: INodeProperties[] = [
 
 const endPollFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'endBroadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username who owns the poll',
+		description: 'The broadcaster user ID or login name who owns the poll',
 	},
 	{
-		displayName: 'Poll ID',
+		displayName: 'Poll',
 		name: 'pollId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. ed961efd-8a3f-4cf5-a9d0-e616c590cd2a',
-		description: 'The ID of the poll to end',
+		description: 'Poll ID. ID of the poll to end.',
 	},
 	{
 		displayName: 'Status',
@@ -201,7 +201,7 @@ export const pollOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const title = this.getNodeParameter('title', 0) as string;
 								const choicesInput = this.getNodeParameter('choices', 0) as string;
 								const duration = this.getNodeParameter('duration', 0) as number;
@@ -266,7 +266,7 @@ export const pollOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('getBroadcasterId', 0) as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const qs: IDataObject = {
 									broadcaster_id: broadcasterId,
 								};
@@ -316,7 +316,7 @@ export const pollOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('endBroadcasterId', 0) as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const pollId = this.getNodeParameter('pollId', 0) as string;
 								const status = this.getNodeParameter('status', 0) as string;
 

@@ -1,17 +1,17 @@
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
 const createPredictionFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Title',
@@ -56,21 +56,21 @@ const createPredictionFields: INodeProperties[] = [
 
 const getPredictionsFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'Prediction ID',
+		displayName: 'Prediction',
 		name: 'predictionId',
 		type: 'string',
 		default: '',
 		placeholder: 'e.g. abc123-def456-ghi789',
-		description: 'The ID of the prediction to get. To specify multiple IDs, separate them with commas. Maximum of 25 IDs. If not specified, returns all predictions for the broadcaster.',
+		description: 'Prediction ID. ID of the prediction to get. To specify multiple IDs, separate them with commas. Maximum of 25 IDs. If not specified, returns all predictions for the broadcaster.',
 	},
 	{
 		displayName: 'First',
@@ -95,22 +95,22 @@ const getPredictionsFields: INodeProperties[] = [
 
 const endPredictionFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'Prediction ID',
+		displayName: 'Prediction',
 		name: 'endPredictionId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. abc123-def456-ghi789',
-		description: 'The ID of the prediction to end',
+		description: 'Prediction ID. ID of the prediction to end.',
 	},
 	{
 		displayName: 'Status',
@@ -138,7 +138,7 @@ const endPredictionFields: INodeProperties[] = [
 		description: 'The status to set the prediction to',
 	},
 	{
-		displayName: 'Winning Outcome ID',
+		displayName: 'Winning Outcome',
 		name: 'winningOutcomeId',
 		type: 'string',
 		displayOptions: {
@@ -179,7 +179,7 @@ export const predictionOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const title = this.getNodeParameter('title', 0) as string;
 								const predictionWindow = this.getNodeParameter('predictionWindow', 0) as number;
 								const outcome1Title = this.getNodeParameter('outcome1Title', 0) as string;
@@ -226,7 +226,7 @@ export const predictionOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const qs: IDataObject = {
 									broadcaster_id: broadcasterId,
 								};
@@ -284,7 +284,7 @@ export const predictionOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const predictionId = this.getNodeParameter('endPredictionId', 0) as string;
 								const status = this.getNodeParameter('status', 0) as string;
 

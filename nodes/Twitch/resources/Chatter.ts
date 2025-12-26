@@ -1,5 +1,5 @@
 import type { INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 
 export const chatterOperations: INodeProperties[] = [
 	{
@@ -32,8 +32,8 @@ export const chatterOperations: INodeProperties[] = [
 								const after = this.getNodeParameter('after', '') as string;
 
 								// Resolve usernames to user IDs
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
-								const moderatorId = await resolveUserIdOrUsername.call(this, moderatorIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
+								const moderatorId = await resolveUserIdOrLogin.call(this, moderatorIdInput);
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,
@@ -81,7 +81,7 @@ export const chatterFields: INodeProperties[] = [
 			},
 		},
 		default: '',
-		description: 'The ID or username of the broadcaster whose list of chatters you want to get',
+		description: 'Broadcaster user ID or login name whose list of chatters you want to get',
 	},
 	{
 		displayName: 'Moderator',
@@ -95,7 +95,7 @@ export const chatterFields: INodeProperties[] = [
 			},
 		},
 		default: '',
-		description: 'The ID or username of the broadcaster or one of the broadcaster\'s moderators. This ID must match the user ID in the user access token.',
+		description: 'Broadcaster user ID or login name or one of the broadcaster\'s moderators. This ID must match the user ID in the user access token.',
 	},
 	{
 		displayName: 'Limit',

@@ -1,46 +1,46 @@
 import type { INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
 const getChatSettingsFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The ID of the broadcaster whose chat settings you want to get',
 	},
 	{
-		displayName: 'Moderator ID or Username',
+		displayName: 'Moderator',
 		name: 'moderatorId',
 		type: 'string',
 		default: '',
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The ID or username of the broadcaster or one of the broadcaster\'s moderators. If a username is provided, it will be automatically converted to user ID. Required only if you want to include the non_moderator_chat_delay and non_moderator_chat_delay_duration settings in the response. This ID must match the user ID in the user access token.',
+		placeholder: 'e.g. 123456789 or torpedo09',
+		description: 'The User ID or login name of the broadcaster or one of the broadcaster\'s moderators. If a login name is provided, it will be automatically converted to user ID. Required only if you want to include the non_moderator_chat_delay and non_moderator_chat_delay_duration settings in the response. This ID must match the user ID in the user access token.',
 	},
 ];
 
 const updateChatSettingsFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The ID of the broadcaster whose chat settings you want to update',
 	},
 	{
-		displayName: 'Moderator ID or Username',
+		displayName: 'Moderator',
 		name: 'moderatorId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The ID or username of a user that has permission to moderate the broadcaster\'s chat room, or the broadcaster\'s ID/username if they\'re making the update. If a username is provided, it will be automatically converted to user ID. This ID must match the user ID in the user access token.',
+		placeholder: 'e.g. 123456789 or torpedo09',
+		description: 'The User ID or login name of a user that has permission to moderate the broadcaster\'s chat room, or the broadcaster\'s ID/username if they\'re making the update. If a login name is provided, it will be automatically converted to user ID. This ID must match the user ID in the user access token.',
 	},
 	{
 		displayName: 'Emote Mode',
@@ -143,13 +143,13 @@ const getUserChatColorFields: INodeProperties[] = [
 
 const updateUserChatColorFields: INodeProperties[] = [
 	{
-		displayName: 'User ID or Username',
+		displayName: 'User',
 		name: 'userId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The ID or username of the user whose chat color you want to update. If a username is provided, it will be automatically converted to user ID. This ID must match the user ID in the access token.',
+		placeholder: 'e.g. 123456789 or torpedo09',
+		description: 'The User ID or login name of the user whose chat color you want to update. If a login name is provided, it will be automatically converted to user ID. This ID must match the user ID in the access token.',
 	},
 	{
 		displayName: 'Color',
@@ -193,12 +193,12 @@ const updateUserChatColorFields: INodeProperties[] = [
 
 const getSharedChatSessionFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
+		placeholder: 'e.g. 123456789 or torpedo09',
 		description: 'The User ID of the channel broadcaster',
 	},
 ];
@@ -229,7 +229,7 @@ export const chatSettingsOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 
 								const qs: {
 									broadcaster_id: string;
@@ -240,7 +240,7 @@ export const chatSettingsOperations: INodeProperties[] = [
 
 								const moderatorIdInput = this.getNodeParameter('moderatorId', '') as string;
 								if (moderatorIdInput !== '') {
-									const moderatorId = await resolveUserIdOrUsername.call(this, moderatorIdInput);
+									const moderatorId = await resolveUserIdOrLogin.call(this, moderatorIdInput);
 									qs.moderator_id = moderatorId;
 								}
 
@@ -276,9 +276,9 @@ export const chatSettingsOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const moderatorIdInput = this.getNodeParameter('moderatorId') as string;
-								const moderatorId = await resolveUserIdOrUsername.call(this, moderatorIdInput);
+								const moderatorId = await resolveUserIdOrLogin.call(this, moderatorIdInput);
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,
@@ -379,7 +379,7 @@ export const chatSettingsOperations: INodeProperties[] = [
 								// Support multiple IDs or usernames separated by commas
 								const inputs = userIdsInput.split(',').map(id => id.trim());
 								const ids = await Promise.all(
-									inputs.map(input => resolveUserIdOrUsername.call(this, input))
+									inputs.map(input => resolveUserIdOrLogin.call(this, input))
 								);
 
 								requestOptions.qs = {
@@ -416,7 +416,7 @@ export const chatSettingsOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const userIdInput = this.getNodeParameter('userId') as string;
-								const userId = await resolveUserIdOrUsername.call(this, userIdInput);
+								const userId = await resolveUserIdOrLogin.call(this, userIdInput);
 								const colorOption = this.getNodeParameter('color') as string;
 
 								let color = colorOption;
@@ -451,7 +451,7 @@ export const chatSettingsOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,

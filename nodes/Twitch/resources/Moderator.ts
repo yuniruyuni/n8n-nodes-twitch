@@ -1,18 +1,18 @@
 import { ApplicationError } from 'n8n-workflow';
 import type { INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
 const getFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'User IDs or Usernames',
@@ -45,13 +45,13 @@ const getFields: INodeProperties[] = [
 
 const getModeratedChannelsFields: INodeProperties[] = [
 	{
-		displayName: 'User ID or Username',
+		displayName: 'User',
 		name: 'userId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The user ID or username. Returns the list of channels that this user has moderator privileges in. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The user ID or login name. Returns the list of channels that this user has moderator privileges in. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'First',
@@ -76,43 +76,43 @@ const getModeratedChannelsFields: INodeProperties[] = [
 
 const addFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'User ID or Username',
+		displayName: 'User',
 		name: 'userId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 ];
 
 const removeFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'User ID or Username',
+		displayName: 'User',
 		name: 'userId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 ];
 
@@ -155,7 +155,7 @@ export const moderatorOperations: INodeProperties[] = [
 									throw new ApplicationError('First parameter must be between 1 and 100');
 								}
 
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput.trim());
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput.trim());
 
 								const qs: Record<string, string | string[] | number> = {
 									broadcaster_id: broadcasterId,
@@ -166,9 +166,9 @@ export const moderatorOperations: INodeProperties[] = [
 								if (userIdsInput && userIdsInput.trim() !== '') {
 									const userIdList = userIdsInput.split(',').map((v) => v.trim()).filter((v) => v !== '');
 									if (userIdList.length > 0) {
-										// Resolve each user ID or username
+										// Resolve each user ID or login name
 										const resolvedUserIds = await Promise.all(
-											userIdList.map((id) => resolveUserIdOrUsername.call(this, id))
+											userIdList.map((id) => resolveUserIdOrLogin.call(this, id))
 										);
 										qs.user_id = resolvedUserIds;
 									}
@@ -223,7 +223,7 @@ export const moderatorOperations: INodeProperties[] = [
 									throw new ApplicationError('First parameter must be between 1 and 100');
 								}
 
-								const userId = await resolveUserIdOrUsername.call(this, userIdInput.trim());
+								const userId = await resolveUserIdOrLogin.call(this, userIdInput.trim());
 
 								const qs: Record<string, string | number> = {
 									user_id: userId,
@@ -277,8 +277,8 @@ export const moderatorOperations: INodeProperties[] = [
 									throw new ApplicationError('User ID is required');
 								}
 
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput.trim());
-								const userId = await resolveUserIdOrUsername.call(this, userIdInput.trim());
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput.trim());
+								const userId = await resolveUserIdOrLogin.call(this, userIdInput.trim());
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,
@@ -325,8 +325,8 @@ export const moderatorOperations: INodeProperties[] = [
 									throw new ApplicationError('User ID is required');
 								}
 
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput.trim());
-								const userId = await resolveUserIdOrUsername.call(this, userIdInput.trim());
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput.trim());
+								const userId = await resolveUserIdOrLogin.call(this, userIdInput.trim());
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,

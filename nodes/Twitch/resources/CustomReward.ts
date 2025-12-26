@@ -1,17 +1,17 @@
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
 const createFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Title',
@@ -134,13 +134,13 @@ const createFields: INodeProperties[] = [
 
 const getFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -150,12 +150,12 @@ const getFields: INodeProperties[] = [
 		default: {},
 		options: [
 			{
-				displayName: 'Reward ID',
+				displayName: 'Reward',
 				name: 'id',
 				type: 'string',
 				default: '',
 				placeholder: 'e.g. 92af127c-7326-4483-a52b-b0da0be61c01',
-				description: 'The ID of the custom reward to get (if not specified, returns all rewards)',
+				description: 'Reward ID. ID of the custom reward to get (if not specified, returns all rewards).',
 			},
 			{
 				displayName: 'Only Manageable Rewards',
@@ -170,22 +170,22 @@ const getFields: INodeProperties[] = [
 
 const updateFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'Reward ID',
+		displayName: 'Reward',
 		name: 'rewardId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 92af127c-7326-4483-a52b-b0da0be61c01',
-		description: 'The ID of the custom reward',
+		description: 'Reward ID. ID of the custom reward.',
 	},
 	{
 		displayName: 'Update Fields',
@@ -313,22 +313,22 @@ const updateFields: INodeProperties[] = [
 
 const deleteFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 123456789 or username',
-		description: 'The broadcaster user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'Reward ID',
+		displayName: 'Reward',
 		name: 'rewardId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 92af127c-7326-4483-a52b-b0da0be61c01',
-		description: 'The ID of the custom reward',
+		description: 'Reward ID. ID of the custom reward.',
 	},
 ];
 
@@ -358,7 +358,7 @@ export const customRewardOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								requestOptions.qs = { broadcaster_id: broadcasterId };
 
 								const body: IDataObject = {
@@ -433,7 +433,7 @@ export const customRewardOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const qs: IDataObject = { broadcaster_id: broadcasterId };
 
 								const additionalFields = this.getNodeParameter('additionalFields', 0, {}) as IDataObject;
@@ -476,7 +476,7 @@ export const customRewardOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const id = this.getNodeParameter('rewardId', 0) as string;
 								requestOptions.qs = { broadcaster_id: broadcasterId, id };
 
@@ -557,7 +557,7 @@ export const customRewardOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const id = this.getNodeParameter('rewardId', 0) as string;
 								requestOptions.qs = { broadcaster_id: broadcasterId, id };
 								return requestOptions;

@@ -1,6 +1,6 @@
 import type { INodeProperties, IDataObject } from 'n8n-workflow';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
-import { resolveUserIdOrUsername } from '../../Twitch/shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../../Twitch/shared/userIdConverter';
 import type { EventConditionBuilder } from './types';
 
 const raidEventNames = ['channel.raid'];
@@ -52,7 +52,7 @@ export const buildCondition: EventConditionBuilder = async (context) => {
 	const condition: IDataObject = {};
 	const raidDirection = context.getNodeParameter('raidDirection') as string;
 	const raidBroadcasterIdInput = context.getNodeParameter('raidBroadcasterId') as string;
-	const raidBroadcasterId = await resolveUserIdOrUsername.call(context, raidBroadcasterIdInput);
+	const raidBroadcasterId = await resolveUserIdOrLogin.call(context, raidBroadcasterIdInput);
 
 	if (raidDirection === 'to') {
 		condition.to_broadcaster_user_id = raidBroadcasterId;

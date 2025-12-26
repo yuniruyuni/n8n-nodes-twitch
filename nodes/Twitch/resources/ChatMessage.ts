@@ -1,17 +1,17 @@
 import type { INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
 const sendMessageFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 12826 or username',
-		description: 'The ID of the broadcaster whose chat room the message will be sent to. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The ID of the broadcaster whose chat room the message will be sent to. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Sender ID or Username',
@@ -20,7 +20,7 @@ const sendMessageFields: INodeProperties[] = [
 		default: '',
 		required: true,
 		placeholder: 'e.g. 141981764 or username',
-		description: 'The ID of the user sending the message. This ID must match the user ID in the user access token. If a username is provided, it will be automatically converted to user ID.',
+		description: 'The ID of the user sending the message. This ID must match the user ID in the user access token. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
 		displayName: 'Message',
@@ -35,7 +35,7 @@ const sendMessageFields: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Reply Parent Message ID',
+		displayName: 'Reply Parent Message',
 		name: 'replyParentMessageId',
 		type: 'string',
 		default: '',
@@ -83,8 +83,8 @@ export const chatMessageOperations: INodeProperties[] = [
 								const forSourceOnly = this.getNodeParameter('forSourceOnly', false) as boolean;
 
 								// Resolve usernames to user IDs
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
-								const senderId = await resolveUserIdOrUsername.call(this, senderIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
+								const senderId = await resolveUserIdOrLogin.call(this, senderIdInput);
 
 								// Build request body with required fields
 								const body: {

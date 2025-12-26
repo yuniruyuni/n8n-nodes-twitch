@@ -1,5 +1,5 @@
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
@@ -30,7 +30,7 @@ const getVideosFields: INodeProperties[] = [
 		description: 'How to query for videos (at least one required)',
 	},
 	{
-		displayName: 'User ID or Username',
+		displayName: 'User',
 		name: 'userId',
 		type: 'string',
 		displayOptions: {
@@ -39,11 +39,11 @@ const getVideosFields: INodeProperties[] = [
 			},
 		},
 		default: '',
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The user ID or username. If a username is provided, it will be automatically converted to user ID.',
+		placeholder: 'e.g. 123456789 or torpedo09',
+		description: 'User ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'Game ID',
+		displayName: 'Game',
 		name: 'gameId',
 		type: 'string',
 		displayOptions: {
@@ -53,10 +53,10 @@ const getVideosFields: INodeProperties[] = [
 		},
 		default: '',
 		placeholder: 'e.g. 493057',
-		description: 'ID of the game the videos are of',
+		description: 'Game ID. ID of the game the videos are of.',
 	},
 	{
-		displayName: 'Video IDs',
+		displayName: 'Videos',
 		name: 'videoIds',
 		type: 'string',
 		displayOptions: {
@@ -66,7 +66,7 @@ const getVideosFields: INodeProperties[] = [
 		},
 		default: '',
 		placeholder: 'e.g. 234482848 or 234482848,234482850',
-		description: 'ID(s) of the video(s). Separate multiple IDs with commas. Maximum 100 IDs.',
+		description: 'Video ID(s). Separate multiple IDs with commas. Maximum 100 IDs.',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -189,13 +189,13 @@ const getVideosFields: INodeProperties[] = [
 
 const deleteVideosFields: INodeProperties[] = [
 	{
-		displayName: 'Video IDs',
+		displayName: 'Videos',
 		name: 'deleteVideoIds',
 		type: 'string',
 		default: '',
 		required: true,
 		placeholder: 'e.g. 234482848 or 234482848,234482850',
-		description: 'ID(s) of the video(s) to delete. Separate multiple IDs with commas. Maximum 5 IDs.',
+		description: 'Video ID(s) to delete. Separate multiple IDs with commas. Maximum 5 IDs.',
 	},
 	{
 		displayName: 'Note',
@@ -237,7 +237,7 @@ export const videoOperations: INodeProperties[] = [
 								// Add required parameter based on query type
 								if (queryBy === 'userId') {
 									const userIdInput = this.getNodeParameter('userId', 0) as string;
-									const userId = await resolveUserIdOrUsername.call(this, userIdInput);
+									const userId = await resolveUserIdOrLogin.call(this, userIdInput);
 									qs.user_id = userId;
 								} else if (queryBy === 'gameId') {
 									const gameId = this.getNodeParameter('gameId', 0) as string;

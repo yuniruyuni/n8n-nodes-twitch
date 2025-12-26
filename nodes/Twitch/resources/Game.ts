@@ -5,7 +5,7 @@ import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 // Field definitions for each operation
 const getGamesFields: INodeProperties[] = [
 	{
-		displayName: 'Game IDs',
+		displayName: 'Games',
 		name: 'gameIds',
 		type: 'string',
 		default: '',

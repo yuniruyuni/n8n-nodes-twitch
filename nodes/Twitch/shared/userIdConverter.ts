@@ -1,11 +1,11 @@
 import type { IExecuteFunctions, IExecuteSingleFunctions, IHookFunctions, ITriggerFunctions, IHttpRequestOptions } from 'n8n-workflow';
 
 /**
- * Convert Twitch username to user ID
+ * Convert Twitch login name to user ID
  * If input is already a numeric ID, returns it as-is
- * If input is a username, calls Twitch API to resolve to ID
+ * If input is a login name, calls Twitch API to resolve to ID
  */
-export async function resolveUserIdOrUsername(
+export async function resolveUserIdOrLogin(
 	this: IExecuteFunctions | IExecuteSingleFunctions | IHookFunctions | ITriggerFunctions,
 	input: string,
 ): Promise<string> {
@@ -19,7 +19,7 @@ export async function resolveUserIdOrUsername(
 		return input;
 	}
 
-	// Otherwise, treat it as a username and resolve to ID
+	// Otherwise, treat it as a login name and resolve to ID
 	const credentials = await this.getCredentials('twitchUserOAuth2Api');
 	const clientId = credentials.clientId as string;
 

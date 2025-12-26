@@ -1,17 +1,17 @@
 import type { IDataObject, INodeProperties } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
 const createClipFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The ID or username of the broadcaster whose stream you want to create a clip from. If a username is provided, it will be automatically converted to user ID. This ID must match the user ID in the access token or the user must be an editor for the channel.',
+		placeholder: 'e.g. 123456789 or torpedo09',
+		description: 'Broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID. This ID must match the user ID in the access token or the user must be an editor for the channel.',
 	},
 	{
 		displayName: 'Title',
@@ -62,7 +62,7 @@ const getClipsFields: INodeProperties[] = [
 		description: 'The type of filter to use when retrieving clips. These filters are mutually exclusive - you can only use one at a time.',
 	},
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		displayOptions: {
@@ -71,11 +71,11 @@ const getClipsFields: INodeProperties[] = [
 			},
 		},
 		default: '',
-		placeholder: 'e.g. 123456789 or username',
-		description: 'The ID or username of the broadcaster whose clips you want to get. If a username is provided, it will be automatically converted to user ID.',
+		placeholder: 'e.g. 123456789 or torpedo09',
+		description: 'Broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'Game ID',
+		displayName: 'Game',
 		name: 'gameId',
 		type: 'string',
 		displayOptions: {
@@ -85,10 +85,10 @@ const getClipsFields: INodeProperties[] = [
 		},
 		default: '',
 		placeholder: 'e.g. 987654321',
-		description: 'The ID of the game whose clips you want to get',
+		description: 'Game ID. The ID of the game whose clips you want to get.',
 	},
 	{
-		displayName: 'Clip ID',
+		displayName: 'Clip',
 		name: 'clipId',
 		type: 'string',
 		displayOptions: {
@@ -98,7 +98,7 @@ const getClipsFields: INodeProperties[] = [
 		},
 		default: '',
 		placeholder: 'e.g. AwkwardHelplessSalamanderSwiftRage or clip1,clip2,clip3',
-		description: 'One or more clip IDs separated by commas (max 100)',
+		description: 'Clip ID(s). One or more clip IDs separated by commas (max 100).',
 	},
 	{
 		displayName: 'Started At',
@@ -196,7 +196,7 @@ export const clipOperations: INodeProperties[] = [
 								const title = this.getNodeParameter('title', '') as string;
 								const duration = this.getNodeParameter('duration', 30) as number;
 
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 
 								const qs: IDataObject = {
 									broadcaster_id: broadcasterId,
@@ -246,7 +246,7 @@ export const clipOperations: INodeProperties[] = [
 
 								if (filterType === 'broadcasterId') {
 									const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-									const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+									const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 									qs.broadcaster_id = broadcasterId;
 								} else if (filterType === 'gameId') {
 									qs.game_id = this.getNodeParameter('gameId') as string;

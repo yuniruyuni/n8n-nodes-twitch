@@ -1,5 +1,5 @@
 import type { INodeProperties, IDataObject } from 'n8n-workflow';
-import { resolveUserIdOrUsername } from '../shared/userIdConverter';
+import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../shared/updateDisplayOptions';
 
 // Field definitions for each operation
@@ -45,7 +45,7 @@ const getStreamsFields: INodeProperties[] = [
 		description: 'User login names to filter by (comma-separated, max 100)',
 	},
 	{
-		displayName: 'User IDs',
+		displayName: 'Users',
 		name: 'userIds',
 		type: 'string',
 		default: '',
@@ -58,7 +58,7 @@ const getStreamsFields: INodeProperties[] = [
 		description: 'User IDs to filter by (comma-separated, max 100)',
 	},
 	{
-		displayName: 'Game IDs',
+		displayName: 'Games',
 		name: 'gameIds',
 		type: 'string',
 		default: '',
@@ -134,13 +134,13 @@ const getStreamsFields: INodeProperties[] = [
 // Get Followed Streams
 const getFollowedStreamsFields: INodeProperties[] = [
 	{
-		displayName: 'User ID or Username',
+		displayName: 'User',
 		name: 'userId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 141981764 or username',
-		description: 'The ID or username of the user whose followed streams to get. If a username is provided, it will be automatically converted to user ID. This must match the user ID in the access token.',
+		placeholder: 'e.g. 141981764 or torpedo09',
+		description: 'User ID or login name whose followed streams to get. If a login name is provided, it will be automatically converted to user ID. This must match the user ID in the access token.',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -174,26 +174,26 @@ const getFollowedStreamsFields: INodeProperties[] = [
 // Get Stream Key
 const getStreamKeyFields: INodeProperties[] = [
 	{
-		displayName: 'Broadcaster ID or Username',
+		displayName: 'Broadcaster',
 		name: 'broadcasterId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 141981764 or username',
-		description: 'The ID or username of the broadcaster. If a username is provided, it will be automatically converted to user ID. This must match the user ID in the access token.',
+		placeholder: 'e.g. 141981764 or torpedo09',
+		description: 'Broadcaster user ID or login name. If a login name is provided, it will be automatically converted to user ID. This must match the user ID in the access token.',
 	},
 ];
 
 // Create Stream Marker
 const createMarkerFields: INodeProperties[] = [
 	{
-		displayName: 'User ID or Username',
+		displayName: 'User',
 		name: 'userId',
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. 123 or username',
-		description: 'The ID or username of the broadcaster streaming content. If a username is provided, it will be automatically converted to user ID. This must match the user ID in the access token or be an editor.',
+		placeholder: 'e.g. 123 or torpedo09',
+		description: 'User ID or login name of the broadcaster streaming content. If a login name is provided, it will be automatically converted to user ID. This must match the user ID in the access token or be an editor.',
 	},
 	{
 		displayName: 'Description',
@@ -229,7 +229,7 @@ const getMarkersFields: INodeProperties[] = [
 		description: 'Get markers by user (most recent stream) or specific video',
 	},
 	{
-		displayName: 'User ID or Username',
+		displayName: 'User',
 		name: 'userId',
 		type: 'string',
 		default: '',
@@ -239,11 +239,11 @@ const getMarkersFields: INodeProperties[] = [
 			},
 		},
 		required: true,
-		placeholder: 'e.g. 123 or username',
-		description: 'User ID or username to get markers from their most recent stream. If a username is provided, it will be automatically converted to user ID.',
+		placeholder: 'e.g. 123 or torpedo09',
+		description: 'User ID or login name to get markers from their most recent stream. If a login name is provided, it will be automatically converted to user ID.',
 	},
 	{
-		displayName: 'Video ID',
+		displayName: 'Video',
 		name: 'videoId',
 		type: 'string',
 		default: '',
@@ -407,7 +407,7 @@ export const streamOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const userIdInput = this.getNodeParameter('userId', 0) as string;
-								const userId = await resolveUserIdOrUsername.call(this, userIdInput);
+								const userId = await resolveUserIdOrLogin.call(this, userIdInput);
 								const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
 
 								requestOptions.qs = requestOptions.qs || {};
@@ -450,7 +450,7 @@ export const streamOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-								const broadcasterId = await resolveUserIdOrUsername.call(this, broadcasterIdInput);
+								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,
@@ -486,7 +486,7 @@ export const streamOperations: INodeProperties[] = [
 						preSend: [
 							async function (this, requestOptions) {
 								const userIdInput = this.getNodeParameter('userId', 0) as string;
-								const userId = await resolveUserIdOrUsername.call(this, userIdInput);
+								const userId = await resolveUserIdOrLogin.call(this, userIdInput);
 								const description = this.getNodeParameter('description', 0) as string;
 
 								const body: { user_id: string; description?: string } = { user_id: userId };
@@ -531,7 +531,7 @@ export const streamOperations: INodeProperties[] = [
 
 								if (filterBy === 'userId') {
 									const userIdInput = this.getNodeParameter('userId', 0) as string;
-									const userId = await resolveUserIdOrUsername.call(this, userIdInput);
+									const userId = await resolveUserIdOrLogin.call(this, userIdInput);
 									requestOptions.qs.user_id = userId;
 								} else if (filterBy === 'videoId') {
 									const videoId = this.getNodeParameter('videoId', 0) as string;
