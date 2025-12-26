@@ -9,8 +9,8 @@ const searchCommonFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		placeholder: 'e.g. starcraft',
-		description: 'URI-encoded search string. For example, encode search strings like "angel of death" as "angel%20of%20death".',
+		placeholder: 'e.g. angel of death',
+		description: 'Search query string. Enter plain text - spaces and special characters will be automatically encoded.',
 	},
 	{
 		displayName: 'First',
