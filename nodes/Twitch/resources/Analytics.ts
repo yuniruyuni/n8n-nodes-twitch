@@ -170,7 +170,7 @@ export const analyticsOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
+								const additionalFields = this.getNodeParameter('additionalFields', {}) as IDataObject;
 
 								requestOptions.qs = requestOptions.qs || {};
 
@@ -228,7 +228,7 @@ export const analyticsOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
+								const additionalFields = this.getNodeParameter('additionalFields', {}) as IDataObject;
 
 								requestOptions.qs = requestOptions.qs || {};
 

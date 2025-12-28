@@ -211,10 +211,10 @@ export const redemptionOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
-								const rewardId = this.getNodeParameter('rewardId', 0) as string;
-								const filterBy = this.getNodeParameter('filterBy', 0) as string;
+								const rewardId = this.getNodeParameter('rewardId') as string;
+								const filterBy = this.getNodeParameter('filterBy', 'status') as string;
 
 								const qs: IDataObject = {
 									broadcaster_id: broadcasterId,
@@ -223,10 +223,10 @@ export const redemptionOperations: INodeProperties[] = [
 
 								// Handle filtering - either by status or by redemption IDs
 								if (filterBy === 'status') {
-									const status = this.getNodeParameter('status', 0) as string;
+									const status = this.getNodeParameter('status', 'UNFULFILLED') as string;
 									qs.status = status;
 								} else if (filterBy === 'ids') {
-									const redemptionIdsInput = this.getNodeParameter('redemptionIds', 0) as string;
+									const redemptionIdsInput = this.getNodeParameter('redemptionIds', '') as string;
 									const redemptionIds = redemptionIdsInput.split(',').map(id => id.trim()).filter(id => id);
 
 									// Add multiple id parameters (API supports id=123&id=456 format)
@@ -237,7 +237,7 @@ export const redemptionOperations: INodeProperties[] = [
 									(requestOptions.qs as IDataObject).id = redemptionIds;
 								}
 
-								const additionalFields = this.getNodeParameter('additionalFields', 0, {}) as IDataObject;
+								const additionalFields = this.getNodeParameter('additionalFields', {}) as IDataObject;
 
 								if (additionalFields.sort) {
 									qs.sort = additionalFields.sort;

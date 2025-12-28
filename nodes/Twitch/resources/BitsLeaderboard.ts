@@ -97,10 +97,10 @@ export const bitsLeaderboardOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const count = this.getNodeParameter('count', 0) as number;
-								const period = this.getNodeParameter('period', 0) as string;
-								const startedAt = this.getNodeParameter('startedAt', 0) as string;
-								const userIdInput = this.getNodeParameter('userId', 0) as string;
+								const count = this.getNodeParameter('count', 10) as number;
+								const period = this.getNodeParameter('period', 'all') as string;
+								const startedAt = this.getNodeParameter('startedAt', '') as string;
+								const userIdInput = this.getNodeParameter('userId', '') as string;
 
 								const qs: IDataObject = {};
 

@@ -121,10 +121,10 @@ export const vipOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const userIdsInput = this.getNodeParameter('userIds', 0) as string;
-								const first = this.getNodeParameter('first', 0) as number;
-								const after = this.getNodeParameter('after', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId', '') as string;
+								const userIdsInput = this.getNodeParameter('userIds', '') as string;
+								const first = this.getNodeParameter('first', 20) as number;
+								const after = this.getNodeParameter('after', '') as string;
 
 								if (!broadcasterIdInput || broadcasterIdInput.trim() === '') {
 									throw new ApplicationError('Broadcaster ID is required');
@@ -194,8 +194,8 @@ export const vipOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const userIdInput = this.getNodeParameter('userId', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId', '') as string;
+								const userIdInput = this.getNodeParameter('userId', '') as string;
 
 								if (!broadcasterIdInput || broadcasterIdInput.trim() === '') {
 									throw new ApplicationError('Broadcaster ID is required');
@@ -242,8 +242,8 @@ export const vipOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const userIdInput = this.getNodeParameter('userId', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId', '') as string;
+								const userIdInput = this.getNodeParameter('userId', '') as string;
 
 								if (!broadcasterIdInput || broadcasterIdInput.trim() === '') {
 									throw new ApplicationError('Broadcaster ID is required');

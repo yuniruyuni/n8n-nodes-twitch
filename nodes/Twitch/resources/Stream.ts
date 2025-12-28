@@ -309,8 +309,8 @@ export const streamOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const filterBy = this.getNodeParameter('filterBy', 0) as string;
-								const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
+								const filterBy = this.getNodeParameter('filterBy', 'userLogin') as string;
+								const additionalFields = this.getNodeParameter('additionalFields', {}) as IDataObject;
 								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
 								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 50) as number);
 
@@ -318,7 +318,7 @@ export const streamOperations: INodeProperties[] = [
 
 								// Handle filter parameters
 								if (filterBy === 'userLogin') {
-									const userLogins = this.getNodeParameter('userLogins', 0) as string;
+									const userLogins = this.getNodeParameter('userLogins', '') as string;
 									if (userLogins) {
 										const logins = userLogins.split(',').map((s) => s.trim()).filter(Boolean);
 										if (logins.length === 1) {
@@ -328,7 +328,7 @@ export const streamOperations: INodeProperties[] = [
 										}
 									}
 								} else if (filterBy === 'userId') {
-									const userIds = this.getNodeParameter('userIds', 0) as string;
+									const userIds = this.getNodeParameter('userIds', '') as string;
 									if (userIds) {
 										const ids = userIds.split(',').map((s) => s.trim()).filter(Boolean);
 										if (ids.length === 1) {
@@ -338,7 +338,7 @@ export const streamOperations: INodeProperties[] = [
 										}
 									}
 								} else if (filterBy === 'gameId') {
-									const gameIds = this.getNodeParameter('gameIds', 0) as string;
+									const gameIds = this.getNodeParameter('gameIds', '') as string;
 									if (gameIds) {
 										const ids = gameIds.split(',').map((s) => s.trim()).filter(Boolean);
 										if (ids.length === 1) {
@@ -402,7 +402,7 @@ export const streamOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const userIdInput = this.getNodeParameter('userId', 0) as string;
+								const userIdInput = this.getNodeParameter('userId', '') as string;
 								const userId = await resolveUserIdOrLogin.call(this, userIdInput);
 								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
 								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 50) as number);
@@ -451,7 +451,7 @@ export const streamOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId', '') as string;
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 
 								requestOptions.qs = {
@@ -487,9 +487,9 @@ export const streamOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const userIdInput = this.getNodeParameter('userId', 0) as string;
+								const userIdInput = this.getNodeParameter('userId', '') as string;
 								const userId = await resolveUserIdOrLogin.call(this, userIdInput);
-								const description = this.getNodeParameter('description', 0) as string;
+								const description = this.getNodeParameter('description', '') as string;
 
 								const body: { user_id: string; description?: string } = { user_id: userId };
 								if (description) {
@@ -526,18 +526,18 @@ export const streamOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const filterBy = this.getNodeParameter('filterBy', 0) as string;
+								const filterBy = this.getNodeParameter('filterBy', 'userId') as string;
 								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
 								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 50) as number);
 
 								requestOptions.qs = requestOptions.qs || {};
 
 								if (filterBy === 'userId') {
-									const userIdInput = this.getNodeParameter('userId', 0) as string;
+									const userIdInput = this.getNodeParameter('userId', '') as string;
 									const userId = await resolveUserIdOrLogin.call(this, userIdInput);
 									requestOptions.qs.user_id = userId;
 								} else if (filterBy === 'videoId') {
-									const videoId = this.getNodeParameter('videoId', 0) as string;
+									const videoId = this.getNodeParameter('videoId', '') as string;
 									requestOptions.qs.video_id = videoId;
 								}
 

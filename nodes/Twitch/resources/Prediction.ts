@@ -189,12 +189,12 @@ export const predictionOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
-								const title = this.getNodeParameter('title', 0) as string;
-								const predictionWindow = this.getNodeParameter('predictionWindow', 0) as number;
-								const outcome1Title = this.getNodeParameter('outcome1Title', 0) as string;
-								const outcome2Title = this.getNodeParameter('outcome2Title', 0) as string;
+								const title = this.getNodeParameter('title') as string;
+								const predictionWindow = this.getNodeParameter('predictionWindow') as number;
+								const outcome1Title = this.getNodeParameter('outcome1Title') as string;
+								const outcome2Title = this.getNodeParameter('outcome2Title') as string;
 
 								const body = {
 									broadcaster_id: broadcasterId,
@@ -236,7 +236,7 @@ export const predictionOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const qs: IDataObject = {
 									broadcaster_id: broadcasterId,
@@ -254,7 +254,7 @@ export const predictionOperations: INodeProperties[] = [
 									}
 								}
 
-								const first = this.getNodeParameter('first', '') as number;
+								const first = this.getNodeParameter('first', 20) as number;
 								if (first) {
 									qs.first = first;
 								}
@@ -294,10 +294,10 @@ export const predictionOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
-								const predictionId = this.getNodeParameter('endPredictionId', 0) as string;
-								const status = this.getNodeParameter('status', 0) as string;
+								const predictionId = this.getNodeParameter('endPredictionId') as string;
+								const status = this.getNodeParameter('status') as string;
 
 								const body: IDataObject = {
 									broadcaster_id: broadcasterId,
@@ -306,7 +306,7 @@ export const predictionOperations: INodeProperties[] = [
 								};
 
 								if (status === 'RESOLVED') {
-									const winningOutcomeId = this.getNodeParameter('winningOutcomeId', 0) as string;
+									const winningOutcomeId = this.getNodeParameter('winningOutcomeId') as string;
 									body.winning_outcome_id = winningOutcomeId;
 								}
 

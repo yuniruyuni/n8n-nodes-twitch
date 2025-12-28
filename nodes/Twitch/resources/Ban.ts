@@ -211,9 +211,9 @@ export const banOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-								const moderatorIdInput = this.getNodeParameter('moderatorId') as string;
-								const userIdInput = this.getNodeParameter('userId') as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId', '') as string;
+								const moderatorIdInput = this.getNodeParameter('moderatorId', '') as string;
+								const userIdInput = this.getNodeParameter('userId', '') as string;
 
 								// Resolve usernames to user IDs
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
@@ -274,9 +274,9 @@ export const banOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-								const moderatorIdInput = this.getNodeParameter('moderatorId') as string;
-								const userIdInput = this.getNodeParameter('userId') as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId', '') as string;
+								const moderatorIdInput = this.getNodeParameter('moderatorId', '') as string;
+								const userIdInput = this.getNodeParameter('userId', '') as string;
 
 								// Resolve usernames to user IDs
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
@@ -309,10 +309,10 @@ export const banOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId', '') as string;
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
-								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 100) as number);
+								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 50) as number);
 
 								const qs: IDataObject = {
 									broadcaster_id: broadcasterId,
@@ -371,10 +371,10 @@ export const banOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-								const moderatorIdInput = this.getNodeParameter('moderatorId') as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId', '') as string;
+								const moderatorIdInput = this.getNodeParameter('moderatorId', '') as string;
 								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
-								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 100) as number);
+								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 50) as number);
 
 								// Resolve usernames to user IDs
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
@@ -383,7 +383,7 @@ export const banOperations: INodeProperties[] = [
 								const qs: IDataObject = {
 									broadcaster_id: broadcasterId,
 									moderator_id: moderatorId,
-									status: this.getNodeParameter('status') as string,
+									status: this.getNodeParameter('status', 'pending') as string,
 									// Optimal page size: API max when returnAll, otherwise min(limit, API max)
 									first: returnAll ? 100 : Math.min(limit, 100),
 								};
@@ -433,8 +433,8 @@ export const banOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-								const moderatorIdInput = this.getNodeParameter('moderatorId') as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId', '') as string;
+								const moderatorIdInput = this.getNodeParameter('moderatorId', '') as string;
 
 								// Resolve usernames to user IDs
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
@@ -443,8 +443,8 @@ export const banOperations: INodeProperties[] = [
 								const qs: IDataObject = {
 									broadcaster_id: broadcasterId,
 									moderator_id: moderatorId,
-									unban_request_id: this.getNodeParameter('unbanRequestId') as string,
-									status: this.getNodeParameter('status') as string,
+									unban_request_id: this.getNodeParameter('unbanRequestId', '') as string,
+									status: this.getNodeParameter('status', 'approved') as string,
 								};
 
 								const resolutionText = this.getNodeParameter('resolutionText', '') as string;

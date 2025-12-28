@@ -249,17 +249,17 @@ export const clipOperations: INodeProperties[] = [
 								// Build query parameters based on filter type
 								const filterType = this.getNodeParameter('filterType') as string;
 								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
-								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 100) as number);
+								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 50) as number);
 								const qs: IDataObject = {};
 
 								if (filterType === 'broadcasterId') {
-									const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+									const broadcasterIdInput = this.getNodeParameter('broadcasterId', '') as string;
 									const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 									qs.broadcaster_id = broadcasterId;
 								} else if (filterType === 'gameId') {
-									qs.game_id = this.getNodeParameter('gameId') as string;
+									qs.game_id = this.getNodeParameter('gameId', '') as string;
 								} else if (filterType === 'clipId') {
-									const clipIdInput = this.getNodeParameter('clipId') as string;
+									const clipIdInput = this.getNodeParameter('clipId', '') as string;
 									// Split by comma and trim whitespace, support multiple clip IDs
 									const clipIds = clipIdInput.split(',').map((id) => id.trim()).filter((id) => id !== '');
 									qs.id = clipIds;

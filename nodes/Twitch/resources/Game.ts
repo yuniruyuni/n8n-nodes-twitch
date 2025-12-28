@@ -95,9 +95,9 @@ export const gameOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const gameIds = this.getNodeParameter('gameIds', 0) as string;
-								const gameNames = this.getNodeParameter('gameNames', 0) as string;
-								const igdbIds = this.getNodeParameter('igdbIds', 0) as string;
+								const gameIds = this.getNodeParameter('gameIds', '') as string;
+								const gameNames = this.getNodeParameter('gameNames', '') as string;
+								const igdbIds = this.getNodeParameter('igdbIds', '') as string;
 
 								// Parse and collect all values
 								const ids = gameIds ? gameIds.split(',').map((v) => v.trim()).filter((v) => v !== '') : [];
@@ -159,9 +159,9 @@ export const gameOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const first = this.getNodeParameter('first', 0) as number;
-								const after = this.getNodeParameter('after', 0) as string;
-								const before = this.getNodeParameter('before', 0) as string;
+								const first = this.getNodeParameter('first', 20) as number;
+								const after = this.getNodeParameter('after', '') as string;
+								const before = this.getNodeParameter('before', '') as string;
 
 								const qs: Record<string, string | number> = {};
 

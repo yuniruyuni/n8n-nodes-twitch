@@ -434,7 +434,7 @@ export const chatSettingsOperations: INodeProperties[] = [
 
 								let color = colorOption;
 								if (colorOption === 'custom') {
-									const customColor = this.getNodeParameter('customColor') as string;
+									const customColor = this.getNodeParameter('customColor', '') as string;
 									// URL encode the hex color (e.g., #9146FF -> %239146FF)
 									color = encodeURIComponent(customColor);
 								}

@@ -135,8 +135,8 @@ export const teamOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const searchBy = this.getNodeParameter('searchBy', 0) as string;
-								const searchValue = this.getNodeParameter(searchBy, 0) as string;
+								const searchBy = this.getNodeParameter('searchBy') as string;
+								const searchValue = this.getNodeParameter(searchBy, '') as string;
 
 								requestOptions.qs = {
 									[searchBy]: searchValue,

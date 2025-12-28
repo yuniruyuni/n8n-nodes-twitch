@@ -336,13 +336,13 @@ export const scheduleOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
-								const id = this.getNodeParameter('id', 0) as string;
-								const startTime = this.getNodeParameter('startTime', 0) as string;
-								const utcOffset = this.getNodeParameter('utcOffset', 0) as string;
-								const first = this.getNodeParameter('first', 0) as number;
-								const after = this.getNodeParameter('after', 0) as string;
+								const id = this.getNodeParameter('id', '') as string;
+								const startTime = this.getNodeParameter('startTime', '') as string;
+								const utcOffset = this.getNodeParameter('utcOffset', '') as string;
+								const first = this.getNodeParameter('first', 20) as number;
+								const after = this.getNodeParameter('after', '') as string;
 
 								const qs: IDataObject = {
 									broadcaster_id: broadcasterId,
@@ -389,7 +389,7 @@ export const scheduleOperations: INodeProperties[] = [
 								const segmentStartTime = this.getNodeParameter('segmentStartTime', 0) as string;
 								const timezone = this.getNodeParameter('timezone', 0) as string;
 								const duration = this.getNodeParameter('duration', 0) as number;
-								const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
+								const additionalFields = this.getNodeParameter('additionalFields', {}) as IDataObject;
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,
@@ -444,7 +444,7 @@ export const scheduleOperations: INodeProperties[] = [
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const segmentId = this.getNodeParameter('segmentId', 0) as string;
-								const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
+								const additionalFields = this.getNodeParameter('additionalFields', {}) as IDataObject;
 
 								requestOptions.qs = {
 									broadcaster_id: broadcasterId,
@@ -520,7 +520,7 @@ export const scheduleOperations: INodeProperties[] = [
 							async function (this, requestOptions) {
 								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
-								const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
+								const additionalFields = this.getNodeParameter('additionalFields', {}) as IDataObject;
 
 								const qs: IDataObject = {
 									broadcaster_id: broadcasterId,

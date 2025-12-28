@@ -36,10 +36,10 @@ export const chatterOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
-								const moderatorIdInput = this.getNodeParameter('moderatorId') as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId', '') as string;
+								const moderatorIdInput = this.getNodeParameter('moderatorId', '') as string;
 								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
-								const limit = returnAll ? 1000 : (this.getNodeParameter('limit', 100) as number);
+								const limit = returnAll ? 1000 : (this.getNodeParameter('limit', 50) as number);
 
 								// Resolve usernames to user IDs
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);

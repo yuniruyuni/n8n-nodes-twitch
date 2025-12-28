@@ -211,11 +211,11 @@ export const pollOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId', '') as string;
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
-								const title = this.getNodeParameter('title', 0) as string;
-								const choicesInput = this.getNodeParameter('choices', 0) as string;
-								const duration = this.getNodeParameter('duration', 0) as number;
+								const title = this.getNodeParameter('title', '') as string;
+								const choicesInput = this.getNodeParameter('choices', '') as string;
+								const duration = this.getNodeParameter('duration', 300) as number;
 
 								// Parse choices - can be comma-separated or JSON array
 								let choices: string[];
@@ -237,7 +237,7 @@ export const pollOperations: INodeProperties[] = [
 									duration: duration,
 								};
 
-								const additionalFields = this.getNodeParameter('additionalFields', 0, {}) as IDataObject;
+								const additionalFields = this.getNodeParameter('additionalFields', {}) as IDataObject;
 
 								if (additionalFields.channelPointsVotingEnabled !== undefined) {
 									body.channel_points_voting_enabled = additionalFields.channelPointsVotingEnabled;
@@ -276,13 +276,13 @@ export const pollOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('getBroadcasterId', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('getBroadcasterId', '') as string;
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const qs: IDataObject = {
 									broadcaster_id: broadcasterId,
 								};
 
-								const additionalFields = this.getNodeParameter('additionalFields', 0, {}) as IDataObject;
+								const additionalFields = this.getNodeParameter('additionalFields', {}) as IDataObject;
 
 								if (additionalFields.pollIds) {
 									qs.id = additionalFields.pollIds;
@@ -326,10 +326,10 @@ export const pollOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('endBroadcasterId', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('endBroadcasterId', '') as string;
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
-								const pollId = this.getNodeParameter('pollId', 0) as string;
-								const status = this.getNodeParameter('status', 0) as string;
+								const pollId = this.getNodeParameter('pollId', '') as string;
+								const status = this.getNodeParameter('status', 'TERMINATED') as string;
 
 								const body: IDataObject = {
 									broadcaster_id: broadcasterId,

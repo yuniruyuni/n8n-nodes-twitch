@@ -369,16 +369,16 @@ export const customRewardOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								requestOptions.qs = { broadcaster_id: broadcasterId };
 
 								const body: IDataObject = {
-									title: this.getNodeParameter('title', 0) as string,
-									cost: this.getNodeParameter('cost', 0) as number,
+									title: this.getNodeParameter('title') as string,
+									cost: this.getNodeParameter('cost') as number,
 								};
 
-								const additionalFields = this.getNodeParameter('additionalFields', 0, {}) as IDataObject;
+								const additionalFields = this.getNodeParameter('additionalFields', {}) as IDataObject;
 
 								if (additionalFields.prompt) {
 									body.prompt = additionalFields.prompt;
@@ -444,11 +444,11 @@ export const customRewardOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const qs: IDataObject = { broadcaster_id: broadcasterId };
 
-								const additionalFields = this.getNodeParameter('additionalFields', 0, {}) as IDataObject;
+								const additionalFields = this.getNodeParameter('additionalFields', {}) as IDataObject;
 
 								if (additionalFields.id) {
 									qs.id = additionalFields.id;
@@ -487,13 +487,13 @@ export const customRewardOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
-								const id = this.getNodeParameter('rewardId', 0) as string;
+								const id = this.getNodeParameter('rewardId') as string;
 								requestOptions.qs = { broadcaster_id: broadcasterId, id };
 
 								const body: IDataObject = {};
-								const updateFields = this.getNodeParameter('updateFields', 0, {}) as IDataObject;
+								const updateFields = this.getNodeParameter('updateFields', {}) as IDataObject;
 
 								if (updateFields.title) {
 									body.title = updateFields.title;
@@ -568,9 +568,9 @@ export const customRewardOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
-								const id = this.getNodeParameter('rewardId', 0) as string;
+								const id = this.getNodeParameter('rewardId') as string;
 								requestOptions.qs = { broadcaster_id: broadcasterId, id };
 								return requestOptions;
 							},

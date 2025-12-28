@@ -316,10 +316,10 @@ export const userOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const lookupBy = this.getNodeParameter('lookupBy', 0) as string;
+								const lookupBy = this.getNodeParameter('lookupBy', 'login') as string;
 								const value = this.getNodeParameter(
 									lookupBy === 'id' ? 'userIds' : 'userLogins',
-									0,
+									'',
 								) as string;
 
 								if (value) {
@@ -385,7 +385,7 @@ export const userOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const userIdsInput = this.getNodeParameter('userIds', 0) as string;
+								const userIdsInput = this.getNodeParameter('userIds') as string;
 								const inputs = userIdsInput.split(',').map((id) => id.trim());
 								const ids = await Promise.all(
 									inputs.map((input) => resolveUserIdOrLogin.call(this, input))
@@ -602,7 +602,7 @@ export const userOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const extensionsData = this.getNodeParameter('extensionsData', 0) as string;
+								const extensionsData = this.getNodeParameter('extensionsData') as string;
 								requestOptions.body = JSON.parse(extensionsData);
 								return requestOptions;
 							},

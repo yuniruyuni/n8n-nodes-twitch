@@ -239,26 +239,26 @@ export const videoOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const queryBy = this.getNodeParameter('queryBy', 0) as string;
+								const queryBy = this.getNodeParameter('queryBy') as string;
 								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
-								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 100) as number);
+								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 50) as number);
 								const qs: IDataObject = {};
 
 								// Add required parameter based on query type
 								if (queryBy === 'userId') {
-									const userIdInput = this.getNodeParameter('userId', 0) as string;
+									const userIdInput = this.getNodeParameter('userId', '') as string;
 									const userId = await resolveUserIdOrLogin.call(this, userIdInput);
 									qs.user_id = userId;
 								} else if (queryBy === 'gameId') {
-									const gameId = this.getNodeParameter('gameId', 0) as string;
+									const gameId = this.getNodeParameter('gameId', '') as string;
 									qs.game_id = gameId;
 								} else if (queryBy === 'videoId') {
-									const videoIds = this.getNodeParameter('videoIds', 0) as string;
+									const videoIds = this.getNodeParameter('videoIds', '') as string;
 									qs.id = videoIds;
 								}
 
 								// Add optional parameters
-								const additionalFields = this.getNodeParameter('additionalFields', 0, {}) as IDataObject;
+								const additionalFields = this.getNodeParameter('additionalFields', {}) as IDataObject;
 
 								// Optimal page size: API max when returnAll, otherwise min(limit, API max)
 								qs.first = returnAll ? 100 : Math.min(limit, 100);
@@ -315,7 +315,7 @@ export const videoOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const videoIds = this.getNodeParameter('deleteVideoIds', 0) as string;
+								const videoIds = this.getNodeParameter('deleteVideoIds', '') as string;
 								requestOptions.qs = {
 									id: videoIds,
 								};

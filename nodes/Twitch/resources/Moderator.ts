@@ -161,10 +161,10 @@ export const moderatorOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const userIdsInput = this.getNodeParameter('userIds', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+								const userIdsInput = this.getNodeParameter('userIds', '') as string;
 								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
-								const limit = returnAll ? 1000 : (this.getNodeParameter('limit', 0) as number);
+								const limit = returnAll ? 1000 : (this.getNodeParameter('limit', 50) as number);
 
 								const broadcasterIdTrimmed = validateRequired(broadcasterIdInput, 'Broadcaster ID');
 								validateRange(limit, 1, Number.MAX_SAFE_INTEGER, 'Limit parameter');
@@ -227,9 +227,9 @@ export const moderatorOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const userIdInput = this.getNodeParameter('userId', 0) as string;
+								const userIdInput = this.getNodeParameter('userId') as string;
 								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
-								const limit = returnAll ? 1000 : (this.getNodeParameter('limit', 0) as number);
+								const limit = returnAll ? 1000 : (this.getNodeParameter('limit', 50) as number);
 
 								const userIdTrimmed = validateRequired(userIdInput, 'User ID');
 								validateRange(limit, 1, Number.MAX_SAFE_INTEGER, 'Limit parameter');
@@ -282,8 +282,8 @@ export const moderatorOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const userIdInput = this.getNodeParameter('userId', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+								const userIdInput = this.getNodeParameter('userId') as string;
 
 								if (!broadcasterIdInput || broadcasterIdInput.trim() === '') {
 									throw new ApplicationError('Broadcaster ID is required');
@@ -330,8 +330,8 @@ export const moderatorOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const userIdInput = this.getNodeParameter('userId', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+								const userIdInput = this.getNodeParameter('userId') as string;
 
 								if (!broadcasterIdInput || broadcasterIdInput.trim() === '') {
 									throw new ApplicationError('Broadcaster ID is required');

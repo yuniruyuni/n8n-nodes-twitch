@@ -102,10 +102,10 @@ export const subscriptionOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const userIdInput = this.getNodeParameter('userId', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+								const userIdInput = this.getNodeParameter('userId', '') as string;
 								const returnAll = this.getNodeParameter('returnAll', false) as boolean;
-								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 100) as number);
+								const limit = returnAll ? 100 : (this.getNodeParameter('limit', 50) as number);
 
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 
@@ -166,8 +166,8 @@ export const subscriptionOperations: INodeProperties[] = [
 					send: {
 						preSend: [
 							async function (this, requestOptions) {
-								const broadcasterIdInput = this.getNodeParameter('broadcasterId', 0) as string;
-								const userIdInput = this.getNodeParameter('checkUserId', 0) as string;
+								const broadcasterIdInput = this.getNodeParameter('broadcasterId') as string;
+								const userIdInput = this.getNodeParameter('checkUserId') as string;
 
 								const broadcasterId = await resolveUserIdOrLogin.call(this, broadcasterIdInput);
 								const userId = await resolveUserIdOrLogin.call(this, userIdInput);
