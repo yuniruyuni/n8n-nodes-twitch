@@ -1,15 +1,20 @@
-import { ApplicationError, LoggerProxy, type IDataObject } from 'n8n-workflow';
+import { ApplicationError, LoggerProxy, sleep, type IDataObject } from 'n8n-workflow';
 
 type SessionHandler = (sessionId: string) => Promise<void>;
 type NotificationHandler = (data: IDataObject) => void;
 type RevocationHandler = (subscriptionId: string) => void;
 type DisconnectHandler = () => void;
 
+// Extra margin added to keepalive timeout to account for network latency
+const KEEPALIVE_MARGIN_MS = 2000;
+
 export class EventSubWebSocket {
 	private ws: WebSocket | null = null;
 	private reconnectUrl: string | null = null;
 	private isClosing = false;
 	private settled = false;
+	private keepaliveEpoch = 0;
+	private keepaliveTimeoutMs = 0;
 	constructor(
 		private readonly onSessionWelcome: SessionHandler,
 		private readonly onNotification: NotificationHandler,
@@ -29,6 +34,9 @@ export class EventSubWebSocket {
 
 				this.ws.onmessage = async (event: MessageEvent) => {
 					try {
+						// Any message resets the keepalive timer
+						this.resetKeepaliveTimer();
+
 						const message = JSON.parse(event.data as string) as IDataObject;
 						const metadata = message.metadata as IDataObject;
 						const messageType = metadata.message_type as string;
@@ -38,6 +46,11 @@ export class EventSubWebSocket {
 							const welcomeSession = session.session as IDataObject;
 							const sessionId = welcomeSession.id as string;
 
+							const keepaliveTimeoutSeconds =
+								(welcomeSession.keepalive_timeout_seconds as number) || 10;
+							this.keepaliveTimeoutMs =
+								keepaliveTimeoutSeconds * 1000 + KEEPALIVE_MARGIN_MS;
+
 							await this.onSessionWelcome(sessionId);
 							this.settled = true;
 							resolve();
@@ -46,7 +59,7 @@ export class EventSubWebSocket {
 							const eventData = (payload.event as IDataObject) || {};
 							this.onNotification(eventData);
 						} else if (messageType === 'session_keepalive') {
-							// Just keep the connection alive
+							// Keepalive timer already reset above
 						} else if (messageType === 'session_reconnect') {
 							const payload = message.payload as IDataObject;
 							const reconnectSession = payload.session as IDataObject;
@@ -78,6 +91,8 @@ export class EventSubWebSocket {
 				};
 
 				this.ws.onclose = async () => {
+					this.stopKeepaliveTimer();
+
 					if (this.isClosing) {
 						return;
 					}
@@ -115,9 +130,38 @@ export class EventSubWebSocket {
 
 	close() {
 		this.isClosing = true;
+		this.stopKeepaliveTimer();
 		if (this.ws) {
 			this.ws.close();
 			this.ws = null;
 		}
+	}
+
+	/**
+	 * Reset the keepalive timer. Each call invalidates the previous timer
+	 * by incrementing the epoch counter, so only the latest timer fires.
+	 */
+	private resetKeepaliveTimer(): void {
+		if (this.keepaliveTimeoutMs <= 0) {
+			return;
+		}
+		const epoch = ++this.keepaliveEpoch;
+		void sleep(this.keepaliveTimeoutMs).then(() => {
+			if (epoch !== this.keepaliveEpoch || this.isClosing) {
+				return;
+			}
+			LoggerProxy.warn('Twitch EventSub WebSocket keepalive timeout, closing connection', {
+				workflowId: this.workflowId,
+				nodeType: 'n8n-nodes-twitch.twitchTrigger',
+				timeoutMs: this.keepaliveTimeoutMs,
+			});
+			if (this.ws) {
+				this.ws.close();
+			}
+		});
+	}
+
+	private stopKeepaliveTimer(): void {
+		this.keepaliveEpoch++;
 	}
 }
