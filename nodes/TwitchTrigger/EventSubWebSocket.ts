@@ -3,16 +3,19 @@ import { ApplicationError, LoggerProxy, type IDataObject } from 'n8n-workflow';
 type SessionHandler = (sessionId: string) => Promise<void>;
 type NotificationHandler = (data: IDataObject) => void;
 type RevocationHandler = (subscriptionId: string) => void;
+type DisconnectHandler = () => void;
 
 export class EventSubWebSocket {
 	private ws: WebSocket | null = null;
 	private reconnectUrl: string | null = null;
 	private isClosing = false;
+	private settled = false;
 	constructor(
 		private readonly onSessionWelcome: SessionHandler,
 		private readonly onNotification: NotificationHandler,
 		private readonly onRevocation: RevocationHandler,
 		private readonly workflowId: string,
+		private readonly onDisconnect?: DisconnectHandler,
 	) {}
 
 	async connect(url: string = 'wss://eventsub.wss.twitch.tv/ws'): Promise<void> {
@@ -36,6 +39,7 @@ export class EventSubWebSocket {
 							const sessionId = welcomeSession.id as string;
 
 							await this.onSessionWelcome(sessionId);
+							this.settled = true;
 							resolve();
 						} else if (messageType === 'notification') {
 							const payload = message.payload as IDataObject;
@@ -63,6 +67,9 @@ export class EventSubWebSocket {
 							workflowId: this.workflowId,
 							nodeType: 'n8n-nodes-twitch.twitchTrigger',
 						});
+						// If the promise hasn't settled yet, reject with the real error
+						// so subscription creation failures are properly surfaced.
+						reject(error);
 					}
 				};
 
@@ -80,8 +87,17 @@ export class EventSubWebSocket {
 						this.reconnectUrl = null;
 						try {
 							await this.connect(nextUrl);
+							if (!this.settled) {
+								this.settled = true;
+								resolve();
+							}
 						} catch (error) {
 							reject(error);
+						}
+					} else if (this.settled) {
+						// Post-activation disconnection — notify the owner for reconnection
+						if (this.onDisconnect) {
+							this.onDisconnect();
 						}
 					} else {
 						reject(

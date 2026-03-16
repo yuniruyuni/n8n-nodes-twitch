@@ -7,6 +7,18 @@ import {
 } from 'n8n-workflow';
 import { eventConditionBuilders } from './events/conditionBuilders';
 
+const EVENT_VERSIONS: Record<string, string> = {
+	'automod.message.hold': '2',
+	'automod.message.update': '2',
+	'channel.update': '2',
+	'channel.follow': '2',
+	'channel.moderate': '2',
+	'channel.guest_star_session.begin': 'beta',
+	'channel.guest_star_session.end': 'beta',
+	'channel.guest_star_guest.update': 'beta',
+	'channel.guest_star_settings.update': 'beta',
+};
+
 export class Subscription {
 	constructor(
 		private readonly trigger: ITriggerFunctions,
@@ -24,7 +36,7 @@ export class Subscription {
 
 		const requestBody = {
 			type: this.event,
-			version: '1',
+			version: EVENT_VERSIONS[this.event] ?? '1',
 			condition,
 			transport: {
 				method: 'websocket',
