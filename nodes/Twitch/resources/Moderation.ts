@@ -13,7 +13,7 @@
  * @see https://dev.twitch.tv/docs/api/reference#check-automod-status
  */
 
-import type { IDataObject, INodeProperties } from 'n8n-workflow';
+import { NodeOperationError, type IDataObject, type INodeProperties } from 'n8n-workflow';
 import { resolveUserIdOrLogin } from '../shared/userIdConverter';
 import { updateDisplayOptions } from '../../../shared/updateDisplayOptions';
 
@@ -379,7 +379,7 @@ export const moderationOperations: INodeProperties[] = [
 								try {
 									messages = JSON.parse(messagesJson);
 								} catch {
-									throw new Error('Messages must be a valid JSON array');
+									throw new NodeOperationError(this.getNode(), 'Messages must be a valid JSON array');
 								}
 
 								if (!Array.isArray(messages) || messages.length === 0 || messages.length > 100) {
