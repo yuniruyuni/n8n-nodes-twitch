@@ -1,6 +1,6 @@
 {
   "name": "@yuniruyuni/n8n-nodes-twitch",
-  "version": "0.1.44",
+  "version": "0.1.45",
   "description": "n8n node for Twitch API integration. Supports Twitch operations and EventSub triggers.",
   "license": "MIT",
   "homepage": "https://github.com/yuniruyuni/n8n-nodes-twitch",
@@ -52,8 +52,8 @@
   "devDependencies": {
     "@n8n/node-cli": "*",
     "@types/node": "^25.5.0",
-    "eslint": "9.39.4",
-    "prettier": "3.8.4",
+    "eslint": "9.39.5",
+    "prettier": "3.9.5",
     "release-it": "^20.0.0",
     "typescript": "6.0.3"
   },
