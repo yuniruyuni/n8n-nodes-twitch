@@ -21,7 +21,6 @@ export class TwitchTrigger implements INodeType {
 		defaults: {
 			name: 'Twitch Trigger',
 		},
-		usableAsTool: true,
 		inputs: [],
 		outputs: [NodeConnectionTypes.Main],
 		credentials: [
