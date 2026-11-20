@@ -33,6 +33,11 @@
       "groupName": "github-actions",
       "commitMessagePrefix": "ci(deps):",
       "addLabels": ["github-actions"]
+    },
+    {
+      "description": "n8n packages follow the npm stable tag (3.x is still rc)",
+      "matchPackageNames": ["n8n-workflow", "@n8n/node-cli"],
+      "followTag": "stable"
     }
   ]
 }
